@@ -1,4 +1,11 @@
 package Parser;
 
-public class LiteralExpression {
+import java.util.Map;
+
+public record LiteralExpression(long val) implements Expression {
+
+    @Override
+    public long eval(EvaluationContext ctx) {
+        return val;
+    }
 }

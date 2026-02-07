@@ -1,4 +1,4 @@
 package Parser;
 
-public class Node {
+public abstract class Node {
 }
