@@ -60,6 +60,8 @@ public class Parser {
         if(tkz.peek("shoot")){
             tkz.consume();
             String dir = tkz.consume();
+            if (!directions.contains(dir))
+                throw new SyntaxError("Invalid direction");
             Expression expr = parseExpression();
             return stmtFactory.createShoot(dir, expr);
         }
@@ -92,7 +94,7 @@ public class Parser {
         tkz.consume("then");
         Statement thenB = parseStatement();
         tkz.consume("else");
-        Statement elseB = parseBlock();
+        Statement elseB = parseStatement();
         return stmtFactory.createIf(condition, thenB, elseB);
     }
 
@@ -155,6 +157,8 @@ public class Parser {
         if(tkz.peek("nearby")){
             tkz.consume();
             String dir = tkz.consume();
+            if (!directions.contains(dir))
+                throw new SyntaxError("Invalid direction");
             return exprFactory.nearby(dir);
         }
 
