@@ -4,21 +4,29 @@ public class HexGrid {
     public enum Direction {
         up,down,upleft,downleft,upright,downright
     }
-    private Hex[][] grid = new Hex[9][9];
-
-    public HexGrid() {
+    private static HexGrid instance;
+    private HexGrid() {
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[i].length; j++) {
-                grid[i][j] = new Hex(i, j);
+                grid[i][j] = new Hex(i+1, j+1);
             }
         }
     }
+    public static HexGrid getInstance() {
+        if (instance == null) {
+            instance = new HexGrid();
+        }
+        return instance;
+    }
+    private Hex[][] grid = new Hex[8][8];
+
+
     public Hex getHex(int row, int col) {
-        return grid[row][col];
+        return grid[row+1][col+1];
     }
 
     public boolean isInside(int row, int col) {
-        return row >= 0 && row < grid.length && col >= 0 && col < grid[row].length;
+        return row >= 0 && row <= 8 && col >= 0 && col <= 8;
     }
 
     public int getDistance(Hex hex1,Hex hex2) {
@@ -56,28 +64,33 @@ public class HexGrid {
         int dCol = 0;
         int dRow = 0;
 
-        switch(direction){
-            case up:
-                dRow = -1;
-                break;
-            case down:
-                dRow = 1;
-                break;
+        switch (direction) {
+            case up:    dRow = -1; break;
+            case down:  dRow = 1; break;
+
+            // ODD-Q LOGIC:
+            // Odd Cols (1,3) are visually LOWER.
+            // Even Cols (2,4) are visually HIGHER.
+
             case upleft:
                 dCol = -1;
-                dRow = (parity == 1) ? -1 : 0;
+                // If I am Odd (Low), neighbor is Same Row.
+                // If I am Even (High), neighbor is Row-1.
+                dRow = (parity == 1) ? 0 : -1;
                 break;
             case downleft:
                 dCol = -1;
-                dRow = (parity == 1) ? 0 : 1;
+                // If I am Odd (Low), neighbor is Row+1.
+                // If I am Even (High), neighbor is Same Row.
+                dRow = (parity == 1) ? 1 : 0;
                 break;
             case upright:
                 dCol = 1;
-                dRow = (parity == 1) ? -1 : 0;
+                dRow = (parity == 1) ? 0 : -1;
                 break;
             case downright:
                 dCol = 1;
-                dRow = (parity == 1) ? 0 : 1;
+                dRow = (parity == 1) ? 1 : 0;
                 break;
         }
 
