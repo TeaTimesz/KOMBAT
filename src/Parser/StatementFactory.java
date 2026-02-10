@@ -18,11 +18,11 @@ public class StatementFactory {
         return new DoneCommand();
     }
 
-    public Statement createMove(String direction) {
+    public Statement createMove(Direction direction) {
         return new MoveCommand(direction);
     }
 
-    public Statement createShoot(String direction, Expression cost) {
+    public Statement createShoot(Direction direction, Expression cost) {
         return new ShootCommand(direction, cost);
     }
 

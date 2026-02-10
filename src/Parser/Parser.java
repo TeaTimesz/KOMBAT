@@ -44,24 +44,30 @@ public class Parser {
             return stmtFactory.createDone();
         }
         //  MoveCommand → move Direction
-        if(tkz.peek("move")){
+        if (tkz.peek("move")) {
             tkz.consume();
-            if(!tkz.hasNextToken()){
+
+            if (!tkz.hasNextToken())
                 throw new SyntaxError("Direction expected");
-            }
-            String dir = tkz.peek();
-            if(!directions.contains(dir)){
+
+            String dirToken = tkz.consume();
+            Direction dir = Direction.fromString(dirToken);
+
+            if (dir == null)
                 throw new SyntaxError("Invalid direction");
-            }
-            tkz.consume();//consume direction
+
             return stmtFactory.createMove(dir);
         }
         //  AttackCommand → shoot Direction Expression
-        if(tkz.peek("shoot")){
+        if (tkz.peek("shoot")) {
             tkz.consume();
-            String dir = tkz.consume();
-            if (!directions.contains(dir))
+
+            String dirToken = tkz.consume();
+            Direction dir = Direction.fromString(dirToken);
+
+            if (dir == null)
                 throw new SyntaxError("Invalid direction");
+
             Expression expr = parseExpression();
             return stmtFactory.createShoot(dir, expr);
         }
@@ -154,13 +160,18 @@ public class Parser {
             tkz.consume();
             return exprFactory.opponent();
         }
-        if(tkz.peek("nearby")){
+        if (tkz.peek("nearby")) {
             tkz.consume();
-            String dir = tkz.consume();
-            if (!directions.contains(dir))
+
+            String dirToken = tkz.consume();
+            Direction dir = Direction.fromString(dirToken);
+
+            if (dir == null)
                 throw new SyntaxError("Invalid direction");
+
             return exprFactory.nearby(dir);
         }
+
 
         String token = tkz.consume();
         return exprFactory.expr(token);

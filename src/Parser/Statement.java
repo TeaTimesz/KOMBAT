@@ -73,8 +73,8 @@ class WhileStatement extends Statement {
 
 
 class MoveCommand extends Statement {
-    String direction;
-    public MoveCommand(String direction) {
+    Direction direction;
+    public MoveCommand(Direction direction) {
         this.direction = direction;
     }
 
@@ -86,9 +86,9 @@ class MoveCommand extends Statement {
 }
 
 class ShootCommand  extends Statement {
-    String direction;
+    Direction direction;
     Expression cost;
-    public ShootCommand(String direction, Expression cost) {
+    public ShootCommand(Direction direction, Expression cost) {
         this.direction = direction;
         this.cost = cost;
     }

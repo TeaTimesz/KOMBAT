@@ -1,6 +1,6 @@
 package Parser;
 
-public record InfoExpr(String type, String direction) implements Expression {
+public record InfoExpr(String type, Direction direction) implements Expression {
 
     @Override
     public long eval(EvaluationContext ctx) {

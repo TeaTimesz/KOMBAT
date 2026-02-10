@@ -39,7 +39,7 @@ public class ExprFactory {
         return new InfoExpr("opponent", null);
     }
 
-    public Expression nearby(String direction) {
+    public Expression nearby(Direction direction) {
         return new InfoExpr("nearby", direction);
     }
 }
