@@ -2,7 +2,7 @@ package Parser;
 
 import java.util.List;
 
-public class StatementFactory extends Statement {
+public class StatementFactory {
     //Singleton
     private static StatementFactory instance;
     private StatementFactory() {}
