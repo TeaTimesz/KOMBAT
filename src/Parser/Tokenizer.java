@@ -1,9 +1,6 @@
 package Parser;
 
 import java.util.NoSuchElementException;
-import java.util.Set;
-
-import static java.lang.Character.*;
 
 //reference from OOP Lab16
 public class Tokenizer {
@@ -50,43 +47,48 @@ public class Tokenizer {
 
     private void computeNext() {
         StringBuilder s = new StringBuilder();
-        while (position < src.length() && isWhitespace(src.charAt(position))) {
-            position++;//ignore whitespace
+
+        // skip whitespace
+        while (position < src.length() && Character.isWhitespace(src.charAt(position))) {
+            position++;
         }
 
-        if (position == src.length()) {
+        if (position >= src.length()) {
             next = null;
-            return; // no more tokens
+            return;
         }
 
         char c = src.charAt(position);
 
-        //Tokentype check
-
-        if (isDigit(c)) {  //number
-            s.append(c);
-            for (position++; position < src.length() && isDigit(src.charAt(position)); position++) {
+        // number
+        if (Character.isDigit(c)) {
+            while (position < src.length() && Character.isDigit(src.charAt(position))) {
                 s.append(src.charAt(position));
+                position++;
             }
         }
-        else if (isLetter(c)) { //identifier,keyword,direction
-            s.append(c);
-            for (position++; position < src.length() && isLetter(src.charAt(position)); position++) {
+        // identifier / keyword
+        else if (Character.isLetter(c)) {
+            while (position < src.length() && Character.isLetter(src.charAt(position))) {
                 s.append(src.charAt(position));
+                position++;
             }
         }
-        else if("+-*/%^=".indexOf(c) >= 0){ //operator
+        // operator
+        else if ("+-*/%^=".indexOf(c) >= 0) {
             s.append(c);
             position++;
         }
-        else if("(){}".indexOf(c) >= 0){//symbol
+        // symbol
+        else if ("(){}".indexOf(c) >= 0) {
             s.append(c);
             position++;
-        }else{
-            throw new LexicalError("unknown character");
+        }
+        else {
+            throw new LexicalError("unknown character: " + c);
         }
 
         next = s.toString();
-
     }
+
 }
