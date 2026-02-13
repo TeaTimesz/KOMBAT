@@ -3,6 +3,6 @@ import Parser.*;
 import Controller.*;
 
 void main() {
-    HexGrid grid = HexGrid.getInstance();
+    HexGrid grid = new HexGrid();
     HexGridPrinter.printHexMap(grid);
 }

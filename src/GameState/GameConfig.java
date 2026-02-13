@@ -10,9 +10,9 @@ public class GameConfig {
     private GameConfig() {
         this.spawn_cost = 100;
         this.hex_purchase_cost = 1000;
-        this.init_budget = 10000;
+        this.init_budget = 1000;
         this.init_hp = 100;
-        this.turn_budget = 90;
+        this.turn_budget = 100;
         this.max_budget = 23456;
         this.interest_pct = 6;
         this.max_turns = 69;

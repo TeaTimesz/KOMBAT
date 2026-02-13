@@ -1,55 +1,25 @@
 package GameState;
 
+import Parser.Direction;
+
 public class HexGrid {
-    public enum Direction {
-        up,down,upleft,downleft,upright,downright
-    }
-    private static HexGrid instance;
-    private HexGrid() {
+    private Hex[][] grid = new Hex[8][8];
+
+    public HexGrid() {
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[i].length; j++) {
                 grid[i][j] = new Hex(i+1, j+1);
             }
         }
     }
-    public static HexGrid getInstance() {
-        if (instance == null) {
-            instance = new HexGrid();
-        }
-        return instance;
-    }
-    private Hex[][] grid = new Hex[8][8];
 
 
     public Hex getHex(int row, int col) {
-        return grid[row+1][col+1];
+        return grid[row-1][col-1];
     }
 
     public boolean isInside(int row, int col) {
-        return row >= 0 && row <= 8 && col >= 0 && col <= 8;
-    }
-
-    public int getDistance(Hex hex1,Hex hex2) {
-        if(hex1 == null || hex2 == null) {
-            return -1;
-        }
-
-        //convert both hex to Cube coordinate
-        int[] cube1 = offsetToCube(hex1.getRow(),hex1.getCol());
-        int[] cube2 = offsetToCube(hex2.getRow(),hex2.getCol());
-        //calculate distance by (|dx|+|dy|+|dz|) / 2
-        int dx = Math.abs(cube1[0] - cube2[0]);
-        int dy = Math.abs(cube1[1] - cube2[1]);
-        int dz = Math.abs(cube1[2] - cube2[2]);
-        return (dx + dy +dz) / 2;
-    }
-
-    private int[] offsetToCube(int row, int col) {
-        //in offset coordinate (even-q)
-        int x = col;
-        int z = row - (col + (col&1)) / 2;
-        int y = -x -z;
-        return new int[]{x,y,z};
+        return row >= 1 && row <= 8 && col >= 1 && col <= 8;
     }
 
     public Hex getNeighbour(Hex hex, Direction direction) {
@@ -97,7 +67,7 @@ public class HexGrid {
         int targetRow = row + dRow;
         int targetCol = col + dCol;
         if(isInside(targetRow,targetCol)){
-            return grid[targetRow][targetCol];
+            return getHex(targetRow,targetCol);
         }
         return null;
     }

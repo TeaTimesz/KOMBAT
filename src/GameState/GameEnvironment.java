@@ -1,6 +1,7 @@
 package GameState;
 
 import java.util.List;
+import Parser.Direction;
 
 public class GameEnvironment {
     private int turnCount;
@@ -10,9 +11,10 @@ public class GameEnvironment {
     private Player currentPlayer;
 
     public GameEnvironment () {
-        this.player1 = new Player(GameConfig.getInstance().init_hp,GameConfig.getInstance().max_spawns);
-        this.player2 = new Player(GameConfig.getInstance().init_hp,GameConfig.getInstance().max_spawns);
-        grid = HexGrid.getInstance();
+        player1 = new Player();
+        player2 = new Player();
+        currentPlayer = player1;
+        grid = new HexGrid();
         config = GameConfig.getInstance();
     }
 
@@ -39,10 +41,34 @@ public class GameEnvironment {
         if(currMinions.isEmpty()||oppMinions.isEmpty()){
             return true;
         }
-        if(GameConfig.getInstance().max_turns > turnCount){
+        if(turnCount > GameConfig.getInstance().max_turns){
             return true;
         }
         return false;
     }
+
+    public void moveMinion(Minion minion,Direction direction) {
+        Hex curretnHex = minion.getLocation();
+        Hex targetHex = grid.getNeighbour(curretnHex,direction);
+        if(targetHex == null){
+            return;
+        }
+        if(!targetHex.isEmpty()){
+            return;
+        }
+        minion.moveTo(targetHex);
+    }
+
+    public void shootHex(Minion minion,Direction direction,long expenditure) {
+        Hex targetHex = grid.getNeighbour(minion.getLocation(), direction);
+        if(targetHex.getOccupant() != null){
+            targetHex.getOccupant().takeDamage(expenditure);
+        }
+    }
+
+    public HexGrid getGrid() {
+        return grid;
+    }
+
 
 }

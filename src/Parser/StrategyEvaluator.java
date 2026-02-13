@@ -1,13 +1,19 @@
 package Parser;
 
-import GameState.Minion;
+import GameState.*;
 
 public class StrategyEvaluator {
-    EvaluationContext context;
-    public StrategyEvaluator(EvaluationContext context) {
-        this.context = context;
+    private final GameEnvironment env;
+
+    public StrategyEvaluator(GameEnvironment env) {
+        this.env = env;
     }
 
-    public void evaluate(Minion minion) {}
+    public void evaluate(Minion minion) throws DoneException{
+        Player player = minion.getOwner();
+        EvaluationContext ctx = new EvaluationContext(env,minion,player);
+        Statement root = minion.getStrategy().getRootNode();
+        root.execute(ctx);
+    }
 
 }

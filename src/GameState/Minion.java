@@ -1,47 +1,63 @@
 package GameState;
+import Parser.EvalError;
+
 import java.util.HashMap;
-
-interface Strategy{
-
-}
 
 public class Minion {
     private long hp;
     private long defense;
     private Hex location;
-    private Player owner;
-    private Strategy strategy;
-    private HashMap<String ,Long> localVariables;
+    private final Player owner;
+    private final Strategy strategy;
+    private final HashMap<String ,Long> localVariables;
     public Minion(long hp,long defense,Hex location,Player owner,Strategy strategy) {
         this.hp = hp;
         this.defense = defense;
         this.location = location;
         this.owner = owner;
         this.strategy = strategy;
+        this.localVariables = new HashMap<>();
+        location.setOccupant(this);
     }
+
     public boolean isAlive() {
-        return hp < 1;
+        return hp > 1;
     }
     public Hex getLocation() {
         return location;
     }
     public void takeDamage(long damage) {
         hp -= Math.max(1,damage - defense);
-        if(isAlive()) {
+        if(!isAlive()) {
             location.setOccupant(null);
             location = null;
             owner.removeMinion(this);
         }
     }
     public void moveTo(Hex location) {
+        this.location.setOccupant(null);
         this.location = location;
-        location.setOccupant(this);
+        this.location.setOccupant(this);
     }
     public Player getOwner() {
         return owner;
     }
     public long getHp() {
         return hp;
+    }
+
+    public long getLocalVariable(String name) {
+        if(localVariables.containsKey(name)) {
+            return localVariables.get(name);
+        }
+        throw new EvalError("No local variable named " + name);
+    }
+    public void setLocalVariable(String name, long value) {
+        localVariables.put(name, value);
+    }
+
+    public Strategy getStrategy() {
+        return strategy;
     }
 
 }

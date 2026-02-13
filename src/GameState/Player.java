@@ -1,22 +1,33 @@
 package GameState;
+import Parser.EvalError;
+
+import java.lang.module.Configuration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
 public class Player {
     private double budget;
-    private int spawnsLeft;
+    private long spawnsLeft;
     private List<Minion> minions;
     private HashMap<String,Long> globalVariables;
-    public Player(double budget,int spawnsLeft) {
-        this.budget = budget;
-        this.spawnsLeft = spawnsLeft;
+    public Player() {
+        this.budget = GameConfig.getInstance().init_budget;
+        this.spawnsLeft = GameConfig.getInstance().max_spawns;
         minions = new ArrayList<>();
+        globalVariables = new HashMap<>();
     }
     public double getBudget() {
         return budget;
     }
-    public void addBudget(double amount) {
+    public void editBudget(double amount) {
+        if(budget + amount < 1 ){
+            budget = 1;
+            return;
+        } else if(budget + amount > GameConfig.getInstance().max_budget){
+            budget = GameConfig.getInstance().max_budget;
+            return;
+        }
         this.budget += amount;
     }
     public boolean canSpawn(){
@@ -35,6 +46,21 @@ public class Player {
     }
     public List<Minion> getMinions(){
         return minions;
+    }
+
+    public long getGlobalVariable(String name){
+        if(globalVariables.containsKey(name)){
+            return globalVariables.get(name);
+        }
+        throw new EvalError("No global variable named " + name);
+    }
+
+    public void setGlobalVariable(String name,long value){
+        globalVariables.put(name,value);
+    }
+
+    public long getSpawnsLeft(){
+        return spawnsLeft;
     }
 
 }

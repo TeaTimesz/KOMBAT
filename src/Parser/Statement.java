@@ -2,8 +2,9 @@ package Parser;
 
 import java.util.List;
 
+//implement using visitor pattern
 public abstract class Statement extends Node {
-    public abstract void execute(EvaluationContext ctx);
+    public abstract void execute(EvaluationContext ctx)throws DoneException;
 }
 
 class BlockStatement extends Statement {
@@ -13,7 +14,7 @@ class BlockStatement extends Statement {
     }
 
     @Override
-    public void execute(EvaluationContext ctx) {
+    public void execute(EvaluationContext ctx) throws DoneException {
         for (Statement statement : statements) {
             statement.execute(ctx);
         }
@@ -23,12 +24,16 @@ class BlockStatement extends Statement {
 class AssignmentStatement extends Statement {
     String identifier;
     Expression expression;
+    private static final java.util.Set<String> ReserveWord = java.util.Set.of("row","col","Budget","Int","MaxBudget","SpawnsLeft","random");
     public AssignmentStatement(String identifier, Expression expression) {
         this.identifier = identifier;
         this.expression = expression;
     }
     @Override
-    public void execute(EvaluationContext ctx) {
+    public void execute(EvaluationContext ctx) throws DoneException {
+        if(ReserveWord.contains(identifier)){
+            return; // no-op
+        }
         long val = expression.eval(ctx);
         ctx.setVariable(identifier, val);
     }
@@ -44,7 +49,7 @@ class IfStatement extends Statement {
         this.elseBranch = elseBranch;
     }
     @Override
-    public void execute(EvaluationContext ctx) {
+    public void execute(EvaluationContext ctx) throws DoneException {
         if(condition.eval(ctx) > 0){
             thenBranch.execute(ctx);
         }else{
@@ -62,11 +67,11 @@ class WhileStatement extends Statement {
     }
 
     @Override
-    public void execute(EvaluationContext ctx) {
+    public void execute(EvaluationContext ctx) throws DoneException {
         int count = 0;
-        while(condition.eval(ctx) > 0) {
-            if(count++ >= 10000) return;
+        while(count < 10000 && condition.eval(ctx) > 0) { // make it check the condition again every iteration
             body.execute(ctx);
+            count++;
         }
     }
 }
@@ -79,9 +84,13 @@ class MoveCommand extends Statement {
     }
 
     @Override
-    public void execute(EvaluationContext ctx) {
-        if(!ctx.canMove()) throw new DoneException("can't move");
-        ctx.consume(1);
+    public void execute(EvaluationContext ctx) throws DoneException {
+        if (ctx.getPlayer().getBudget() < 1){
+            throw new DoneException("Budget is less than 1");
+        }
+        ctx.getPlayer().editBudget(-1);
+        ctx.getEnv().moveMinion(ctx.getMinion(),direction);
+        throw new DoneException("Done after moving");
     }
 }
 
@@ -93,10 +102,15 @@ class ShootCommand  extends Statement {
         this.cost = cost;
     }
     @Override
-    public void execute(EvaluationContext ctx) {
-        if (!ctx.canShoot()) return;
+    public void execute(EvaluationContext ctx) throws DoneException {
+        long expenditure = cost.eval(ctx);
+        long totalCost = expenditure + 1;
 
-        ctx.consume(cost.eval(ctx));
+        if(ctx.getPlayer().getBudget() >= totalCost){
+            ctx.getPlayer().editBudget(-totalCost);
+            ctx.getEnv().shootHex(ctx.getMinion(),direction,expenditure);
+        }
+        throw new DoneException("Done after shooting");
     }
 }
 
