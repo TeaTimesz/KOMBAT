@@ -50,49 +50,31 @@ class StrategyEvaluatorTest {
         // Setup Minion at (1,1)
         Hex startHex = grid.getHex(1, 1);
         Minion minion = new Minion(100, 10, startHex, p1, strategy);
-        startHex.setOccupant(minion);
 
-        // Pre-check
-        assertEquals(1000, p1.getBudget());
+        // Pre-check: 1000 (Init) - 100 (Spawn) = 900
+        assertEquals(900, p1.getBudget());
 
         // Execute & Assert Exception
         assertThrows(DoneException.class, () -> {
             evaluator.evaluate(minion);
         });
 
-        // Verify Side Effects
-        assertEquals(999, p1.getBudget(), "Budget should decrease by 1 for move");
+        // Verify Side Effects: 900 - 1 (Move Cost) = 899
+        assertEquals(899, p1.getBudget(), "Budget should decrease by 1 for move");
 
-        // Check Grid Position (assuming down from 1,1 goes to 2,1 in your grid logic)
-        // Adjust coordinates based on your specific hex grid skew logic
+        // Check Grid Position
         assertNull(startHex.getOccupant(), "Old hex should be empty");
         assertNotEquals(startHex, minion.getLocation(), "Minion should have updated its internal location");
         assertNotNull(minion.getLocation().getOccupant(), "New hex should occupy the minion");
     }
 
-    /**
-     * Scenario 2: The "Variable Calculator"
-     * Strategy:
-     * counter = 10
-     * result = counter + 5
-     * Verification:
-     * - Local variables are updated
-     * - No DoneException (Assignments don't end turn)
-     */
     @Test
     void testAssignmentAndMath() throws DoneException {
-        // AST:
-        // 1. counter = 10
-        // 2. result = counter + 5
-
-        // Note: You'll need your Expression implementations here.
-        // I am assuming standard naming.
+        // AST: counter = 10; result = counter + 5
         Statement stmt1 = new AssignmentStatement("counter", new LiteralExpression(10));
 
         Expression addition = new BinaryExpression(
-                new VariableExpression("counter"),
-                "+",
-                new LiteralExpression(5)
+                new VariableExpression("counter"), "+", new LiteralExpression(5)
         );
         Statement stmt2 = new AssignmentStatement("result", addition);
 
@@ -103,28 +85,21 @@ class StrategyEvaluatorTest {
         Hex hex = grid.getHex(1, 1);
         Minion minion = new Minion(100, 10, hex, p1, strategy);
 
+
         // Execute
         evaluator.evaluate(minion);
 
-        // Verify Local Memory
+        // Verify Local Memory (Budget not affected by assignment)
         assertEquals(10, minion.getLocalVariable("counter"));
         assertEquals(15, minion.getLocalVariable("result"));
+        assertEquals(900, p1.getBudget()); // 1000 - 100
     }
 
-    /**
-     * Scenario 3: The "Budget Conscious" (If-Statement)
-     * Strategy:
-     * if (Budget > 500) then { move down } else { done }
-     * Case A: Budget is 1000 (Expect Move)
-     * Case B: Budget is 100 (Expect Done command)
-     */
     @Test
     void testConditionalLogic() {
-        // AST Construction
+        // AST: if (Budget - 500) then { move down } else { done }
         Expression condition = new BinaryExpression(
-                new VariableExpression("Budget"),
-                "-",
-                new LiteralExpression(500)
+                new VariableExpression("Budget"), "-", new LiteralExpression(500)
         );
         Statement thenBranch = new MoveCommand(Direction.down);
         Statement elseBranch = new DoneCommand();
@@ -134,27 +109,27 @@ class StrategyEvaluatorTest {
         Hex hex = grid.getHex(1, 1);
         Minion minion = new Minion(100, 10, hex, p1, strategy);
 
-        // --- CASE A: Rich (1000) ---
-        assertThrows(DoneException.class, () -> evaluator.evaluate(minion));
-        assertEquals(999, p1.getBudget(), "Should have moved (cost 1)");
 
-        // --- CASE B: Poor (100) ---
-        p1.editBudget(-899);
-        // Reset minion position for re-run
-        // (In real tests, better to create a fresh minion, but this works for logic check)
+        // --- CASE A: Rich (Start 1000 - 100 = 900) ---
+        // Condition: 900 - 500 = 400 (True)
         assertThrows(DoneException.class, () -> evaluator.evaluate(minion));
+
+        // Expected: 900 - 1 (Move) = 899
+        assertEquals(899, p1.getBudget(), "Should have moved (cost 1)");
+
+        // --- CASE B: Poor (Target 100) ---
+        // Current is 899. To get to 100, we subtract 799.
+        p1.editBudget(-799);
+        assertEquals(100, p1.getBudget()); // Verify we are at 100
+
+        // Reset minion loop logic? (Depends on evaluator state, assuming fresh evaluation)
+        // Condition: 100 - 500 = -400 (False)
+        assertThrows(DoneException.class, () -> evaluator.evaluate(minion));
+
+        // Expected: 100 (No change, 'done' costs 0)
         assertEquals(100, p1.getBudget(), "Should have executed 'done', costing 0");
     }
 
-    /**
-     * Scenario 4: The "Sniper"
-     * Strategy: shoot down 50
-     * Setup: Place enemy at (2,1)
-     * Verification:
-     * - Enemy HP reduced
-     * - Player budget reduced by 51 (50 power + 1 cost)
-     * - Turn ends
-     */
     @Test
     void testShootingMechanic() {
         // AST: shoot down 50
@@ -162,52 +137,80 @@ class StrategyEvaluatorTest {
         Statement shootNode = new ShootCommand(Direction.down, costExpr);
         Strategy strategy = new Strategy(shootNode);
 
-        // 1. Setup Shooter at (1,1)
+        // 1. Setup Shooter
         Hex shooterHex = grid.getHex(1, 1);
         Minion shooter = new Minion(100, 10, shooterHex, p1, strategy);
-        shooterHex.setOccupant(shooter);
 
-        // 2. Setup Target at (2,1) (Assuming 'down' leads here)
+        // 2. Setup Target (Opponent)
         Hex targetHex = grid.getHex(2, 1);
         Player p2 = env.getOpponentPlayer();
-        Minion target = new Minion(100, 5, targetHex, p2, null); // 100 HP, 5 Def
+        Minion target = new Minion(100, 5, targetHex, p2, null);
         targetHex.setOccupant(target);
+        // (Optional: p2.editBudget(-100) if verifying p2's budget, but we focus on p1)
 
         // 3. Execute
         assertThrows(DoneException.class, () -> evaluator.evaluate(shooter));
 
         // 4. Verify Costs
-        // Cost = 1 (fixed) + 50 (expenditure) = 51
-        long expectedBudget = 1000 - 51;
-        assertEquals(expectedBudget, p1.getBudget(), "Budget should deduct shoot cost + expenditure");
+        // Initial: 1000
+        // Spawn: -100 (Current 900)
+        // Shoot: -1 (Base) - 50 (Expenditure) = -51
+        // Final: 849
+        assertEquals(849, p1.getBudget(), "Budget should deduct spawn(100) + shoot(51)");
 
-        // 5. Verify Damage
-        // Damage = max(1, 50 - 5) = 45
-        // New HP = 100 - 45 = 55
+        // 5. Verify Damage (Unchanged)
         assertEquals(55, target.getHp(), "Target should take correct damage");
     }
 
     @Test
-    void testMock() throws Exception{
-        Parser parser = new Parser("""
-        {
-            if (Budget - 500) then {
-                status = 1
-                move up
-            } else {
-                status = 2
-                done
-            }
+    void testMock() throws Exception {
+        // 1. Setup Strategy
+        // Logic: If (Budget - 500) is positive, Move Up. Else, Done.
+        String code = """
+    {
+        if (Budget - 500) then { 
+            status = 1
+            move up
+        } else {
+            status = 2
+            done
         }
-    """);
-        Statement root = parser.parseStatement();
-        Minion minion = new Minion(100,10,grid.getHex(4,4),p1,new Strategy(root));
+        # this is a comment
+    }
+    """;
+
+        // 2. Parse & Init
+        Parser parser = new Parser(code);
+        Statement root = parser.parseStatement(); // Use your actual parser method
+
+        // Place Minion at (4,4) -> Even Column (Low position)
+        Hex startHex = grid.getHex(4, 4);
+        Minion minion = new Minion(100, 10, startHex, p1, new Strategy(root));
+
+        // --- VISUALIZATION: BEFORE ---
+        System.out.println("--- STATE 1: BEFORE MOVE (Budget: " + p1.getBudget() + ") ---");
+        HexGridPrinter.printHexMap(grid);
+
+        // 4. Execute Turn
+        // 900 - 500 = 400 (Positive/True) -> Enters 'move up'
         assertThrows(DoneException.class, () -> evaluator.evaluate(minion));
-        assertEquals(1,minion.getLocalVariable("status"));
-        assertEquals(999,p1.getBudget());
-        p1.editBudget(-899);
-        assertThrows(DoneException.class, () -> evaluator.evaluate(minion));
-        assertEquals(100, p1.getBudget(), "Should have executed 'done', costing 0");
+
+        // --- VISUALIZATION: AFTER ---
+        // Budget should be 899 (900 - 1 move cost)
+        System.out.println("--- STATE 2: AFTER MOVE (Budget: " + p1.getBudget() + ") ---");
+        HexGridPrinter.printHexMap(grid);
+
+        // 5. Verification
+        assertEquals(1, minion.getLocalVariable("status"));
+        assertEquals(899, p1.getBudget());
+
+        // Verify Position: Moved from (4,4) to (3,4)
+        // (3,4) is directly "above" (4,4) in the hex grid logic usually
+        Hex expectedHex = grid.getHex(3, 4);
+
+        assertNull(startHex.getOccupant(), "Start hex (4,4) should be empty");
+        assertNotNull(expectedHex.getOccupant(), "Target hex (3,4) should be occupied");
+        assertEquals(minion, expectedHex.getOccupant());
     }
 
     @Test

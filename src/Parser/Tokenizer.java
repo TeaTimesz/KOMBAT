@@ -48,9 +48,16 @@ public class Tokenizer {
     private void computeNext() {
         StringBuilder s = new StringBuilder();
 
-        // skip whitespace
-        while (position < src.length() && Character.isWhitespace(src.charAt(position))) {
-            position++;
+        // skip whitespace and comment
+        while (position < src.length()) {
+            if (Character.isWhitespace(src.charAt(position))) {
+                position++;
+            }
+            else if(src.charAt(position) == '#'){
+                while(position < src.length() && src.charAt(position) != '\n') position++;
+            }else{
+                break;
+            }
         }
 
         if (position >= src.length()) {
