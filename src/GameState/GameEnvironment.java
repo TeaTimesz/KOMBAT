@@ -70,5 +70,78 @@ public class GameEnvironment {
         return grid;
     }
 
+    public long getClosestOpponent(Minion minion){
+        return findClosest(minion,getOpponentPlayer());
+    }
+
+    public long getClosestAlly(Minion minion){
+        return findClosest(minion,getCurrentPlayer());
+    }
+
+    private long findClosest(Minion minion,Player target){
+        long bestValue = 0;
+        int minDistance = Integer.MAX_VALUE;
+        int bestDirection = Integer.MAX_VALUE;
+
+        for(Direction dir:Direction.values()){
+            Minion found = scanForMinionInDirection(minion.getLocation(),dir,target);
+            if(found != null){
+                int dist = getGrid().getDistance(minion.getLocation(), found.getLocation());
+
+                if(dist < minDistance){
+                    minDistance = dist;
+                    bestDirection = dir.ordinal()+1;
+                }else if(dist == minDistance){
+                    if((dir.ordinal() + 1) < bestDirection){
+                        bestDirection = dir.ordinal()+1;
+                    }
+                }
+            }
+        }
+
+        if(minDistance == Integer.MAX_VALUE){ return 0;}
+        return (long) minDistance * 10 + bestDirection;
+    }
+
+    public long getNearby(Minion minion,Direction direction){
+        Minion found = scanForAnyInDirection(minion.getLocation(),direction);
+
+        if(found == null){return 0;}
+
+        long dist = getGrid().getDistance(minion.getLocation(), found.getLocation());
+        long hpDigits = String.valueOf(found.getHp()).length();
+        long defDigits = String.valueOf(found.getDefense()).length();
+
+        long value = 100 * hpDigits + 10 * defDigits + dist;
+
+        if(found.getOwner() == minion.getOwner()){
+            return -value;
+        }
+        return value;
+    }
+
+    private Minion scanForMinionInDirection(Hex start,Direction direction,Player target) {
+        Hex current = start;
+        List<Minion> minions = target.getMinions();
+        while(true){
+            current = grid.getNeighbour(current,direction);
+            if(current == null){return null;}
+            if(current.getOccupant() != null && minions.contains(current.getOccupant())){
+                return current.getOccupant();
+            }
+        }
+    }
+
+    private Minion scanForAnyInDirection(Hex start,Direction direction){
+        Hex current = start;
+        while(true){
+            current = grid.getNeighbour(current,direction);
+            if(current == null){return null;}
+            if(current.getOccupant() != null){
+                return current.getOccupant();
+            }
+        }
+    }
+
 
 }

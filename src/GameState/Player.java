@@ -39,7 +39,7 @@ public class Player {
     public void addMinion(Minion minion){
         minions.add(minion);
         spawnsLeft -= 1;
-        budget -= GameConfig.getInstance().spawn_cost;
+        editBudget(-GameConfig.getInstance().spawn_cost);
     }
     public void removeMinion(Minion minion){
         minions.remove(minion);
@@ -62,5 +62,6 @@ public class Player {
     public long getSpawnsLeft(){
         return spawnsLeft;
     }
+
 
 }

@@ -24,7 +24,11 @@ class BlockStatement extends Statement {
 class AssignmentStatement extends Statement {
     String identifier;
     Expression expression;
-    private static final java.util.Set<String> ReserveWord = java.util.Set.of("row","col","Budget","Int","MaxBudget","SpawnsLeft","random");
+    private static final java.util.Set<String> SpecialVariable = java.util.Set.of("row","col","Budget","Int","MaxBudget",
+                                                                                "SpawnsLeft","random");
+    private static final java.util.Set<String> ReserveWord = java.util.Set.of("ally","done","down","downleft","downright","else",
+                                                                                "if","move","nearby","opponent","shoot","then","up","upleft",
+                                                                                "upright","while");
     public AssignmentStatement(String identifier, Expression expression) {
         this.identifier = identifier;
         this.expression = expression;
@@ -32,7 +36,10 @@ class AssignmentStatement extends Statement {
     @Override
     public void execute(EvaluationContext ctx) throws DoneException {
         if(ReserveWord.contains(identifier)){
-            return; // no-op
+            throw new SyntaxError("Cannot use Reserved Word as identifier");
+        }
+        if(SpecialVariable.contains(identifier)){
+            return; // no-op;
         }
         long val = expression.eval(ctx);
         ctx.setVariable(identifier, val);

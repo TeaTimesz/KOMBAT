@@ -17,7 +17,8 @@ public class Minion {
         this.owner = owner;
         this.strategy = strategy;
         this.localVariables = new HashMap<>();
-        location.setOccupant(this);
+        this.location.setOccupant(this);
+        this.owner.addMinion(this);
     }
 
     public boolean isAlive() {
@@ -45,6 +46,7 @@ public class Minion {
     public long getHp() {
         return hp;
     }
+    public long getDefense() {return defense;}
 
     public long getLocalVariable(String name) {
         if(localVariables.containsKey(name)) {

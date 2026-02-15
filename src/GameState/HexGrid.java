@@ -22,6 +22,29 @@ public class HexGrid {
         return row >= 1 && row <= 8 && col >= 1 && col <= 8;
     }
 
+    public int getDistance(Hex hex1,Hex hex2) {
+        if(hex1 == null || hex2 == null) {
+            return -1;
+        }
+
+        //convert both hex to Cube coordinate
+        int[] cube1 = offsetToCube(hex1.getRow(),hex1.getCol());
+        int[] cube2 = offsetToCube(hex2.getRow(),hex2.getCol());
+        //calculate distance by (|dx|+|dy|+|dz|) / 2
+        int dx = Math.abs(cube1[0] - cube2[0]);
+        int dy = Math.abs(cube1[1] - cube2[1]);
+        int dz = Math.abs(cube1[2] - cube2[2]);
+        return (dx + dy +dz) / 2;
+    }
+
+    private int[] offsetToCube(int row, int col) {
+        //in offset coordinate (even-q)
+        int x = col;
+        int z = row - (col + (col & 1)) / 2;
+        int y = -x - z;
+        return new int[]{x, y, z};
+    }
+
     public Hex getNeighbour(Hex hex, Direction direction) {
         if(hex == null){
             return null;

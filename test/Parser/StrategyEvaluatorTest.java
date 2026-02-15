@@ -123,7 +123,7 @@ class StrategyEvaluatorTest {
         // AST Construction
         Expression condition = new BinaryExpression(
                 new VariableExpression("Budget"),
-                ">",
+                "-",
                 new LiteralExpression(500)
         );
         Statement thenBranch = new MoveCommand(Direction.down);
@@ -133,7 +133,6 @@ class StrategyEvaluatorTest {
         Strategy strategy = new Strategy(ifStmt);
         Hex hex = grid.getHex(1, 1);
         Minion minion = new Minion(100, 10, hex, p1, strategy);
-        hex.setOccupant(minion);
 
         // --- CASE A: Rich (1000) ---
         assertThrows(DoneException.class, () -> evaluator.evaluate(minion));
@@ -188,38 +187,92 @@ class StrategyEvaluatorTest {
         assertEquals(55, target.getHp(), "Target should take correct damage");
     }
 
-    // ==========================================
-    // Minimal Mock Expressions for Test Compile
-    // (If you don't have these classes yet, use these helpers)
-    // ==========================================
-
-    // Helper for Literal: 10
-    static class LiteralExpression implements Expression {
-        long val;
-        public LiteralExpression(long val) { this.val = val; }
-        public long eval(EvaluationContext ctx) { return val; }
-    }
-
-    // Helper for Variable: "Budget", "counter"
-    static class VariableExpression implements Expression {
-        String name;
-        public VariableExpression(String name) { this.name = name; }
-        public long eval(EvaluationContext ctx) { return ctx.getVariable(name); }
-    }
-
-    // Helper for Binary: A + B
-    static class BinaryExpression implements Expression {
-        Expression left, right;
-        String op;
-        public BinaryExpression(Expression left, String op, Expression right) {
-            this.left = left; this.op = op; this.right = right;
+    @Test
+    void testMock() throws Exception{
+        Parser parser = new Parser("""
+        {
+            if (Budget - 500) then {
+                status = 1
+                move up
+            } else {
+                status = 2
+                done
+            }
         }
-        public long eval(EvaluationContext ctx) {
-            long l = left.eval(ctx);
-            long r = right.eval(ctx);
-            if (op.equals("+")) return l + r;
-            if (op.equals(">")) return (l > r) ? 1 : 0;
-            return 0;
-        }
+    """);
+        Statement root = parser.parseStatement();
+        Minion minion = new Minion(100,10,grid.getHex(4,4),p1,new Strategy(root));
+        assertThrows(DoneException.class, () -> evaluator.evaluate(minion));
+        assertEquals(1,minion.getLocalVariable("status"));
+        assertEquals(999,p1.getBudget());
+        p1.editBudget(-899);
+        assertThrows(DoneException.class, () -> evaluator.evaluate(minion));
+        assertEquals(100, p1.getBudget(), "Should have executed 'done', costing 0");
     }
+
+    @Test
+    void testInfoExpressions() throws Exception {
+        // 1. Define Strategy using the Parser
+        // We query all three types of information expressions
+        Parser parser = new Parser("""
+    {
+        valally = ally
+        valenemy = opponent
+        scanup = nearby up
+        scandown = nearby down
+        scanempty = nearby upright
+        done
+    }
+    """);
+        Statement root = parser.parseStatement();
+
+        // 2. Setup the Board
+        // Place Observer (Our Minion) at (4,4)
+        Hex centerHex = grid.getHex(4, 4);
+        Minion observer = new Minion(100, 10, centerHex, p1, new Strategy(root));
+        centerHex.setOccupant(observer);
+
+        // --- Setup Ally (UP from observer) ---
+        // We use getNeighbour to ensure we are theoretically correct regardless of grid skew
+        Hex upHex = grid.getNeighbour(centerHex, Direction.up);
+        // Ally Stats: HP=100 (3 digits), Def=10 (2 digits)
+        Minion ally = new Minion(100, 10, upHex, p1, null);
+        upHex.setOccupant(ally);
+
+        // --- Setup Enemy (DOWN from observer) ---
+        Hex downHex = grid.getNeighbour(centerHex, Direction.down);
+        Player p2 = env.getOpponentPlayer();
+        // Enemy Stats: HP=9 (1 digit), Def=9 (1 digit)
+        Minion enemy = new Minion(9, 9, downHex, p2, null);
+        downHex.setOccupant(enemy);
+
+        // 3. Execute Strategy
+        assertThrows(DoneException.class, () -> evaluator.evaluate(observer));
+
+        // 4. Verify Calculations
+        // Expected: Distance 1, Direction 1 (Up) -> 11
+        assertEquals(11, observer.getLocalVariable("valally"),
+                "Ally at dist 1, dir 1 should return 11");
+
+        // Expected: Distance 1, Direction 4 (Down) -> 14
+        assertEquals(14, observer.getLocalVariable("valenemy"),
+                "Enemy at dist 1, dir 4 should return 14");
+
+        // Formula: -(100*digits(HP) + 10*digits(Def) + dist)
+        // HP=100 (3 digits), Def=10 (2 digits), Dist=1
+        // Value = -(100*3 + 10*2 + 1) = -321
+        assertEquals(-321, observer.getLocalVariable("scanup"),
+                "Nearby Ally: -(300 + 20 + 1) = -321");
+
+        // Formula: 100*digits(HP) + 10*digits(Def) + dist
+        // HP=9 (1 digit), Def=9 (1 digit), Dist=1
+        // Value = 100*1 + 10*1 + 1 = 111
+        assertEquals(111, observer.getLocalVariable("scandown"),
+                "Nearby Enemy: 100 + 10 + 1 = 111");
+
+        // E. NEARBY EMPTY
+        assertEquals(0, observer.getLocalVariable("scanempty"),
+                "Nearby on empty direction should return 0");
+    }
+
 }

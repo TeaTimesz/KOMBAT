@@ -1,7 +1,7 @@
 package Parser;
 
 public enum Direction {
-    up, down, upleft, upright, downleft, downright;
+    up, upright,downright,down,downleft,upleft;
 
     public static Direction fromString(String s) {
         try {
