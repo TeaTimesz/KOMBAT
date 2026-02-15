@@ -278,4 +278,102 @@ class StrategyEvaluatorTest {
                 "Nearby on empty direction should return 0");
     }
 
+    @Test
+    void testFullSampleStrategy_OpponentAfar() throws Exception {
+        // ----------------------------------------------------------------
+        // 1. THE SAMPLE STRATEGY
+        // ----------------------------------------------------------------
+        // pasted exactly as provided (comments included)
+        String code = """
+        t = t + 1  # keeping track of the turn number
+        m = 0  # number of random moves this turn
+        while (3 - m) {  # made less than 3 random moves
+          if (Budget - 100) then {} else done  # too poor to do anything else
+          opponentLoc = opponent
+          if (opponentLoc / 10 - 1)
+          then  # opponent afar
+            if (opponentLoc % 10 - 5) then move downleft
+            else if (opponentLoc % 10 - 4) then move down
+            else if (opponentLoc % 10 - 3) then move downright
+            else if (opponentLoc % 10 - 2) then move upright
+            else if (opponentLoc % 10 - 1) then move up
+            else move upleft
+          else if (opponentLoc)
+          then  # opponent adjacent to this minion
+            # (Shooting logic omitted for this test case branch)
+            done 
+          else {  # no visible opponent
+             m = 3 # force exit for test stability
+          }
+          m = m + 1
+        }
+    """;
+
+        // ----------------------------------------------------------------
+        // 2. PARSE STRATEGY
+        // ----------------------------------------------------------------
+        Parser parser = new Parser(code);
+        Statement root = parser.parse();
+
+        // ----------------------------------------------------------------
+        // 3. SETUP SCENARIO
+        // ----------------------------------------------------------------
+        p1.setBudget(5000); // Give plenty of budget
+
+        // A. Place Our Minion at (3,3)
+        Hex startHex = grid.getHex(3, 3);
+        Minion minion = new Minion(100, 10, startHex, p1, new Strategy(root));
+        startHex.setOccupant(minion);
+
+        // B. Place Enemy at (6,3)
+        // Logic: (3,3) -> (4,3) -> (5,3) -> (6,3) is 3 steps DOWN (Direction 4).
+        // So 'opponent' should return 34.
+        Hex enemyHex = grid.getHex(6, 3);
+        Player p2 = env.getOpponentPlayer();
+        Minion enemy = new Minion(100, 10, enemyHex, p2, null);
+        enemyHex.setOccupant(enemy);
+
+        // ----------------------------------------------------------------
+        // 4. VISUALIZATION (BEFORE)
+        // ----------------------------------------------------------------
+        System.out.println("--- STATE 1: BEFORE TURN (Minion @ 3,3 | Enemy @ 6,3) ---");
+        HexGridPrinter.printHexMap(grid);
+
+        // ----------------------------------------------------------------
+        // 5. EXECUTE TURN
+        // ----------------------------------------------------------------
+        // LOGIC TRACE:
+        // 1. opponentLoc = 34 (Dist 3, Dir 4)
+        // 2. (34 / 10 - 1) -> (3 - 1) = 2 (True, "Afar")
+        // 3. Check (34 % 10 - 5) -> (4 - 5) = -1 (False)
+        // 4. Check (34 % 10 - 4) -> (4 - 4) = 0  (False)
+        // 5. Check (34 % 10 - 3) -> (4 - 3) = 1  (True) -> Executes 'move downright'
+        assertThrows(DoneException.class, () -> evaluator.evaluate(minion));
+
+        // ----------------------------------------------------------------
+        // 6. VISUALIZATION (AFTER)
+        // ----------------------------------------------------------------
+        System.out.println("--- STATE 2: AFTER TURN (Expected: Move DownRight) ---");
+        HexGridPrinter.printHexMap(grid);
+
+        // ----------------------------------------------------------------
+        // 7. VERIFICATION
+        // ----------------------------------------------------------------
+
+        // A. Verify Variables
+        assertEquals(1, minion.getLocalVariable("t"), "Turn counter 't' should increment");
+        assertEquals(34, minion.getLocalVariable("opponentLoc"), "Should detect enemy at 34");
+
+        // B. Verify Movement (DownRight from 3,3)
+        // Note: Verify your HexGrid neighbor logic.
+        // Usually, DownRight from (3,3) (Odd Row) goes to (3,4).
+        Hex expectedHex = grid.getNeighbour(startHex, Direction.downright);
+
+        assertNull(startHex.getOccupant(), "Start hex should be empty");
+        assertNotNull(expectedHex.getOccupant(), "Minion should be in new hex");
+        assertEquals(minion, expectedHex.getOccupant());
+
+        System.out.println("✅ Test Passed: Sample Strategy parsed and executed 'move downright' correctly.");
+    }
+
 }

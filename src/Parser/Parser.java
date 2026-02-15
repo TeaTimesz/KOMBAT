@@ -17,6 +17,14 @@ public class Parser {
         this.tkz = new Tokenizer(src);
     }
 
+    public Statement parse() {
+        List<Statement> statements = new ArrayList<>();
+        while(tkz.hasNextToken()){
+            statements.add(parseStatement());
+        }
+        return stmtFactory.createBlock(statements);
+    }
+
 //  Strategy → Statement+
     public List<Statement> parseStrategy() {
         List<Statement> result = new ArrayList<>();

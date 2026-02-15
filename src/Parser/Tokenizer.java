@@ -76,7 +76,7 @@ public class Tokenizer {
         }
         // identifier / keyword
         else if (Character.isLetter(c)) {
-            while (position < src.length() && Character.isLetter(src.charAt(position))) {
+            while (position < src.length() && Character.isLetterOrDigit(src.charAt(position))) {
                 s.append(src.charAt(position));
                 position++;
             }

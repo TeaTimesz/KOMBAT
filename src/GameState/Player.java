@@ -52,7 +52,7 @@ public class Player {
         if(globalVariables.containsKey(name)){
             return globalVariables.get(name);
         }
-        throw new EvalError("No global variable named " + name);
+        return 0;
     }
 
     public void setGlobalVariable(String name,long value){
@@ -63,5 +63,8 @@ public class Player {
         return spawnsLeft;
     }
 
+    public void setBudget(double budget){
+        this.budget = budget;
+    }
 
 }

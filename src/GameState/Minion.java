@@ -52,7 +52,7 @@ public class Minion {
         if(localVariables.containsKey(name)) {
             return localVariables.get(name);
         }
-        throw new EvalError("No local variable named " + name);
+        return 0;
     }
     public void setLocalVariable(String name, long value) {
         localVariables.put(name, value);
