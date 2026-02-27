@@ -1,0 +1,105 @@
+/* --- src/css/select-amount.css --- */
+
+.select-amount-screen {
+    font-family: 'Henny Penny', system-ui; 
+    height: 100vh;
+    width: 100vw;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 40px 0;
+    overflow: hidden;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.overlay-box {
+    background: rgba(255, 255, 255, 0.7); 
+    border-radius: 40px;
+    padding: 40px;
+    width: 90vw; 
+    max-width: 1200px;
+    height: 80vh; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(8px);
+}
+
+.select-title {
+    font-family: 'Henny Penny', cursive;
+    font-size: 5rem; 
+    color: #4a3728;
+    margin-bottom: 40px;
+    text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8);
+}
+
+.card-container {
+    display: flex;
+    justify-content: center;
+    /* 4. ใช้ baseline หรือ stretch เพื่อให้ฐานหรือความสูงเท่ากัน */
+    align-items: stretch; 
+    gap: 15px;
+    width: 100%;
+}
+.amount-card {
+    position: relative;
+    width: 220px; 
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* เอฟเฟกต์เมื่อเลือกการ์ด */
+.amount-card {
+    position: relative;
+    /* 1. ปรับความกว้างให้สมดุลกับความสูง (ลองใช้ 200px - 220px) */
+    width: 210px; 
+    /* 2. ความสูงคงที่ */
+    height: 310px; 
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* ป้องกันส่วนเกินหลุดออกนอกกรอบการ์ด */
+    overflow: hidden; 
+}
+
+.leaf-img {
+    width: 100%;
+    height: 100%;
+    /* 3. ใช้ 'fill' เพื่อบังคับให้รูปยืด/หดให้เต็มกรอบที่กำหนดไว้เป๊ะๆ */
+    /* วิธีนี้จะทำให้ขอบไม่โดนตัดแน่นอน แต่อาจจะมีการยืดของลายกระดาษเล็กน้อยซึ่งสังเกตยากครับ */
+    object-fit: fill; 
+    display: block;
+}
+
+/* เอฟเฟกต์เมื่อเลือกการ์ด */
+.amount-card.selected {
+    transform: translateY(-20px) scale(1.1);
+    /* เพิ่ม z-index เพื่อให้ใบที่เลือกลอยทับใบอื่นเล็กน้อย */
+    z-index: 10;
+    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)); 
+}
+
+.img-btn-footer {
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.img-btn-footer img {
+    width: 200px;
+}
+
+.btn-confirm.disabled {
+    filter: grayscale(1);
+    opacity: 0.5;
+    cursor: not-allowed;
+}

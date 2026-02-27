@@ -1,0 +1,39 @@
+/* --- ส่วนปุ่มควบคุมด้านล่าง --- */
+.navigation-footer {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 40px 30px 40px;
+    box-sizing: border-box;
+    z-index: 10;
+}
+
+.img-btn-footer {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ขนาดปุ่ม Back (เน้นให้ดูเล็กกว่านิดหน่อยเพื่อให้ดูเป็นปุ่มย้อนกลับ) */
+.btn-back img {
+    width: 100px; /* ปรับขนาดให้เล็กลงจากเดิม */
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+}
+
+/* ขนาดปุ่ม Confirm */
+.btn-confirm img {
+    width: 180px; /* ปรับให้ใหญ่ขึ้นเพื่อเป็นจุดสนใจ (Call to Action) */
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.4));
+}
+
+/* เอฟเฟกต์ Hover แยกตามขนาด */
+.img-btn-footer:hover {
+    transform: scale(1.1);
+}
+
+.img-btn-footer:active {
+    transform: scale(0.95);
+}

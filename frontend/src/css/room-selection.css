@@ -1,0 +1,37 @@
+.room-selection-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px; /* ระยะห่างระหว่าง 2 ปุ่ม */
+    padding: 20px;
+    width: 100%;
+}
+
+.room-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    outline: none;
+    transition: transform 0.2s ease, filter 0.2s;
+}
+
+.room-btn-img {
+    width: 320px; /* ปรับขนาดความกว้างตามความเหมาะสมของรูปคุณ */
+    height: auto;
+    display: block;
+    /* ถ้ามีขอบขาวติดมาตอนตัดรูป สามารถใส่ border-radius ได้ */
+    border-radius: 15px; 
+}
+
+/* เอฟเฟกต์ตอนเอาเมาส์วาง */
+.room-btn:hover {
+    transform: scale(1.05);
+    filter: brightness(1.15) drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+}
+
+/* เอฟเฟกต์ตอนกดปุ่ม */
+.room-btn:active {
+    transform: scale(0.95);
+    filter: brightness(0.9);
+}

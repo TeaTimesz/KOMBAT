@@ -1,0 +1,37 @@
+/* Container ของตัวละครแต่ละตัว */
+.amount-card {
+    position: relative;
+    width: 200px;      
+    height: 280px;     
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: transparent; 
+}
+
+/* ปรับแต่งรูปมินเนี่ยนภายใน */
+.leaf-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    display: block;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+}
+
+/* สมมติว่าตัวถือกีตาร์คือ ID 4 */
+.amount-card:nth-child(4) .leaf-img {
+    transform: scale(1.05); 
+}
+
+.card-container {
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    gap: 15px;
+    width: 100%;
+    padding: 20px;
+}

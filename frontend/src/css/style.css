@@ -1,0 +1,57 @@
+/* ล้างค่าขอบเดิม */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.main-container {
+    /* ย้าย background-image ไปไว้ในไฟล์ JS แทนเพื่อลด Error Path */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; 
+    align-items: center;
+    padding: 40px 0; /* ปรับ Padding ให้สมดุล */
+}
+
+.game-logo {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.logo-image {
+    width: 800px; 
+    max-width: 90%;
+    height: auto;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+}
+
+.action-area {
+    margin-bottom: 60px; /* ดันปุ่มขึ้นจากขอบล่างเล็กน้อย */
+}
+
+.btn-start-image {
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    outline: none;
+}
+
+.btn-start-image:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+}
+
+.btn-start-image img {
+    width: 400px; 
+    max-width: 80vw;
+    height: auto;
+    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+}

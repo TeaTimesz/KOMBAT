@@ -1,0 +1,80 @@
+/* พื้นหลังและโครงสร้างหลัก */
+.solitaire-screen, .how-to-screen {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around; 
+    position: relative;
+    padding: 20px 0;
+    box-sizing: border-box;
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+}
+
+/* หัวข้อ How to Play ด้านบน */
+.header-box {
+    z-index: 2;
+    margin-top: 20px;
+}
+
+.how-to-header-img {
+    width: 400px; 
+    max-width: 80vw;
+    height: auto;
+    filter: drop-shadow(2px 4px 10px rgba(0,0,0,0.5));
+}
+
+/* แผ่นป้ายหินตรงกลาง */
+.tablet-box {
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1; 
+}
+
+.tablet-main-img {
+    width: auto;
+    max-width: 85vw; 
+    height: auto;
+    max-height: 65vh;
+    filter: drop-shadow(10px 15px 25px rgba(0,0,0,0.6));
+    object-fit: contain;
+}
+
+/* แถบปุ่ม Back / Confirm ด้านล่าง */
+.navigation-footer {
+    position: absolute;
+    bottom: 40px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 60px; 
+    box-sizing: border-box;
+}
+
+.img-btn-footer {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.img-btn-footer img {
+    width: 180px; 
+    height: auto;
+    filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.5));
+}
+
+.img-btn-footer:hover {
+    transform: scale(1.1);
+}
+
+.img-btn-footer:active {
+    transform: scale(0.9);
+}
+
