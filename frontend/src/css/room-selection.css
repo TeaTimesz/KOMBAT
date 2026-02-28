@@ -2,7 +2,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 30px; /* ระยะห่างระหว่าง 2 ปุ่ม */
+    gap: 30px; 
     padding: 20px;
     width: 100%;
 }
@@ -17,10 +17,9 @@
 }
 
 .room-btn-img {
-    width: 320px; /* ปรับขนาดความกว้างตามความเหมาะสมของรูปคุณ */
+    width: 320px; 
     height: auto;
     display: block;
-    /* ถ้ามีขอบขาวติดมาตอนตัดรูป สามารถใส่ border-radius ได้ */
     border-radius: 15px; 
 }
 

@@ -16,7 +16,7 @@
     flex-direction: column;
     justify-content: space-between; 
     align-items: center;
-    padding: 40px 0; /* ปรับ Padding ให้สมดุล */
+    padding: 40px 0;
 }
 
 .game-logo {
@@ -33,7 +33,7 @@
 }
 
 .action-area {
-    margin-bottom: 60px; /* ดันปุ่มขึ้นจากขอบล่างเล็กน้อย */
+    margin-bottom: 60px; 
 }
 
 .btn-start-image {

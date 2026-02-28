@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import '../css/setup-minions.css'; // สร้างไฟล์ CSS สำหรับจัดหน้า
+import '../css/setup-minions.css'; 
 
 function SetupMinions() {
     const location = useLocation();

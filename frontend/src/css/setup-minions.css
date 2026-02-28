@@ -10,7 +10,7 @@
 
 .strategy-scroll-container {
     display: flex;
-    overflow-x: auto; /* ทำให้เลื่อนซ้ายขวาได้ */
+    overflow-x: auto; 
     gap: 30px;
     width: 95vw;
     padding: 40px 20px;
@@ -18,8 +18,8 @@
 }
 
 .strategy-card {
-    min-width: 500px; /* ขนาดตามรูปที่คุณส่งมา */
-    background: url('/images/form_bg.png') no-repeat center; /* ใช้รูปพื้นหลังฟอร์ม */
+    min-width: 500px; 
+    background: url('/images/form_bg.png') no-repeat center; 
     background-size: contain;
     padding: 20px;
     display: flex;

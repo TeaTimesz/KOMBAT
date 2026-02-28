@@ -6,10 +6,8 @@ function CreateMinion() {
     const location = useLocation();
     const navigate = useNavigate();
     
-    // รับจำนวนมินเนี่ยนที่เลือกมาจากหน้า Select Amount
     const amount = location.state?.amount || 1;
 
-    // State สำหรับเก็บ ID ของมินเนี่ยนที่ถูกเลือก (เลือกได้หลายตัวตามจำนวน amount)
     const [selectedMinions, setSelectedMinions] = useState([]);
 
     const minions = [
@@ -25,7 +23,7 @@ function CreateMinion() {
         if (selectedMinions.includes(id)) {
             setSelectedMinions(selectedMinions.filter(item => item !== id));
         } else {
-            // ถ้ายังไม่เลือก และยังไม่เกินจำนวนที่กำหนด ให้เพิ่มเข้าไป
+
             if (selectedMinions.length < amount) {
                 setSelectedMinions([...selectedMinions, id]);
             } else {
