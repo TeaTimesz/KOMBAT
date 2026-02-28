@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../css/room-selection.css'; // แยกไฟล์ CSS ออกมาเพื่อความสะอาด
+import '../css/room-selection.css'; 
 
 function RoomSelection() {
     const navigate = useNavigate();

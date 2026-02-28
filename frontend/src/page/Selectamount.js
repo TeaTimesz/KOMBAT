@@ -6,9 +6,6 @@ function SelectAmount() {
     const navigate = useNavigate();
     const [selectedAmount, setSelectedAmount] = useState(null);
 
-    
-    
-    // กำหนด Array ของรูปภาพทั้ง 5 รูปที่คุณต้องการ
     const leafOptions = [
         { id: 1, img: '/images/1.png' },
         { id: 2, img: '/images/2.png' },
@@ -34,13 +31,12 @@ function SelectAmount() {
                     {leafOptions.map((item) => (
                         <div 
                             key={item.id} 
-                            // ถ้า id ตรงกับที่เลือก ให้เพิ่ม class 'selected'
+                
                             className={`amount-card ${selectedAmount === item.id ? 'selected' : ''}`} 
                             onClick={() => setSelectedAmount(item.id)}
                         >
                     
-                            
-                            {/* รูปใบไม้แต่ละเลขที่ต้องการเปลี่ยน */}
+                        
                             <div className="leaf-content">
                                 <img src={item.img} alt={`Leaf ${item.id}`} className="leaf-img" />
                             </div>

@@ -42,7 +42,6 @@
 .card-container {
     display: flex;
     justify-content: center;
-    /* 4. ใช้ baseline หรือ stretch เพื่อให้ฐานหรือความสูงเท่ากัน */
     align-items: stretch; 
     gap: 15px;
     width: 100%;
@@ -57,24 +56,19 @@
 /* เอฟเฟกต์เมื่อเลือกการ์ด */
 .amount-card {
     position: relative;
-    /* 1. ปรับความกว้างให้สมดุลกับความสูง (ลองใช้ 200px - 220px) */
     width: 210px; 
-    /* 2. ความสูงคงที่ */
     height: 310px; 
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex;
     align-items: center;
     justify-content: center;
-    /* ป้องกันส่วนเกินหลุดออกนอกกรอบการ์ด */
     overflow: hidden; 
 }
 
 .leaf-img {
     width: 100%;
     height: 100%;
-    /* 3. ใช้ 'fill' เพื่อบังคับให้รูปยืด/หดให้เต็มกรอบที่กำหนดไว้เป๊ะๆ */
-    /* วิธีนี้จะทำให้ขอบไม่โดนตัดแน่นอน แต่อาจจะมีการยืดของลายกระดาษเล็กน้อยซึ่งสังเกตยากครับ */
     object-fit: fill; 
     display: block;
 }
@@ -82,7 +76,6 @@
 /* เอฟเฟกต์เมื่อเลือกการ์ด */
 .amount-card.selected {
     transform: translateY(-20px) scale(1.1);
-    /* เพิ่ม z-index เพื่อให้ใบที่เลือกลอยทับใบอื่นเล็กน้อย */
     z-index: 10;
     filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)); 
 }

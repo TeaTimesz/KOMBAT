@@ -7,7 +7,6 @@ function SetupMinions() {
     const navigate = useNavigate();
     const selectedIds = location.state?.selectedIds || [];
 
-    // ดึงข้อมูลมินเนี่ยนทั้งหมดเพื่อหาข้อมูลรูปภาพตาม ID ที่เลือกมา
     const allMinions = [
         { id: 1, img: '/images/minion1.png' },
         { id: 2, img: '/images/minion2.png' },
@@ -16,7 +15,6 @@ function SetupMinions() {
         { id: 5, img: '/images/minion5.png' }
     ];
 
-    // สร้าง State สำหรับเก็บข้อมูลที่กรอกของแต่ละตัว
     const [minionConfigs, setMinionConfigs] = useState(
         selectedIds.map(id => ({ id, name: '', strategy: 'Balanced' }))
     );

@@ -8,7 +8,7 @@ function Home() {
     return (
         <div 
             className="main-container" 
-            style={{ backgroundImage: "url('/images/index.PNG')" }} // ดึงรูปจาก public/images/index.PNG
+            style={{ backgroundImage: "url('/images/index.PNG')" }} 
         >
             <header className="game-logo">
                 <img 

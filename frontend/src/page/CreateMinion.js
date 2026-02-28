@@ -52,7 +52,7 @@ function CreateMinion() {
                     {minions.map((minion) => (
                         <div 
                             key={minion.id} 
-                            // เพิ่ม Class 'selected' เมื่อมินเนี่ยนตัวนี้อยู่ใน List ที่เลือก
+                        
                             className={`amount-card ${selectedMinions.includes(minion.id) ? 'selected' : ''}`} 
                             onClick={() => handleSelect(minion.id)}
                         >
