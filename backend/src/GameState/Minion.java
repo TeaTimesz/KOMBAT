@@ -21,8 +21,24 @@ public class Minion {
         this.owner.addMinion(this);
     }
 
+    // constructor variant to create a minion without charging spawn cost
+    public Minion(long hp,long defense,Hex location,Player owner,Strategy strategy, boolean free) {
+        this.hp = hp;
+        this.defense = defense;
+        this.location = location;
+        this.owner = owner;
+        this.strategy = strategy;
+        this.localVariables = new HashMap<>();
+        this.location.setOccupant(this);
+        if (free) {
+            this.owner.addMinionFree(this);
+        } else {
+            this.owner.addMinion(this);
+        }
+    }
+
     public boolean isAlive() {
-        return hp > 1;
+        return hp > 0;
     }
     public Hex getLocation() {
         return location;
