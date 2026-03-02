@@ -41,7 +41,7 @@ public class GameConfig {
 
     private Map<String, Long> readFromFile() {
         Map<String, Long> map = new HashMap<>();
-        Path inputPath = Paths.get("../config.txt");
+        Path inputPath = Paths.get("backend/src/ConfigFile.txt");
 
         if (!Files.exists(inputPath)) {
             System.out.println("Config file not found. Using default presets.");
