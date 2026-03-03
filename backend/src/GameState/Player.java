@@ -42,7 +42,6 @@ public class Player {
         editBudget(-GameConfig.getInstance().spawn_cost);
     }
     public void addMinionFree(Minion minion){
-        // add the minion and consume a spawn slot without charging budget
         minions.add(minion);
         spawnsLeft -= 1;
     }

@@ -21,7 +21,6 @@ public class Minion {
         this.owner.addMinion(this);
     }
 
-    // constructor variant to create a minion without charging spawn cost
     public Minion(long hp,long defense,Hex location,Player owner,Strategy strategy, boolean free) {
         this.hp = hp;
         this.defense = defense;

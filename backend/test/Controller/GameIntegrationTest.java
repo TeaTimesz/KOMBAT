@@ -1,15 +1,13 @@
 package Controller;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import Controller.GameMode;
-import Controller.TurnManager;
 import GameState.*;
 import Parser.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class GameIntegrationTest {
     private GameEnvironment env;

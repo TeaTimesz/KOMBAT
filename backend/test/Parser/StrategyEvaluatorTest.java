@@ -1,14 +1,13 @@
 package Parser;
 
-import static org.junit.jupiter.api.Assertions.*;
+import GameState.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.util.Arrays;
-import java.util.List;
-
-// Imports
-import GameState.*;
 import utils.HexGridPrinter;
+
+import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class StrategyEvaluatorTest {
 
