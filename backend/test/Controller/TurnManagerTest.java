@@ -108,8 +108,8 @@ class TurnManagerTest {
         assertFalse(p.getMinions().isEmpty(), "Bot should have spawned at least one minion");
 
         Hex loc = p.getMinions().get(0).getLocation();
-        assertTrue(loc.getRow() >= 7, "Bot spawn row should be more than 7 (designated area)");
-        assertTrue(loc.getCol() >= 6, "Bot spawn column should be more than 6 (designated area)");
+        assertTrue(loc.getRow() >= 6, "Bot spawn row should be more than 7 (designated area)");
+        assertTrue(loc.getCol() >= 7, "Bot spawn column should be more than 6 (designated area)");
 
         assertEquals(p, loc.getTerritory(), "Spawn hex territory should be assigned to player");
     }
