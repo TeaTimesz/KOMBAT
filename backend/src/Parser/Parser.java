@@ -9,10 +9,6 @@ public class Parser {
     private final StatementFactory stmtFactory = StatementFactory.getInstance();
     private final ExprFactory exprFactory = ExprFactory.getInstance();
 
-    private static final Set<String> directions = Set.of(
-         "up", "down", "upleft", "upright", "downleft", "downright"
-    );
-
     public Parser(String src) {
         this.tkz = new Tokenizer(src);
     }

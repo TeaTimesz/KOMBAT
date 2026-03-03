@@ -1,14 +1,13 @@
 package Controller;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import GameState.GameConfig;
 import GameState.GameEnvironment;
 import GameState.Hex;
 import GameState.Player;
-import Controller.GameMode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class TurnManagerTest {
     private GameEnvironment env;
