@@ -7,6 +7,7 @@ import HowtoSolitaire from './page/HowtoSolitaire';
 import HowtoAuto from './page/HowtoAuto';
 import SelectAmount from './page/Selectamount';
 import CreateMinion from './page/CreateMinion';
+import HexGrid from './page/HexGrid';
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path="/select-amount" element={<SelectAmount />} />
         
         <Route path="/create-minion" element={<CreateMinion />} />
+          <Route path="/hexgrid" element={<HexGrid />} />
       </Routes>
     </Router>
   );
