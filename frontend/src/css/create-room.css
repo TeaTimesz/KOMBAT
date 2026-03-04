@@ -1,0 +1,43 @@
+/* src/css/create-room.css */
+
+.menu-screen {
+    height: 100vh;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; 
+}
+
+.game-logo {
+   
+    margin-top: 100px; 
+    margin-bottom: 120px; 
+}
+
+.button-group {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    margin-top: 20px; 
+}
+
+.kombat-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.kombat-btn img {
+    width: 500px; 
+    height: auto;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6));
+}
+
+.kombat-btn:hover {
+    transform: scale(1.05); 
+}
