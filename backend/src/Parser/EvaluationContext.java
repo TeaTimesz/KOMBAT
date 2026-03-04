@@ -5,9 +5,6 @@ import GameState.GameEnvironment;
 import GameState.Minion;
 import GameState.Player;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class EvaluationContext {
     private final GameEnvironment env;
     private final Minion minion;

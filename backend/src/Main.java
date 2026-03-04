@@ -1,5 +1,5 @@
-import GameState.*;
 import Controller.*;
+import GameState.*;
 import Parser.Parser;
 import Parser.Statement;
 import utils.HexGridPrinter;
