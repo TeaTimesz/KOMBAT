@@ -7,7 +7,11 @@ import HowtoSolitaire from './page/HowtoSolitaire';
 import HowtoAuto from './page/HowtoAuto';
 import SelectAmount from './page/Selectamount';
 import CreateMinion from './page/CreateMinion';
-
+import Createroom from './page/Createroom';
+import Coderoom from './page/Coderoom';
+import Statusroom from './page/Statusroom';
+import Joinroom from './page/Joinroom';
+import Strategyinput from './page/Strategyinput';
 
 function App() {
   return (
@@ -21,6 +25,12 @@ function App() {
         <Route path="/select-amount" element={<SelectAmount />} />
         
         <Route path="/create-minion" element={<CreateMinion />} />
+        <Route path="/create-room" element={<Createroom />} />
+    
+        <Route path="/code-room" element={<Coderoom />} />
+        <Route path="/status-room" element={<Statusroom />} />
+        <Route path="/join-room" element={<Joinroom />} />
+        <Route path="/strategy-input" element={<Strategyinput />} />
       </Routes>
     </Router>
   );

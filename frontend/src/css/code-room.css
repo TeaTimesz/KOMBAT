@@ -1,0 +1,105 @@
+.create-screen {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* --- กรอบสีขาว (ปรับขนาดให้เล็กลงตามรูปแรก) --- */
+.white-glass-panel {
+    width: 680px;  /* ลดความกว้างลง */
+    height: 380px; /* ลดความสูงลง */
+    background: rgba(255, 255, 255, 0.45); /* ปรับความใสให้พอดี */
+    border-radius: 15px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 80px; /* เว้นที่ให้ป้ายบน */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* ป้าย CREATE ROOM (ต้องดึงขึ้นไปทับขอบมากขึ้น) */
+.header-container {
+    position: absolute;
+    top: -55px; /* ดึงขึ้นไปทับขอบบน */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.top-banner {
+    width: 550px; /* ปรับขนาดป้ายให้สมดุลกับกรอบ */
+}
+
+/* ตัวหนังสือ Room code (ใช้ฟอนต์ที่มีหัวหยัก) */
+.room-text-label {
+    font-family: 'Henny Penny', cursive; /* ตรวจสอบว่าได้ Import ฟอนต์นี้ใน index.html หรือยัง */
+    font-size: 55px;
+    color: #1a1a1a;
+    margin: 10px 0 20px 0;
+    font-weight: normal;
+}
+
+/* แถบไม้โชว์รหัส (บีบความกว้างให้สั้นลง) --- */
+.code-row-wrapper {
+    width: 420px; /* ปรับให้สั้นลงตามรูป */
+    height: 75px;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* จัดให้อยู่กลาง */
+    position: relative;
+    padding-right: 20px; /* เว้นที่ให้ปุ่ม Copy */
+}
+
+.code-text {
+    font-size: 42px;
+    color: #f7e9ba;
+    font-weight: bold;
+    letter-spacing: 4px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    margin-right: 60px; /* ดันตัวเลขหลบปุ่ม Copy */
+    z-index: 2;
+}
+
+.copy-action-btn {
+    position: absolute;
+    right: -50px; /* ให้ปุ่ม Copy ลอยอยู่ฝั่งขวาของแถบไม้ */
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.copy-action-btn img {
+    width: 500px; /* ปรับขนาดปุ่มสีทองให้เล็กลงตามรูป */
+}
+
+/* ปุ่ม JOIN ROOM (ดึงลงมาทับขอบล่าง) --- */
+.join-action-btn {
+    position: absolute;
+    bottom: -45px; /* ดึงลงมาทับขอบล่าง */
+    left: 50%;
+    transform: translateX(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.join-action-btn img {
+    width: 420px; /* ปรับขนาดให้พอดีกับกรอบ */
+}
+
+.join-action-btn:hover {
+    transform: translateX(-50%) scale(1.05);
+}

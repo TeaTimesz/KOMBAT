@@ -51,7 +51,7 @@ function SelectAmount() {
                 </button>
                 
                 <button 
-                    className={`img-btn-footer btn-confirm ${!selectedAmount ? 'disabled' : ''}`} 
+                    className={`img-btn-footer btn-confirm  ${!selectedAmount ? 'disabled' : ''}`} 
                     onClick={handleConfirm}
                 >
                     <img src="/images/confirm.png" alt="Confirm" />
