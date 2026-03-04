@@ -11,7 +11,10 @@
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.0",
     "react-scripts": "^5.0.1",
+<<<<<<< HEAD
     "socket.io-client": "^4.8.3",
+=======
+>>>>>>> d28d348a075fd1a8f0adb4bd76b92cd414926553
     "web-vitals": "^2.1.4"
   },
   "scripts": {

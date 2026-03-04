@@ -10,12 +10,28 @@ public class GameEnvironment {
     private final GameConfig config;
     private Player currentPlayer;
 
+    public static final int[][] SPAWN_AREA_P1 = {{1,1},{1,2},{2,1},{2,2},{1,3}};
+    public static final int[][] SPAWN_AREA_P2 = {{8,6},{7,7},{7,8},{8,7},{8,8}};
+
     public GameEnvironment () {
         player1 = new Player();
         player2 = new Player();
         currentPlayer = player1;
         grid = new HexGrid();
         config = GameConfig.getInstance();
+
+        for (int[] coord : SPAWN_AREA_P1) {
+            Hex h = grid.getHex(coord[0], coord[1]);
+            if (h != null) {
+                h.setTerritory(player1);
+            }
+        }
+        for (int[] coord : SPAWN_AREA_P2) {
+            Hex h = grid.getHex(coord[0], coord[1]);
+            if (h != null) {
+                h.setTerritory(player2);
+            }
+        }
     }
 
     public Player getCurrentPlayer() {
@@ -23,6 +39,12 @@ public class GameEnvironment {
     }
     public Player getOpponentPlayer() {
         return (currentPlayer == player1) ? player2 : player1;
+    }
+    public Player getPlayer1() {
+        return player1;
+    }
+    public Player getPlayer2() {
+        return player2;
     }
     public void switchTurn() {
         if(currentPlayer == player1){
@@ -38,7 +60,7 @@ public class GameEnvironment {
         List<Minion> currMinions = curr.getMinions();
         List<Minion> oppMinions = opp.getMinions();
 
-        if(currMinions.isEmpty()||oppMinions.isEmpty()){
+        if(currMinions.isEmpty() || oppMinions.isEmpty()){
             return true;
         }
         if(turnCount > GameConfig.getInstance().max_turns){
@@ -47,9 +69,13 @@ public class GameEnvironment {
         return false;
     }
 
+    public int getTurnCount() {
+        return turnCount;
+    }
+
     public void moveMinion(Minion minion,Direction direction) {
-        Hex curretnHex = minion.getLocation();
-        Hex targetHex = grid.getNeighbour(curretnHex,direction);
+        Hex currentHex = minion.getLocation();
+        Hex targetHex = grid.getNeighbour(currentHex,direction);
         if(targetHex == null){
             return;
         }
@@ -60,10 +86,10 @@ public class GameEnvironment {
     }
 
     public void shootHex(Minion minion,Direction direction,long expenditure) {
+        if(grid.getNeighbour(minion.getLocation(),direction) == null) return;
         Hex targetHex = grid.getNeighbour(minion.getLocation(), direction);
-        if(targetHex.getOccupant() != null){
-            targetHex.getOccupant().takeDamage(expenditure);
-        }
+        if(targetHex.getOccupant() == null) return;
+        targetHex.getOccupant().takeDamage(expenditure);
     }
 
     public HexGrid getGrid() {

@@ -41,6 +41,10 @@ public class Player {
         spawnsLeft -= 1;
         editBudget(-GameConfig.getInstance().spawn_cost);
     }
+    public void addMinionFree(Minion minion){
+        minions.add(minion);
+        spawnsLeft -= 1;
+    }
     public void removeMinion(Minion minion){
         minions.remove(minion);
     }

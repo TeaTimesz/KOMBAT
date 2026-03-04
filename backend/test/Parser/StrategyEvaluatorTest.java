@@ -1,13 +1,13 @@
 package Parser;
 
-import static org.junit.jupiter.api.Assertions.*;
+import GameState.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.util.Arrays;
-import java.util.List;
+import utils.HexGridPrinter;
 
-// Imports
-import GameState.*;
+import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class StrategyEvaluatorTest {
 
@@ -189,7 +189,7 @@ class StrategyEvaluatorTest {
 
         // --- VISUALIZATION: BEFORE ---
         System.out.println("--- STATE 1: BEFORE MOVE (Budget: " + p1.getBudget() + ") ---");
-        HexGridPrinter.printHexMap(grid);
+        HexGridPrinter.printHexMap(env);
 
         // 4. Execute Turn
         // 900 - 500 = 400 (Positive/True) -> Enters 'move up'
@@ -198,7 +198,7 @@ class StrategyEvaluatorTest {
         // --- VISUALIZATION: AFTER ---
         // Budget should be 899 (900 - 1 move cost)
         System.out.println("--- STATE 2: AFTER MOVE (Budget: " + p1.getBudget() + ") ---");
-        HexGridPrinter.printHexMap(grid);
+        HexGridPrinter.printHexMap(env);
 
         // 5. Verification
         assertEquals(1, minion.getLocalVariable("status"));
@@ -337,7 +337,7 @@ class StrategyEvaluatorTest {
         // 4. VISUALIZATION (BEFORE)
         // ----------------------------------------------------------------
         System.out.println("--- STATE 1: BEFORE TURN (Minion @ 3,3 | Enemy @ 6,3) ---");
-        HexGridPrinter.printHexMap(grid);
+        HexGridPrinter.printHexMap(env);
 
         // ----------------------------------------------------------------
         // 5. EXECUTE TURN
@@ -354,7 +354,7 @@ class StrategyEvaluatorTest {
         // 6. VISUALIZATION (AFTER)
         // ----------------------------------------------------------------
         System.out.println("--- STATE 2: AFTER TURN (Expected: Move DownRight) ---");
-        HexGridPrinter.printHexMap(grid);
+        HexGridPrinter.printHexMap(env);
 
         // ----------------------------------------------------------------
         // 7. VERIFICATION

@@ -3,7 +3,7 @@ package Parser;
 import java.util.List;
 
 //implement using visitor pattern
-public abstract class Statement extends Node {
+public abstract class Statement {
     public abstract void execute(EvaluationContext ctx)throws DoneException;
 }
 
