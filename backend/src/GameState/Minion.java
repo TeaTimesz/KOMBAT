@@ -1,8 +1,9 @@
 package GameState;
-import Parser.EvalError;
+import lombok.Getter;
 
 import java.util.HashMap;
 
+@Getter
 public class Minion {
     private long hp;
     private long defense;
@@ -39,9 +40,7 @@ public class Minion {
     public boolean isAlive() {
         return hp > 0;
     }
-    public Hex getLocation() {
-        return location;
-    }
+
     public void takeDamage(long damage) {
         hp -= Math.max(1,damage - defense);
         if(!isAlive()) {
@@ -55,13 +54,6 @@ public class Minion {
         this.location = location;
         this.location.setOccupant(this);
     }
-    public Player getOwner() {
-        return owner;
-    }
-    public long getHp() {
-        return hp;
-    }
-    public long getDefense() {return defense;}
 
     public long getLocalVariable(String name) {
         if(localVariables.containsKey(name)) {
@@ -71,10 +63,6 @@ public class Minion {
     }
     public void setLocalVariable(String name, long value) {
         localVariables.put(name, value);
-    }
-
-    public Strategy getStrategy() {
-        return strategy;
     }
 
 }

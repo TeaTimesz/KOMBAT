@@ -1,6 +1,8 @@
 package Parser;
 
-import GameState.*;
+import GameState.GameEnvironment;
+import GameState.Minion;
+import GameState.Player;
 
 public class StrategyEvaluator {
     private final GameEnvironment env;

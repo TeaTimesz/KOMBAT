@@ -2,12 +2,19 @@ package GameState;
 
 import java.util.List;
 import Parser.Direction;
+import lombok.Getter;
 
 public class GameEnvironment {
+    @Getter
     private int turnCount;
-    private final Player player1,player2;
+    @Getter
+    private final Player player1;
+    @Getter
+    private final Player player2;
+    @Getter
     private final HexGrid grid;
     private final GameConfig config;
+    @Getter
     private Player currentPlayer;
 
     public static final int[][] SPAWN_AREA_P1 = {{1,1},{1,2},{2,1},{2,2},{1,3}};
@@ -34,18 +41,10 @@ public class GameEnvironment {
         }
     }
 
-    public Player getCurrentPlayer() {
-        return currentPlayer;
-    }
     public Player getOpponentPlayer() {
         return (currentPlayer == player1) ? player2 : player1;
     }
-    public Player getPlayer1() {
-        return player1;
-    }
-    public Player getPlayer2() {
-        return player2;
-    }
+
     public void switchTurn() {
         if(currentPlayer == player1){
             currentPlayer = player2;
@@ -69,10 +68,6 @@ public class GameEnvironment {
         return false;
     }
 
-    public int getTurnCount() {
-        return turnCount;
-    }
-
     public void moveMinion(Minion minion,Direction direction) {
         Hex currentHex = minion.getLocation();
         Hex targetHex = grid.getNeighbour(currentHex,direction);
@@ -90,10 +85,6 @@ public class GameEnvironment {
         Hex targetHex = grid.getNeighbour(minion.getLocation(), direction);
         if(targetHex.getOccupant() == null) return;
         targetHex.getOccupant().takeDamage(expenditure);
-    }
-
-    public HexGrid getGrid() {
-        return grid;
     }
 
     public long getClosestOpponent(Minion minion){

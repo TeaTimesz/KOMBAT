@@ -1,11 +1,13 @@
 package GameState;
-import Parser.EvalError;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.lang.module.Configuration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
+@Getter
+@Setter
 public class Player {
     private double budget;
     private long spawnsLeft;
@@ -17,9 +19,7 @@ public class Player {
         minions = new ArrayList<>();
         globalVariables = new HashMap<>();
     }
-    public double getBudget() {
-        return budget;
-    }
+
     public void editBudget(double amount) {
         if(budget + amount < 1 ){
             budget = 1;
@@ -48,9 +48,6 @@ public class Player {
     public void removeMinion(Minion minion){
         minions.remove(minion);
     }
-    public List<Minion> getMinions(){
-        return minions;
-    }
 
     public long getGlobalVariable(String name){
         if(globalVariables.containsKey(name)){
@@ -61,14 +58,6 @@ public class Player {
 
     public void setGlobalVariable(String name,long value){
         globalVariables.put(name,value);
-    }
-
-    public long getSpawnsLeft(){
-        return spawnsLeft;
-    }
-
-    public void setBudget(double budget){
-        this.budget = budget;
     }
 
 }
