@@ -82,16 +82,18 @@ public class GameService {
         return toStateDTO(getSession(gameId));
     }
 
-    public GameStateDTO spawnFree(String gameId, String playerToken, int row, int col) {
+    public GameStateDTO spawnFree(String gameId, String playerToken, int row, int col,
+                                  String strategyStr, Long defenseFactor) {
         GameSession session = getSession(gameId);
         Player player = resolvePlayer(session, playerToken);
 
         Hex hex = session.env.getGrid().getHex(row, col);
         long hp = GameConfig.getInstance().init_hp;
-        long def = Math.max(1, hp / 10);
-        Strategy strategy = makeDefaultStrategy();
+        long def = (defenseFactor != null && defenseFactor >= 1) ? defenseFactor : Math.max(1, hp / 10);
+        Strategy strategy = makeStrategy(strategyStr);
 
-        session.manager.spawnFreeMinion(player, hex, hp, def, strategy);
+        boolean ok = session.manager.spawnFreeMinion(player, hex, hp, def, strategy);
+        if (!ok) throw new RuntimeException("Cannot spawn free minion here.");
         return toStateDTO(session);
     }
 
@@ -109,43 +111,97 @@ public class GameService {
         Player player = resolvePlayer(session, playerToken);
 
         Hex hex = session.env.getGrid().getHex(row, col);
-        session.manager.buyHex(player, hex);
+        boolean ok = session.manager.buyHex(player, hex);
+        if (!ok) throw new RuntimeException("Cannot buy that hex — must be unclaimed, adjacent to your territory, and you need enough budget.");
         return toStateDTO(session);
     }
 
     public GameStateDTO spawnMinion(String gameId, String playerToken, int row, int col,
-                                    String strategyStr) {
+                                    String strategyStr, Long defenseFactor) {
         GameSession session = getSession(gameId);
         Player player = resolvePlayer(session, playerToken);
 
         Hex hex = session.env.getGrid().getHex(row, col);
         long hp = GameConfig.getInstance().init_hp;
-        long def = Math.max(1, hp / 10);
+        long def = (defenseFactor != null && defenseFactor >= 1) ? defenseFactor : Math.max(1, hp / 10);
         Strategy strategy = makeStrategy(strategyStr);
 
-        session.manager.spawnMinion(player, hex, hp, def, strategy);
+        boolean ok = session.manager.spawnMinion(player, hex, hp, def, strategy);
+        if (!ok) throw new RuntimeException("Cannot spawn here — check territory, occupancy, budget, and spawn count.");
         return toStateDTO(session);
     }
 
     public GameStateDTO endTurn(String gameId, String playerToken) {
         GameSession session = getSession(gameId);
         Player currentPlayer = resolvePlayer(session, playerToken);
+        int currentPlayerIndex = (currentPlayer == session.env.getPlayer1()) ? 1 : 2;
+        Player opponent = (currentPlayer == session.env.getPlayer1())
+                ? session.env.getPlayer2() : session.env.getPlayer1();
+
+        List<String> log = new ArrayList<>();
+
+        // Snapshot positions before strategy execution
+        java.util.IdentityHashMap<Minion, int[]> locBefore = new java.util.IdentityHashMap<>();
+        for (Minion m : currentPlayer.getMinions()) {
+            if (m.getLocation() != null)
+                locBefore.put(m, new int[]{m.getLocation().getRow(), m.getLocation().getCol()});
+        }
+
+        // Snapshot opponent HP before
+        java.util.IdentityHashMap<Minion, Long> oppHpBefore = new java.util.IdentityHashMap<>();
+        List<Minion> oppMinionsBefore = List.copyOf(opponent.getMinions());
+        for (Minion m : oppMinionsBefore) oppHpBefore.put(m, m.getHp());
 
         session.manager.executeStrategies(currentPlayer);
+
+        // Log movements
+        int actions = 0;
+        for (Minion m : List.copyOf(currentPlayer.getMinions())) {
+            int[] prev = locBefore.get(m);
+            if (prev != null && m.getLocation() != null) {
+                int r = m.getLocation().getRow(), c = m.getLocation().getCol();
+                if (prev[0] != r || prev[1] != c) {
+                    log.add("  Minion (" + prev[0] + "," + prev[1] + ") moved → (" + r + "," + c + ")");
+                    actions++;
+                }
+            }
+        }
+        // Log shots / eliminations
+        for (Minion m : oppMinionsBefore) {
+            Long hpBefore = oppHpBefore.get(m);
+            if (hpBefore == null) continue;
+            if (!opponent.getMinions().contains(m)) {
+                String pos = m.getLocation() != null
+                        ? m.getLocation().getRow() + "," + m.getLocation().getCol() : "?";
+                log.add("  Minion at (" + pos + ") was eliminated!");
+                actions++;
+            } else if (m.getHp() < hpBefore) {
+                log.add("  Shot enemy (" + m.getLocation().getRow() + "," + m.getLocation().getCol()
+                        + "): " + hpBefore + " → " + m.getHp() + " HP");
+                actions++;
+            }
+        }
+        if (actions == 0) log.add("  Minions took no action (done)");
+
         session.manager.endTurn();
 
         while (!session.env.isGameOver()) {
             Player nextPlayer = session.env.getCurrentPlayer();
             int nextPlayerIndex = (nextPlayer == session.env.getPlayer1()) ? 1 : 2;
+            double budgetBefore = nextPlayer.getBudget();
             session.manager.startTurn(nextPlayer, nextPlayerIndex);
-
-            if (!session.manager.isBot(nextPlayerIndex)) {
-                break;
+            double interest = nextPlayer.getBudget() - budgetBefore;
+            if (interest > 0.5) {
+                log.add("P" + nextPlayerIndex + " earned +" + Math.round(interest)
+                        + " interest (total: " + Math.round(nextPlayer.getBudget()) + ")");
             }
+            if (!session.manager.isBot(nextPlayerIndex)) break;
             session.manager.endTurn();
         }
 
-        return toStateDTO(session);
+        GameStateDTO dto = toStateDTO(session);
+        dto.setActionLog(log);
+        return dto;
     }
 
     // ── helpers ────────────────────────────────────────────────────────────────
@@ -193,8 +249,9 @@ public class GameService {
         dto.setPhase(session.phase);
         dto.setTurnCount(env.getTurnCount());
         dto.setCurrentPlayer(env.getCurrentPlayer() == env.getPlayer1() ? 1 : 2);
-        dto.setGameOver(env.isGameOver());
-        dto.setWinner(env.isGameOver() ? session.manager.getWinner() : 0);
+        boolean over = session.phase.equals("PLAYING") && env.isGameOver();
+        dto.setGameOver(over);
+        dto.setWinner(over ? session.manager.getWinner() : 0);
         dto.setPlayer1(toPlayerDTO(env.getPlayer1(), 1, env));
         dto.setPlayer2(toPlayerDTO(env.getPlayer2(), 2, env));
 
@@ -244,10 +301,12 @@ public class GameService {
             dto.setHasMinion(true);
             dto.setMinionOwner(occupant.getOwner() == env.getPlayer1() ? 1 : 2);
             dto.setMinionHp(occupant.getHp());
+            dto.setMinionId(occupant.getId());
         } else {
             dto.setHasMinion(false);
             dto.setMinionOwner(0);
             dto.setMinionHp(0);
+            dto.setMinionId(null);
         }
         return dto;
     }

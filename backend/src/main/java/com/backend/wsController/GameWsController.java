@@ -27,10 +27,11 @@ public class GameWsController {
 
         state = switch (request.getType()) {
             case "SPAWN_FREE" -> gameService.spawnFree(
-                    gameId, request.getPlayerToken(), request.getRow(), request.getCol());
+                    gameId, request.getPlayerToken(), request.getRow(), request.getCol(),
+                    request.getStrategy(), request.getDefenseFactor());
             case "SPAWN" -> gameService.spawnMinion(
                     gameId, request.getPlayerToken(), request.getRow(), request.getCol(),
-                    request.getStrategy());
+                    request.getStrategy(), request.getDefenseFactor());
             case "BUY_HEX" -> gameService.buyHex(
                     gameId, request.getPlayerToken(), request.getRow(), request.getCol());
             case "END_TURN" -> gameService.endTurn(gameId, request.getPlayerToken());

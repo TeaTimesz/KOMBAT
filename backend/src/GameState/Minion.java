@@ -2,9 +2,11 @@ package GameState;
 import lombok.Getter;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 @Getter
 public class Minion {
+    private final String id = UUID.randomUUID().toString().substring(0, 8);
     private long hp;
     private long defense;
     private Hex location;

@@ -415,5 +415,144 @@
 
 
 .back-btn-global:active img {
-    transform: scale(0.9); 
+    transform: scale(0.9);
+}
+
+/* ── Strategyinput redesign (sk-*) ───────────────────────────────────────── */
+
+.sk-board {
+    display: flex;
+    gap: 40px;
+    background: rgba(253, 245, 220, 0.92);
+    border: 6px solid #8d6e63;
+    border-radius: 20px;
+    padding: 40px 50px;
+    width: 900px;
+    min-height: 480px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+}
+
+.sk-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 220px;
+}
+
+.sk-minion-frame {
+    width: 200px;
+    height: 220px;
+    border: 4px solid #8d6e63;
+    border-radius: 16px;
+    background: #fff8f0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.sk-minion-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.sk-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.sk-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sk-field-grow {
+    flex: 1;
+}
+
+.sk-label {
+    font-family: 'Cinzel', 'Henny Penny', serif;
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: #5d4037;
+    letter-spacing: 0.04em;
+}
+
+.sk-hint {
+    font-size: 0.78rem;
+    font-weight: normal;
+    color: #8d6e63;
+    font-family: sans-serif;
+}
+
+.sk-text-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #a1887f;
+    border-radius: 10px;
+    background: #fff8f0;
+    font-size: 1.05rem;
+    color: #3e2723;
+    font-family: 'Mali', sans-serif;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.sk-text-input:focus {
+    border-color: #5d4037;
+}
+
+.sk-short {
+    width: 140px;
+}
+
+.sk-textarea {
+    flex: 1;
+    width: 100%;
+    min-height: 130px;
+    padding: 10px 14px;
+    border: 2px solid #a1887f;
+    border-radius: 10px;
+    background: #fff8f0;
+    font-size: 0.9rem;
+    color: #3e2723;
+    font-family: 'Courier New', monospace;
+    resize: vertical;
+    outline: none;
+    line-height: 1.5;
+    transition: border-color 0.15s;
+}
+
+.sk-textarea:focus {
+    border-color: #5d4037;
+}
+
+/* Summary board — CSS-only, no background image needed */
+.sk-summary-board {
+    width: 900px;
+    max-height: 80vh;
+    background: rgba(253, 245, 220, 0.95);
+    border: 6px solid #8d6e63;
+    border-radius: 20px;
+    padding: 40px 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+}
+
+.sk-strategy-preview {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 80px;
+    overflow-y: auto;
 }
