@@ -1,5 +1,10 @@
 package GameState;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class Hex {
     private final int row,col;
     private Minion occupant;
@@ -15,22 +20,5 @@ public class Hex {
             return false;
         }
     }
-    public int getRow() {
-        return row;
-    }
-    public int getCol() {
-        return col;
-    }
-    public Minion getOccupant() {
-        return occupant;
-    }
-    public void setOccupant(Minion occupant) {
-        this.occupant = occupant;
-    }
-    public Player getTerritory() {
-        return territory;
-    }
-    public void setTerritory(Player territory) {
-        this.territory = territory;
-    }
+
 }

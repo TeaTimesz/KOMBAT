@@ -1,7 +1,9 @@
 package GameState;
 
 import Parser.*;
+import lombok.Getter;
 
+@Getter
 public class Strategy {
     private final Statement rootNode;
 
@@ -9,7 +11,4 @@ public class Strategy {
         this.rootNode = rootNode;
     }
 
-    public Statement getRootNode() {
-        return rootNode;
-    }
 }
