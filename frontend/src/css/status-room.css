@@ -114,7 +114,7 @@
 }
 
 .btn-start img {
-    width: 500 px;
+    width: 500px;
     mix-blend-mode: multiply; 
     transition: transform 0.2s;
 }
