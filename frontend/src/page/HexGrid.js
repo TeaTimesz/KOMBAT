@@ -145,7 +145,14 @@ export default function HexGridPage() {
     };
 
     useEffect(() => {
-        const navKinds = location.state?.minionKinds;
+        const rawMinions = location.state?.minions ?? location.state?.minionKinds;
+        const navKinds = rawMinions?.map(m => ({
+            id:      m.id,
+            img:     m.img ?? `/images/minion${m.id}.png`,
+            name:    m.name,
+            defense: m.defense ?? m.defenseFactor,
+            strategy: m.strategy,
+        }));
         if (navKinds?.length) {
             // Clear history state immediately so a page refresh won't re-trigger fresh start
             window.history.replaceState({}, '');

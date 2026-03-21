@@ -477,3 +477,55 @@
     max-height: 80px;
     overflow-y: auto;
 }
+.check-record-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.check-strategy-btn {
+    padding: 8px 28px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    border: 2px solid #7a4e10;
+    background: #f5dfa0;
+    color: #3a2200;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.check-strategy-btn:hover:not(:disabled) {
+    background: #e8c96a;
+}
+
+.check-strategy-btn.check-ok {
+    background: #4caf50;
+    border-color: #2e7d32;
+    color: #fff;
+}
+
+.check-strategy-btn.check-fail {
+    background: #e53935;
+    border-color: #b71c1c;
+    color: #fff;
+}
+
+.check-strategy-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.check-error-msg {
+    font-size: 0.85rem;
+    color: #c62828;
+    background: #ffebee;
+    border: 1px solid #ef9a9a;
+    border-radius: 6px;
+    padding: 4px 12px;
+    max-width: 340px;
+    text-align: center;
+    word-break: break-word;
+}
