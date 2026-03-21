@@ -26,6 +26,11 @@ public class GameController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+    @PostMapping("/parse-strategy")
+    public Map<String, Object> parseStrategy(@RequestBody Map<String, String> body) {
+        return gameService.parseStrategy(body.get("strategy"));
+    }
+
     @PostMapping("/create")
     public Map<String, Object> createGame(@RequestBody GameCreateRequest request) {
         return gameService.createGame(request.getMode());

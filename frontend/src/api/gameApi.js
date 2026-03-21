@@ -11,6 +11,13 @@ async function checkOk(r) {
   return r.json();
 }
 
+export const parseStrategy = (strategy) =>
+  fetch(`${BASE}/game/parse-strategy`, {
+    method: "POST",
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ strategy }),
+  }).then(checkOk);
+
 export const createGame = (mode) =>
   fetch(`${BASE}/game/create`, {
     method: "POST",

@@ -228,6 +228,18 @@ public class GameService {
         }
     }
 
+    public Map<String, Object> parseStrategy(String strategyStr) {
+        if (strategyStr == null || strategyStr.isBlank()) {
+            return Map.of("valid", false, "error", "Strategy is empty");
+        }
+        try {
+            new Parser(strategyStr).parse();
+            return Map.of("valid", true);
+        } catch (Exception e) {
+            return Map.of("valid", false, "error", e.getMessage() != null ? e.getMessage() : "Parse error");
+        }
+    }
+
     private Strategy makeStrategy(String strategyStr) {
         if (strategyStr == null || strategyStr.isBlank()) {
             return makeDefaultStrategy();
