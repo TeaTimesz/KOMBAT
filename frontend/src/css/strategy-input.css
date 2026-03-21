@@ -1,4 +1,4 @@
-/* คอนเทนเนอร์หลักให้เต็มจอ */
+/* --- พื้นหลังหลัก --- */
 .strategy-screen {
     height: 100vh;
     width: 100vw;
@@ -9,252 +9,301 @@
     background-position: center;
     margin: 0;
     overflow: hidden;
+    position: relative;
+    font-family: 'Henny Penny', cursive;
 }
 
-/* บอร์ดไม้หลัก */
+/* --- บอร์ดไม้หลัก --- */
 .main-board {
-    width: 1300px; 
+    width: 1150px; 
     height: 700px;
     background-size: 100% 100%;
     background-repeat: no-repeat;
     position: relative; 
     display: flex;
-    padding: 60px;
+    flex-direction: column;
+    padding: 60px 80px;
+    box-sizing: border-box;
 }
 
-/* ส่วนแสดงตัวละครฝั่งซ้าย */
-.char-section {
+/* --- ส่วนหัว: Stat Type --- */
+.stat-type-header {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 30px;
+    margin-top: 50px;
+    width: 100%;
+}
+
+.stat-label-img {
+    width: 200px;
+    height: auto;
+    mix-blend-mode: multiply;
+}
+
+.stat-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0 8px;
+}
+.stat-buttons-group {
+    display: flex;
+    gap: 16px;
+}
+.stat-btn img { width: 160px; transition: 0.2s; cursor: pointer; }
+.stat-btn.active img { filter: brightness(1.2) drop-shadow(0 0 10px gold); }
+.active-stat img {
+    filter: drop-shadow(0px 0px 12px #ffd700) brightness(1.1);
+}
+
+/* --- ส่วนเนื้อหาหลัก (แบ่งซ้าย-ขวา) --- */
+.content-body {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    gap: 40px;
+    align-items: flex-start;
+    height: 900px;
+}
+
+/* ฝั่งซ้าย */
+.char-column {
     flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
 }
 
-.char-frame {
-    width: 300px;
+.char-frame-container {
+    width: 280px;
     height: 300px;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: -50px;
+    margin-bottom: 20px;
+    margin-top: 30px;
+    position: relative;  /* เพิ่ม */
+    top: 30px;           /* ปรับตัวเลขนี้ ยิ่งมากยิ่งลง */
 }
 
 .char-img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+}
+
+.name-input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     width: 100%;
-    height: auto;
-}
-/* ส่วนกลาง: จัดการ Character Name และ Defense Factor */
-
-.center-content {
-    flex: 1.5;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start; 
-    padding-top: 20px;
-    gap: 15px; 
-}
-.defense-section {
-    flex: 1.5;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px; 
-}
-.defense-header {
-    width: 250px ; 
-    height: auto;
-    margin-top: 10px;
-    mix-blend-mode: multiply;
 }
 
-.name-header-area {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    margin-top: 50px; 
-    
-}
-
-.name-header-img {
-    width: 400px; 
-    height: auto;
-    mix-blend-mode: multiply;
-    margin-bottom: 20px; 
-    position: relative;
+.label-text-img {
+    width: 300px;
+    margin-bottom: -10px;
     z-index: 2;
+    mix-blend-mode: multiply;
 }
 
-.name-bg {
-    width: 500px; 
-    height: 70px;
+.input-box-bg {
+    width: 290px;
+    height: 65px;
     background-size: 100% 100%;
     background-repeat: no-repeat;
     display: flex;
-    justify-content: center;
     align-items: center;
-    position: relative;
-    z-index: 1;
+    justify-content: center;
 }
 
-.defense-area {
+/* ฝั่งขวา */
+.strategy-column {
+    flex: 1.5;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
+}
+
+/* strategy-detail-box: relative เพื่อให้ป้ายลอย absolute ได้ */
+.strategy-detail-box {
+    position: relative;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
-    transform: translateX(-135px);
+    flex: 1;
 }
 
-.defense-header img {
-    width: 500px; 
-    height: auto;
+.defense-factor-box {
+    
+    position: absolute;
+    top: 165px;        /* ปรับขึ้น/ลง */
+    left: 65px;         /* ปรับซ้าย/ขวา */
+    width: 280px;
+    z-index: 5;
+    overflow: visible;
+}
+
+/* ป้าย "Strategy Detail" — absolute ขยับอิสระ ไม่กระทบ editor
+   ปรับ top เพื่อขยับขึ้น/ลง */
+.detail-header-img {
+    position: absolute;
+    top: -18px;
+    left: 35%;
+    transform: translateX(-50%);
+    width: 600px;
+    z-index: 3;
     mix-blend-mode: multiply;
-    margin-bottom: -60px; 
-    position: relative;
-    z-index: 2; 
+    pointer-events: none;
+    height: 450px;
 }
 
-.defense-bg {
-    width: 520px; 
-    height: 320px;
+.defense-factor-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.defense-factor-label-img {
+    width: 200px;
+    margin-bottom: -10px;
+    z-index: 2;
+    mix-blend-mode: multiply;
+}
+
+/* ========================================
+   MONACO CODE EDITOR
+   ======================================== */
+
+/* Monaco wrapper — margin-top เว้นที่ให้ป้าย absolute */
+.monaco-wrapper {
+    width: 100%;
+    height: 550px;
+    margin-top: 60px;
+    margin-left: -200px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: transparent;
+    height: 100%;
+}
+
+/* force Monaco iframe/container ให้ใส */
+.monaco-wrapper .overflow-guard,
+.monaco-wrapper .monaco-editor,
+.monaco-wrapper .monaco-editor-background,
+.monaco-wrapper .monaco-editor .margin {
+    background: transparent !important;
+}
+
+/* summary: แสดง code แบบ pre */
+.val-defense {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 0;
+}
+
+/* ======================================== */
+
+.small-input-container {
+    width: 550px;
+    height: 100px;
     background-size: 100% 100%;
     background-repeat: no-repeat;
     display: flex;
-    justify-content: center; 
-    align-items: flex-start;  
-
-    padding-top: -200px !important;    
-    padding-bottom: 20px !important; 
-    padding-left: 50px !important;   
-    padding-right: 50px !important;
-    
-    position: relative;
-    z-index: 1;
-    box-sizing: border-box;         
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 10px;
+    padding-left: -10px;
+    padding-right: 40px;
+    box-sizing: border-box;
+    margin-left: -390px;
+    margin-top: 30px;
 }
 
-/* สไตล์ตัวหนังสือ */
 .strat-input {
     background: transparent !important;
     border: none !important;
     outline: none;
-    width: 100%;             
     color: #4a3728;
+    font-family: 'Henny Penny', cursive;
     font-weight: bold;
-    font-size: 22px; 
-    font-family: inherit;
-    padding-left: 25px;      
-    text-align: left;
+    text-align: center;
+    width: 100%;
+    font-size: 22px;
 }
 
-.strat-textarea {
+.defense-input {
+    width: 100%;
     background: transparent !important;
     border: none !important;
     outline: none;
-    width: 100%;
-    margin-top: -190px;
-    margin-right:-260px;     
-    height: 120%;           
+    font-family: 'Henny Penny', cursive;
     font-size: 20px;
     color: #4a3728;
-    font-weight: bold;
-    resize: none;
-    line-height: 1.2;
-    text-align: center;
-    
-    position: relative;
-    z-index: 10;           /* มั่นใจว่าตัวหนังสือทับรูปป้ายแน่นอน */
-}
-/* ปุ่มฝั่งขวา */
-.stat-type-section {
-    flex: 0.8; 
-    display: flex;
-    flex-direction: column;
-    gap: 12px; 
-    justify-content: center;
-    align-items: center; 
+    text-align: left;
+    padding: 10px;
 }
 
-.stat-label-img {
-    width: 300px; /* ลดขนาดป้าย Stat Type ให้ดูแพง */
-    height: auto;
-    margin-bottom: 5px;
-    mix-blend-mode: darken;
-}
-
-.stat-btn {
-    background: transparent !important;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-}
-
-.stat-btn img {
-    width: 170px; 
-    height: auto;
-    transition: transform 0.2s; 
-    mix-blend-mode: multiply;
-}
-
-.stat-btn:hover img {
-    transform: scale(1.05); 
-}
-
-/* ส่วนปุ่ม Record */
-.record-container {
-    position: absolute;
-    bottom: 40px;
-    right: 50px;
-}
-
-.record-btn {
-    background: transparent !important;
+/* --- ปุ่ม Record และ Back --- */
+.record-btn-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: transparent;
     border: none;
     cursor: pointer;
+    transition: transform 0.2s;
 }
 
-.record-btn img {
-    width: 200px;
+.record-btn-container img {
+    width: 180px;
     filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
 }
 
-.record-btn:hover img {
+.record-btn-container:hover {
     transform: scale(1.1);
-    filter: drop-shadow(4px 8px 12px rgba(0,0,0,0.4));
 }
 
+.back-btn-global {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    background: transparent !important;
+    border: none;
+    cursor: pointer;
+    z-index: 200;
+}
+
+.back-btn-global img {
+    width: 150px;
+    transition: transform 0.2s;
+}
+
+.back-btn-global:hover img { transform: scale(1.1); }
+
+/* --- Step Indicator --- */
 .step-indicator {
     position: absolute;
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(74, 55, 40, 0.8);
-    color: white;
-    padding: 8px 20px;
+    background: rgba(74, 55, 40, 0.9);
+    color: #fff;
+    padding: 8px 25px;
     border-radius: 20px;
-    font-family: 'Henny Penny', cursive;
     z-index: 100;
+    font-size: 18px;
 }
 
-.active-stat img {
-    filter: drop-shadow(0px 0px 10px #ffd700) brightness(1.2);
-    transform: scale(1.05);
-}
-
-/* แสดงข้อความ Stat ที่สร้างเอง */
-.custom-stat-display {
-    color: #4a3728;
-    font-weight: bold;
-    font-size: 14px;
-    background: rgba(255, 255, 255, 0.5);
-    padding: 2px 10px;
-    border-radius: 10px;
-    margin-top: -5px;
-}
-/* คลุมพื้นที่หน้าสรุป */
+/* --- หน้า Summary --- */
 .summary-container {
     display: flex;
     justify-content: center;
@@ -267,153 +316,216 @@
     width: 950px;
     height: 650px;
     background-size: 100% 100%;
-    padding: 60px 80px;
+    padding: 50px;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.summary-header {
-    color: #4a3728;
-    font-size: 32px;
-    text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
-    margin-bottom: 20px;
-}
-
-/* พื้นที่เลื่อนดูมินเนี่ยน */
 .summary-scroll-area {
     width: 100%;
-    flex-grow: 1;
+    flex: 1;
     overflow-y: auto;
-    padding-right: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    margin-top: 20px;
+    padding: 10px;
 }
-
 
 .summary-card {
-    background: rgba(255, 248, 225, 0.6); 
-    border: 3px solid #8d6e63;
+    background: rgba(255, 255, 255, 0.3);
     border-radius: 15px;
+    margin-bottom: 15px;
     display: flex;
-    padding: 20px;
-    gap: 25px;
+    padding: 15px;
+    border: 2px solid #4a3728;
 }
 
-.summary-left {
+/* ── Strategyinput redesign (sk-*) ───────────────────────────────────────── */
+
+.sk-board {
+    display: flex;
+    gap: 40px;
+    background: rgba(253, 245, 220, 0.92);
+    border: 6px solid #8d6e63;
+    border-radius: 20px;
+    padding: 40px 50px;
+    width: 900px;
+    min-height: 480px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+}
+
+.sk-left {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 120px;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 220px;
 }
 
-.minion-frame {
-    width: 100px;
-    height: 120px;
-    border: 2px solid #5d4037;
-    background: #fff;
+.sk-minion-frame {
+    width: 200px;
+    height: 220px;
+    border: 4px solid #8d6e63;
+    border-radius: 16px;
+    background: #fff8f0;
     overflow: hidden;
-    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.15);
 }
 
-.minion-frame img {
+.sk-minion-frame img {
     width: 100%;
     height: 100%;
     object-fit: contain;
 }
 
-.summary-stat-tag {
-    background: #8d6e63;
-    color: white;
-    padding: 2px 12px;
-    border-radius: 20px;
-    font-size: 14px;
-    margin-top: 10px;
-    font-weight: bold;
-}
-
-/* ฝั่งข้อมูล Text */
-.summary-right {
-    flex-grow: 1;
+.sk-right {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    text-align: left;
+    gap: 18px;
 }
 
-.summary-row label {
-    display: block;
+.sk-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sk-field-grow {
+    flex: 1;
+}
+
+.sk-label {
+    font-family: 'Cinzel', 'Henny Penny', serif;
+    font-size: 0.95rem;
     font-weight: bold;
     color: #5d4037;
-    font-size: 14px;
-    margin-bottom: 4px;
+    letter-spacing: 0.04em;
 }
 
-.val-name {
-    font-size: 24px;
-    color: #2e1a0a;
-    font-family: 'Henny Penny', cursive;
+.sk-hint {
+    font-size: 0.78rem;
+    font-weight: normal;
+    color: #8d6e63;
+    font-family: sans-serif;
 }
 
-.val-defense {
-    font-size: 16px;
-    color: #4e342e;
-    line-height: 1.4;
-    background: rgba(255,255,255,0.4);
-    padding: 10px;
-    border-radius: 8px;
-    min-height: 60px;
+.sk-text-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #a1887f;
+    border-radius: 10px;
+    background: #fff8f0;
+    font-size: 1.05rem;
+    color: #3e2723;
+    font-family: 'Mali', sans-serif;
+    outline: none;
+    transition: border-color 0.15s;
 }
 
-/* ปุ่ม Start Duel */
-.final-start-btn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    position: relative;
-    margin-top: 20px;
+.sk-text-input:focus {
+    border-color: #5d4037;
 }
 
-.final-start-btn img {
-    width: 200px;
+.sk-short {
+    width: 140px;
 }
 
-.final-start-btn .btn-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
+.sk-textarea {
+    flex: 1;
+    width: 100%;
+    min-height: 130px;
+    padding: 10px 14px;
+    border: 2px solid #a1887f;
+    border-radius: 10px;
+    background: #fff8f0;
+    font-size: 0.9rem;
+    color: #3e2723;
+    font-family: 'Courier New', monospace;
+    resize: vertical;
+    outline: none;
+    line-height: 1.5;
+    transition: border-color 0.15s;
+}
+
+.sk-textarea:focus {
+    border-color: #5d4037;
+}
+
+/* Summary board — CSS-only, no background image needed */
+.sk-summary-board {
+    width: 900px;
+    max-height: 80vh;
+    background: rgba(253, 245, 220, 0.95);
+    border: 6px solid #8d6e63;
+    border-radius: 20px;
+    padding: 40px 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+}
+
+.sk-strategy-preview {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 80px;
+    overflow-y: auto;
+}
+.check-record-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.check-strategy-btn {
+    padding: 8px 28px;
+    font-size: 1rem;
     font-weight: bold;
-    font-size: 20px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    pointer-events: none;
-}
-.back-btn-global {
-    position: absolute;
-    top: 730px;  
-    left: 20px;  
-    background: transparent !important;
-    border: none;
+    border-radius: 8px;
+    border: 2px solid #7a4e10;
+    background: #f5dfa0;
+    color: #3a2200;
     cursor: pointer;
-    z-index: 1000; 
-    padding: 0;
+    transition: background 0.2s, color 0.2s;
 }
 
-.back-btn-global img {
-    width: 200px;  
-    height: auto;
-    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.4));
-    transition: transform 0.2s ease;
+.check-strategy-btn:hover:not(:disabled) {
+    background: #e8c96a;
 }
 
-
-.back-btn-global:hover img {
-    transform: scale(1.1); 
+.check-strategy-btn.check-ok {
+    background: #4caf50;
+    border-color: #2e7d32;
+    color: #fff;
 }
 
+.check-strategy-btn.check-fail {
+    background: #e53935;
+    border-color: #b71c1c;
+    color: #fff;
+}
 
-.back-btn-global:active img {
-    transform: scale(0.9); 
+.check-strategy-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.check-error-msg {
+    font-size: 0.85rem;
+    color: #c62828;
+    background: #ffebee;
+    border: 1px solid #ef9a9a;
+    border-radius: 6px;
+    padding: 4px 12px;
+    max-width: 340px;
+    text-align: center;
+    word-break: break-word;
 }
