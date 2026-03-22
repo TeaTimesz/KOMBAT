@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import * as api from '../api/gameApi';
 import '../css/hexgrid.css';
 
@@ -51,6 +51,7 @@ function PlayerPanel({ num, data, isActive }) {
 
 export default function HexGridPage() {
     const location = useLocation();
+    const navigate = useNavigate();
 
     const [minionKinds, setMinionKinds] = useState(DEFAULT_KINDS);
     const [gameId, setGameId]           = useState(null);
@@ -328,7 +329,7 @@ export default function HexGridPage() {
             if (state.gameOver) {
                 const result = state.winner === 0 ? 'Tie!' : `P${state.winner} wins!`;
                 addLog(`── Game over — ${result} ──`);
-                setMessage(state.winner === 0 ? "Game Over — It's a tie!" : `Game Over — Player ${state.winner} WINS!`);
+                navigate('/endgame', { state: { winner: state.winner } });
             } else {
                 addLog(`[T${state.turnCount + 1}] P${state.currentPlayer}'s turn`);
                 setMessage(`Player ${state.currentPlayer}'s turn — buy a hex or click END TURN.`);
