@@ -6,7 +6,6 @@ import '../css/strategy-input.css';
 // ── Monaco Code Editor component ──────────────────────────────────────────────
 function StrategyEditor({ onChange }) {
     const handleMount = (editor, monaco) => {
-        // กำหนด theme พื้นหลังใส
         monaco.editor.defineTheme('fantasy-transparent', {
             base: 'vs-dark',
             inherit: true,
@@ -47,7 +46,6 @@ function StrategyEditor({ onChange }) {
         </div>
     );
 }
-// ─────────────────────────────────────────────────────────────────────────────
 
 function Strategyinput() {
     const location = useLocation();
@@ -154,7 +152,7 @@ function Strategyinput() {
                                 <button className={`stat-btn ${selectedStat === 'Balanced' ? 'active-stat' : ''}`} onClick={() => handleSelectStat('Balanced')}>
                                     <img src="/images/support-btn.png" alt="Balanced" />
                                 </button>
-                                <button className="stat-btn" onClick={handleCreateCustomStrategy}>
+                                <button className="stat-btn btn-plus" onClick={handleCreateCustomStrategy}>
                                     <img src="/images/plus-btn.png" alt="Add" />
                                 </button>
                                 {selectedStat && !['Attack', 'Balanced'].includes(selectedStat) && (
@@ -170,6 +168,8 @@ function Strategyinput() {
                                 <div className="char-frame-container">
                                     <img src={`/images/minion${currentMinionId}.png`} alt="Character" className="char-img" />
                                 </div>
+
+                                {/* Character Name */}
                                 <div className="name-input-group">
                                     <img src="/images/Charactername.png" alt="Label" className="label-text-img" />
                                     <div className="input-box-bg" style={{ backgroundImage: "url('/images/ช่อง.png')" }}>
@@ -179,6 +179,20 @@ function Strategyinput() {
                                             value={charName}
                                             onChange={e => setCharName(e.target.value)}
                                             placeholder="Character Name"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Defense Factor — ย้ายมาอยู่ใต้ Character Name */}
+                                <div className="name-input-group" style={{ marginTop: '15px' }}>
+                                    <img src="/images/defasefactor.png" alt="Defense Factor" className="label-text-img" />
+                                    <div className="input-box-bg" style={{ backgroundImage: "url('/images/ช่อง.png')" }}>
+                                        <input
+                                            type="text"
+                                            className="strat-input"
+                                            placeholder="Enter factor..."
+                                            value={defenseFactor}
+                                            onChange={e => setDefenseFactor(e.target.value)}
                                         />
                                     </div>
                                 </div>
@@ -194,21 +208,6 @@ function Strategyinput() {
                                         placeholder="Enter strategy here..."
                                     />
                                 </div>
-
-<div className="defense-factor-box">
-    <img src="/images/defasefactor.png" alt="Defense Factor" className="defense-factor-label-img" />
-    <div className="name-input-group">
-        <div className="input-box-bg" style={{ backgroundImage: "url('/images/ช่อง.png')" }}>
-            <input
-                type="text"
-                className="strat-input"
-                placeholder="Enter factor..."
-                value={defenseFactor}
-                onChange={e => setDefenseFactor(e.target.value)}
-            />
-        </div>
-    </div>
-</div>
                             </div>
                         </div>
 
@@ -228,7 +227,9 @@ function Strategyinput() {
                                         <div className="minion-frame">
                                             <img src={`/images/minion${minion.id}.png`} alt="minion" />
                                         </div>
-                                        <span className="summary-stat-tag">{minion.statType}</span>
+                                        <div className="tag-wrapper">
+                                            <span className="summary-stat-tag">{minion.statType}</span>
+                                        </div>
                                     </div>
                                     <div className="summary-right">
                                         <div className="summary-row">

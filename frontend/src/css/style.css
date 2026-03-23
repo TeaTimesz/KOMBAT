@@ -15,17 +15,18 @@
     flex-direction: column;
     justify-content: space-between; 
     align-items: center;
-    padding: 40px 0;
+    padding: 0;
 }
 
 .game-logo {
-    margin-top: 20px;
+    margin-top: -150px;
     display: flex;
     justify-content: center;
+    top: -50px;
 }
 
 .logo-image {
-    width: 800px; 
+    width: 900px; 
     max-width: 90%;
     height: auto;
     filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));

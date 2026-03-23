@@ -18,7 +18,7 @@ function Createroom() {
     return (
         <div className="menu-screen" style={{ backgroundImage: "url('/images/lobby.png')" }}>
             <div className="game-logo">
-                <img src="/images/kombat2.png" alt="KOMBAT" style={{ width: '500px' }} />
+                <img src="/images/kombat2.png" alt="KOMBAT" style={{ width: '700px' }} />
             </div>
 
             <div className="button-group">

@@ -37,7 +37,7 @@
 }
 
 .stat-label-img {
-    width: 200px;
+    width: 260px;
     height: auto;
     mix-blend-mode: multiply;
 }
@@ -48,14 +48,33 @@
     padding: 0;
     margin: 0 8px;
 }
-.stat-buttons-group {
+
+.stat-buttons-row {
     display: flex;
-    gap: 16px;
+    gap: 12px;
+    align-items: center;
 }
-.stat-btn img { width: 160px; transition: 0.2s; cursor: pointer; }
+
 .stat-btn.active img { filter: brightness(1.2) drop-shadow(0 0 10px gold); }
 .active-stat img {
     filter: drop-shadow(0px 0px 12px #ffd700) brightness(1.1);
+}
+
+.stat-btn img {
+    height: 60px;
+    width: auto;
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+.stat-btn.btn-plus img {
+    height: 60px;
+    width: auto;
+    object-fit: contain;
+}
+
+.stat-btn.btn-plus:hover {
+    transform: scale(1.15);
 }
 
 /* --- ส่วนเนื้อหาหลัก (แบ่งซ้าย-ขวา) --- */
@@ -78,15 +97,15 @@
 }
 
 .char-frame-container {
-    width: 280px;
-    height: 300px;
+    width: 290px;
+    height: 280px;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 20px;
-    margin-top: 30px;
-    position: relative;  /* เพิ่ม */
-    top: 30px;           /* ปรับตัวเลขนี้ ยิ่งมากยิ่งลง */
+    margin-bottom: 10px;
+    margin-top: -20px;  /* ติดลบเพื่อดึงขึ้น */
+    position: relative;
+    top: 0;
 }
 
 .char-img {
@@ -128,7 +147,6 @@
     height: 100%;
 }
 
-/* strategy-detail-box: relative เพื่อให้ป้ายลอย absolute ได้ */
 .strategy-detail-box {
     position: relative;
     width: 100%;
@@ -138,18 +156,7 @@
     flex: 1;
 }
 
-.defense-factor-box {
-    
-    position: absolute;
-    top: 165px;        /* ปรับขึ้น/ลง */
-    left: 65px;         /* ปรับซ้าย/ขวา */
-    width: 280px;
-    z-index: 5;
-    overflow: visible;
-}
-
-/* ป้าย "Strategy Detail" — absolute ขยับอิสระ ไม่กระทบ editor
-   ปรับ top เพื่อขยับขึ้น/ลง */
+/* ป้าย "Strategy Detail" */
 .detail-header-img {
     position: absolute;
     top: -18px;
@@ -162,29 +169,12 @@
     height: 450px;
 }
 
-.defense-factor-box {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    margin-top: 20px;
-}
-
-.defense-factor-label-img {
-    width: 200px;
-    margin-bottom: -10px;
-    z-index: 2;
-    mix-blend-mode: multiply;
-}
-
 /* ========================================
    MONACO CODE EDITOR
    ======================================== */
 
-/* Monaco wrapper — margin-top เว้นที่ให้ป้าย absolute */
 .monaco-wrapper {
     width: 100%;
-    height: 550px;
     margin-top: 60px;
     margin-left: -200px;
     border-radius: 4px;
@@ -193,7 +183,6 @@
     height: 100%;
 }
 
-/* force Monaco iframe/container ให้ใส */
 .monaco-wrapper .overflow-guard,
 .monaco-wrapper .monaco-editor,
 .monaco-wrapper .monaco-editor-background,
@@ -201,7 +190,6 @@
     background: transparent !important;
 }
 
-/* summary: แสดง code แบบ pre */
 .val-defense {
     font-family: 'Courier New', monospace;
     font-size: 13px;
@@ -211,22 +199,6 @@
 }
 
 /* ======================================== */
-
-.small-input-container {
-    width: 550px;
-    height: 100px;
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: 10px;
-    padding-left: -10px;
-    padding-right: 40px;
-    box-sizing: border-box;
-    margin-left: -390px;
-    margin-top: 30px;
-}
 
 .strat-input {
     background: transparent !important;
@@ -253,41 +225,59 @@
 }
 
 /* --- ปุ่ม Record และ Back --- */
-.record-btn-container {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.record-btn-container img {
-    width: 180px;
-    filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
-}
-
-.record-btn-container:hover {
-    transform: scale(1.1);
-}
 
 .back-btn-global {
     position: fixed;
     bottom: 30px;
-    left: 30px;
+    left: 40px; 
     background: transparent !important;
     border: none;
     cursor: pointer;
     z-index: 200;
+    padding: 0;
+    width: 180px; 
+    height: 65px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.back-btn-global img {
-    width: 150px;
-    transition: transform 0.2s;
+.record-btn-container {
+    position: fixed;
+    bottom: 30px;
+    right: 40px; 
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 200;
+    padding: 0;
+    width: 180px; 
+    height: 65px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.back-btn-global:hover img { transform: scale(1.1); }
+.back-btn-global img,
+.record-btn-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: fill; 
+    filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.35));
+    display: block;
+}
+
+.back-btn-global:hover,
+.record-btn-container:hover {
+    transform: scale(1.1);
+}
+
+.back-btn-global:active,
+.record-btn-container:active {
+    transform: scale(0.95);
+}
 
 /* --- Step Indicator --- */
 .step-indicator {
@@ -304,6 +294,7 @@
 }
 
 /* --- หน้า Summary --- */
+/* --- ปรับแต่งหน้า Summary เพิ่มเติม --- */
 .summary-container {
     display: flex;
     justify-content: center;
@@ -313,28 +304,159 @@
 }
 
 .summary-board {
-    width: 950px;
-    height: 650px;
+    width: 1000px; /* ขยายความกว้างบอร์ด */
+    height: 750px; /* ขยายความสูงบอร์ด */
     background-size: 100% 100%;
-    padding: 50px;
+    background-repeat: no-repeat;
+    padding: 60px 80px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
+}
+
+.summary-header {
+    font-size: 36px;
+    color: #4a3728;
+    margin-bottom: 20px;
+    margin-top: 10px;
+    font-family: 'Henny Penny', cursive;
 }
 
 .summary-scroll-area {
     width: 100%;
     flex: 1;
     overflow-y: auto;
-    margin-top: 20px;
-    padding: 10px;
+    margin-top: 10px;
+    padding-right: 15px; /* กันเนื้อหาเบียด scrollbar */
 }
 
+/* ตกแต่ง Card ให้ดูสะอาดตาขึ้น */
 .summary-card {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 15px;
-    margin-bottom: 15px;
+    background: rgba(255, 255, 255, 0.2); 
+    border-radius: 12px;
+    margin-bottom: 20px;
     display: flex;
-    padding: 15px;
-    border: 2px solid #4a3728;
+    padding: 25px;
+    border: 2px solid #634732;
+    gap: 30px;
+}
+
+.summary-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 160px;
+    flex-shrink: 0;
+    gap: 15px; /* เว้นระยะระหว่างกรอบรูปกับป้าย */
+}
+
+.minion-frame {
+    width: 130px;
+    height: 130px;
+    border: 3px solid #5c3200;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fdf5e6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.minion-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ให้รูปเต็มกรอบสวยๆ */
+}
+
+.summary-stat-tag {
+    background: #7a4e10; 
+    color: #ffffff;
+    padding: 6px 16px;   /* เพิ่มพื้นที่ข้างในป้ายให้กว้างขึ้น */
+    border-radius: 20px; /* ปรับให้โค้งมนเหมือนป้ายชื่อเกม */
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1;      /* บังคับความสูงบรรทัดให้พอดีตัวอักษร */
+    text-align: center;
+    min-width: 100px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    border: 2px solid #5c3200; /* เพิ่มขอบเข้มให้ดูมีมิติ */
+    
+    /* ป้องกันการสืบทอด Style ที่ทำให้ตัวหนังสือเลื่อน */
+    display: inline-block; 
+    margin: 0; 
+}
+
+.summary-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.tag-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.summary-stat-tag {
+    background: #7a4e10; /* สีน้ำตาลเข้มตามรูป */
+    color: #ffffff;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 18px; /* ขยายตัวหนังสือให้ชัดขึ้น */
+    font-weight: bold;
+    text-align: center;
+    min-width: 110px;
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+    border: 1px solid #4a3728;
+    line-height: 1;
+    display: block;
+}
+
+.summary-row label {
+    font-weight: bold;
+    color: #4a3728;
+    font-size: 18px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.val-name {
+    font-size: 24px;
+    color: #2a1b0a;
+}
+
+.val-defense {
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+    color: #3d2b1f;
+    background: rgba(255, 255, 255, 0.3);
+    padding: 10px;
+    border-radius: 5px;
+    min-height: 60px;
+}
+
+/* ปรับตำแหน่งปุ่ม Start Game */
+.final-start-btn {
+    background: transparent !important;
+    border: none;
+    cursor: pointer;
+    margin-top: 25px;
+    width: 280px; 
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 0;
+}
+
+.final-start-btn img {
+    width: 100%;
+    height: auto;
+    display: block;
+    /* ลบขอบขาวถ้ามี และเพิ่มเงา */
+    filter: drop-shadow(2px 5px 10px rgba(0,0,0,0.4));
+}
+
+.final-start-btn:hover {
+    transform: scale(1.1);
 }

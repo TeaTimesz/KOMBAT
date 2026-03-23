@@ -1,63 +1,81 @@
-/* พื้นหลังหลัก */
-.solitaire-screen {
-    height: 100vh;
-    width: 100vw;
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    position: relative;
-}
-
-/* หัวข้อ How to Play ด้านบน */
+/* --- ส่วนหัวข้อ How to Play ด้านบน (ปรับให้ใหญ่ขึ้น) --- */
 .header-box {
     margin-bottom: 25px;
     z-index: 2;
-    animation: floating 3s ease-in-out infinite;
+    /* หากมี animation เดิมสามารถใส่ต่อได้ครับ */
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }
 
 .how-to-header-img {
-    width: 500px;
-    max-width: 80vw;
+    /* ขยายขนาดเป็น 650px ตามไฟล์ก่อนหน้า */
+    width: 650px; 
+    max-width: 90vw;
+    height: auto;
     filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.5));
 }
 
-/* แผ่นป้ายคำอธิบายตรงกลาง */
+/* --- แผ่นป้ายคำอธิบายตรงกลาง --- */
 .tablet-box {
     z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .tablet-main-img {
+    /* ปรับขนาดให้สัมพันธ์กับป้ายหัวข้อที่ใหญ่ขึ้น */
     width: 800px; 
     max-width: 100vw;
+    max-height: 55vh; /* จำกัดความสูงเพื่อไม่ให้เบียดกับป้ายด้านบนและปุ่มด้านล่าง */
+    object-fit: contain;
     filter: drop-shadow(8px 12px 20px rgba(0,0,0,0.6));
 }
 
-/* ปุ่มควบคุมด้านล่าง */
+/* --- ปุ่มควบคุมด้านล่าง (ขนาดเท่ากันและขนานกันเป๊ะ) --- */
 .navigation-footer {
     position: absolute;
     bottom: 40px;
     width: 100%;
     display: flex;
-    justify-content: space-between;
-    padding: 0 50px; 
+    /* กระจายซ้าย-ขวา */
+    justify-content: space-between; 
+    /* จัดให้ปุ่มทั้งสองอยู่ตรงกันเป๊ะในแนวนอน (ขนานกัน) */
+    align-items: center; 
+    padding: 0 60px; 
     box-sizing: border-box;
+    z-index: 10;
 }
 
 .img-btn-footer {
     background: none;
     border: none;
     cursor: pointer;
-    transition: transform 0.2s ease-in-out;
+    padding: 0;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    /* บังคับขนาดกล่องปุ่มให้เท่ากันเป๊ะ */
+    width: 200px;  
+    height: 75px;  
+    
+    /* จัดรูปภาพข้างในให้อยู่กึ่งกลางกล่อง */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .img-btn-footer img {
-    width: 220px; 
+    /* บังคับให้รูปภาพยืดเต็มขนาดกล่อง 200x75px ที่เราล็อคไว้ */
+    width: 100%;
+    height: 100%;
+    /* ใช้ fill เพื่อบังคับให้ปุ่มที่สั้นกว่ายืดออกจนเท่ากัน */
+    object-fit: fill; 
+    filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.5));
+    display: block;
 }
 
+/* เอฟเฟกต์ Hover และ Active */
 .img-btn-footer:hover {
     transform: scale(1.1);
 }

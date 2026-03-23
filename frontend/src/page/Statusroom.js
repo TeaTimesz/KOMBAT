@@ -48,12 +48,14 @@ function Statusroom() {
     return (
         <div className="status-screen" style={{ backgroundImage: "url('/images/lobby.png')" }}>
             <div className="room-code-banner" style={{ backgroundImage: "url('/images/RoomCode.png')" }}>
-                <span className="banner-text"> </span>
+                {/* 1. ลบ {roomCode} ออกจากตรงนี้ */}
+                <span className="banner-text"> </span> 
             </div>
 
             <div className="status-panel" style={{ backgroundImage: "url('/images/2room.png')" }}>
                 {/* Player 1 Section */}
                 <div className="player-section p1">
+                    {/* 2. ลบบรรทัด enter-label ออก */}
                     <div className="name-tag" style={{ backgroundImage: "url('/images/player1.png')" }}></div>
                     <button 
                         className={`ready-btn ${isReadyP1 ? 'is-ready' : ''}`}
@@ -65,6 +67,7 @@ function Statusroom() {
 
                 {/* Player 2 Section */}
                 <div className="player-section p2">
+                    {/* 3. ลบบรรทัด enter-label ออก */}
                     <div className="name-tag" style={{ backgroundImage: "url('/images/player2.png')" }}></div>
                     <button 
                         className={`ready-btn ${isReadyP2 ? 'is-ready' : ''}`}
@@ -75,7 +78,7 @@ function Statusroom() {
                 </div>
             </div>
 
-
+            {/* ส่วนปุ่ม Start คงเดิม */}
             {isReadyP1 && isReadyP2 && (
                 <div className="start-container">
                     <button className="btn-start" onClick={() => navigate('/select-amount')}>

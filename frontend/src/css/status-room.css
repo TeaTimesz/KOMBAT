@@ -10,8 +10,8 @@
 
 /* ป้ายด้านบน */
 .room-code-banner {
-    width: 600px;
-    height: 150px;
+    width: 800px;
+    height: 400px;
     background-size: 100% 100%;
     display: flex;
     justify-content: center;
@@ -29,12 +29,20 @@
 
 /* กรอบสมุด */
 .status-panel {
-    width: 900px;
-    height: 500px;
+    /* 1. ขยายความกว้างและความสูง */
+    width: 1100px; 
+    height: 1200px;
+    
     background-size: 100% 100%;
     display: flex;
     position: relative;
-    padding: 20px;
+    
+    /* 2. เพิ่ม Padding ด้านข้างเพื่อให้เนื้อหาไม่ชิดขอบสมุดเกินไป */
+    padding: 40px 60px; 
+    box-sizing: border-box; /* สำคัญ: เพื่อให้ขนาด 1100x600 รวม padding แล้ว */
+    
+    /* เพิ่มเงาให้ดูมีมิติอลังการขึ้น */
+    filter: drop-shadow(10px 15px 30px rgba(0,0,0,0.6));
 }
 
 .player-section {
@@ -42,8 +50,24 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 20px;
+    
+    /* 1. เปลี่ยนจาก center เป็น flex-start เพื่อดันเนื้อหาขึ้นไปด้านบนสุดของพื้นที่ */
+    justify-content: flex-start; 
+    
+    /* 2. กำหนดระยะห่างจากขอบบนของสมุด (ปรับตัวเลขนี้เพื่อให้สูง-ต่ำตามต้องการ) */
+    padding-top: 150px; 
+    
+    /* ระยะห่างระหว่างปุ่ม Player และ Ready */
+    gap: 30px; 
+}
+
+/* จัดระเบียบ padding ส่วนที่เหลือให้คงเดิม */
+.player-section.p1 {
+    padding-left: 50px; 
+}
+
+.player-section.p2 {
+    padding-right: 50px;
 }
 
 /* ตัวหนังสือ ENTER ROOM CODE เล็กๆ */
