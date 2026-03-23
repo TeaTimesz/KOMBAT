@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './page/Home';
 import SelectMode from './page/SelectMode';
@@ -14,6 +13,7 @@ import Coderoom from './page/Coderoom';
 import Statusroom from './page/Statusroom';
 import Joinroom from './page/Joinroom';
 import Strategyinput from './page/Strategyinput';
+import EndGame from './page/EndGame';
 
 function App() {
   return (
@@ -34,6 +34,7 @@ function App() {
         <Route path="/status-room" element={<Statusroom />} />
         <Route path="/join-room" element={<Joinroom />} />
         <Route path="/strategy-input" element={<Strategyinput />} />
+        <Route path="/endgame" element={<EndGame />} />
       </Routes>
     </Router>
   );

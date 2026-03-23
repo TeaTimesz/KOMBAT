@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import * as api from '../api/gameApi';
 import '../css/hexgrid.css';
 
@@ -51,8 +51,10 @@ function PlayerPanel({ num, data, isActive }) {
 
 export default function HexGridPage() {
     const location = useLocation();
+    const navigate = useNavigate();
 
     const [minionKinds, setMinionKinds] = useState(DEFAULT_KINDS);
+    const [mode, setMode] = useState('DUEL');
     const [gameId, setGameId]           = useState(null);
     const [p1Token, setP1Token]         = useState(null);
     const [p2Token, setP2Token]         = useState(null);
@@ -86,10 +88,14 @@ export default function HexGridPage() {
 
     // ── Init ──────────────────────────────────────────────────────────────────
 
-    const startFreshGame = async (kinds) => {
+    const startFreshGame = async (kinds, selectedMode = 'DUEL') => {
         setLoading(true);
+        setMode(selectedMode);
         setMinionKinds(kinds);
-        setSetupStep(1);
+
+        const initialSetup = selectedMode === 'AUTO' ? 3 : 1;
+
+        setSetupStep(initialSetup);
         setSetupKindIdx(0);
         setTurnStep('buy');
         setSelectedKindIdx(null);
@@ -99,7 +105,7 @@ export default function HexGridPage() {
         setMessage('Starting new game…');
         clearSession();
         try {
-            const created = await api.createGame('DUEL');
+            const created = await api.createGame(selectedMode, kinds);
             const gId = created.gameId;
             const t1  = created.p1Token;
             const joined = await api.joinGame(gId);
@@ -109,10 +115,45 @@ export default function HexGridPage() {
             setP1Token(t1);
             setP2Token(t2);
             setGameState(joined.state);
-            saveSession({ gameId: gId, p1Token: t1, p2Token: t2, minionKinds: kinds,
-                          setupStep: 1, setupKindIdx: 0, turnStep: 'buy', minionImgMap: {} });
+
+            // Assign images to bot minions that were pre-spawned at game creation
+            const initImgMap = {};
+            if (selectedMode === 'SOLITAIRE' || selectedMode === 'AUTO') {
+                joined.state?.grid?.forEach(h => {
+                    if (h.hasMinion && h.minionId) {
+                        const ownerIdx = h.minionOwner;
+                        const isBotOwner = selectedMode === 'AUTO' || ownerIdx === 2;
+                        if (isBotOwner) {
+                            const kind = kinds[Math.floor(Math.random() * kinds.length)];
+                            if (kind) initImgMap[h.minionId] = kind.img;
+                        }
+                    }
+                });
+            }
+            setMinionImgMap(initImgMap);
+
+            const savedState = {
+                gameId: gId,
+                p1Token: t1,
+                p2Token: t2,
+                minionKinds: kinds,
+                mode: selectedMode,
+                setupStep: initialSetup,
+                setupKindIdx: 0,
+                turnStep: 'buy',
+                minionImgMap: initImgMap,
+            };
+            saveSession(savedState);
+
             addLog(`Game ID: ${gId}`);
-            setMessage('SETUP — Player 1: pick a kind from the sidebar, then click a blue hex to spawn.');
+
+            if (selectedMode === 'AUTO') {
+                setMessage('Auto mode: bots are ready. Click BOT MOVE to run next bot turn.');
+            } else if (selectedMode === 'SOLITAIRE') {
+                setMessage('Solitaire setup: Player 1 pick kind, then click a hex to spawn. Bot is pre-spawned.');
+            } else {
+                setMessage('SETUP — Player 1: pick a kind from the sidebar, then click a blue hex to spawn.');
+            }
         } catch (e) {
             console.error('[startFreshGame]', e);
             setMessage('Could not start game: ' + e.message);
@@ -128,6 +169,7 @@ export default function HexGridPage() {
             setGameId(saved.gameId);
             setP1Token(saved.p1Token);
             setP2Token(saved.p2Token);
+            setMode(saved.mode ?? 'DUEL');
             setMinionKinds(saved.minionKinds ?? DEFAULT_KINDS);
             setSetupStep(saved.setupStep ?? 1);
             setSetupKindIdx(saved.setupKindIdx ?? 0);
@@ -145,24 +187,25 @@ export default function HexGridPage() {
     };
 
     useEffect(() => {
+        const initialMode = location.state?.mode || (loadSession()?.mode) || 'DUEL';
         const rawMinions = location.state?.minions ?? location.state?.minionKinds;
         const navKinds = rawMinions?.map(m => ({
             id:      m.id,
             img:     m.img ?? `/images/minion${m.id}.png`,
             name:    m.name,
-            defense: m.defense ?? m.defenseFactor,
+            defense: Number(m.defense ?? m.defenseFactor) || 1,
             strategy: m.strategy,
         }));
         if (navKinds?.length) {
             // Clear history state immediately so a page refresh won't re-trigger fresh start
             window.history.replaceState({}, '');
-            startFreshGame(navKinds);
+            startFreshGame(navKinds, initialMode);
         } else {
             const saved = loadSession();
             if (saved?.gameId) {
                 restoreGame(saved);
             } else {
-                startFreshGame(DEFAULT_KINDS);
+                startFreshGame(DEFAULT_KINDS, initialMode);
             }
         }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -188,6 +231,10 @@ export default function HexGridPage() {
 
         // ── SETUP ──
         if (gameState.phase === 'SETUP') {
+            if (mode === 'AUTO') {
+                setMessage('Auto mode: no manual setup needed, click START GAME.');
+                return;
+            }
             if (setupStep > 2) return;
             const playerNum = setupStep;
             const token = playerNum === 1 ? p1Token : p2Token;
@@ -211,7 +258,13 @@ export default function HexGridPage() {
                     : minionImgMap;
                 setGameState(state);
                 setMinionImgMap(newImgMap);
-                if (setupStep === 1) {
+
+                if (mode === 'SOLITAIRE' && setupStep === 1) {
+                    setSetupStep(3);
+                    persist({ setupStep: 3, minionImgMap: newImgMap });
+                    addLog(`[Setup] P1 spawned "${kind.name}" at (${bRow},${bCol})`);
+                    setMessage('Both players ready (bot pre-spawned). Click START GAME.');
+                } else if (setupStep === 1) {
                     setSetupStep(2);
                     setSetupKindIdx(0);
                     persist({ setupStep: 2, setupKindIdx: 0, minionImgMap: newImgMap });
@@ -295,8 +348,14 @@ export default function HexGridPage() {
             setTurnStep('buy');
             persist({ turnStep: 'buy', setupStep: 3 });
             addLog('── Game started ──');
-            addLog("[T1] P1's turn");
-            setMessage("Game started! Player 1 — buy a hex or click END TURN.");
+            if (state.actionLog?.length) state.actionLog.forEach(e => addLog(e));
+            if (mode === 'AUTO') {
+                addLog("[T1] P1's turn (bot)");
+                setMessage("Auto mode: click BOT MOVE to advance bot turn.");
+            } else {
+                addLog("[T1] P1's turn");
+                setMessage("Game started! Player 1 — buy a hex or click END TURN.");
+            }
         } catch (e) {
             setMessage('Start failed: ' + e.message);
         }
@@ -308,6 +367,52 @@ export default function HexGridPage() {
         persist({ turnStep: 'spawn' });
         addLog(`[T${gameState.turnCount + 1}] P${gameState.currentPlayer} skipped buying`);
         setMessage(`Player ${gameState?.currentPlayer} — spawn a minion or click END TURN.`);
+    };
+
+    const handleBotMove = async () => {
+        if (loading || !gameState || gameState.gameOver) return;
+        const actingPlayer = gameState.currentPlayer;
+        setLoading(true);
+        try {
+            const state = await api.botMove(gameId);
+            setGameState(state);
+            setTurnStep('buy');
+            setSelectedKindIdx(null);
+            persist({ turnStep: 'buy' });
+            addLog(`── Bot ${actingPlayer} acting ──`);
+
+            // Assign images to newly spawned bot minions
+            const newImgMap = { ...minionImgMap };
+            if (state.actionLog?.length) {
+                for (const entry of state.actionLog) {
+                    const m = entry.match(/^Bot \d+ spawned (.+) at \((\d+),(\d+)\)/);
+                    if (m) {
+                        const [, kindName, rowStr, colStr] = m;
+                        const row = parseInt(rowStr), col = parseInt(colStr);
+                        const hex = state.grid?.find(h => h.row === row && h.col === col);
+                        if (hex?.minionId) {
+                            const kind = minionKinds.find(k => k.name === kindName) ?? minionKinds[0];
+                            if (kind) newImgMap[hex.minionId] = kind.img;
+                        }
+                    }
+                }
+                state.actionLog.forEach(e => addLog(e));
+            }
+            setMinionImgMap(newImgMap);
+            persist({ minionImgMap: newImgMap });
+
+            if (state.gameOver) {
+                const result = state.winner === 0 ? 'Tie!' : `P${state.winner} wins!`;
+                addLog(`── Game over — ${result} ──`);
+                navigate('/endgame', { state: { winner: state.winner, mode } });
+            } else {
+                addLog(`[T${state.turnCount + 1}] P${state.currentPlayer}'s turn`);
+                setMessage(`Bot ${actingPlayer} done. Next: Player ${state.currentPlayer}.`);
+            }
+        } catch (e) {
+            setMessage('Bot move failed: ' + e.message);
+        }
+        setLoading(false);
     };
 
     const handleEndTurn = async () => {
@@ -328,7 +433,7 @@ export default function HexGridPage() {
             if (state.gameOver) {
                 const result = state.winner === 0 ? 'Tie!' : `P${state.winner} wins!`;
                 addLog(`── Game over — ${result} ──`);
-                setMessage(state.winner === 0 ? "Game Over — It's a tie!" : `Game Over — Player ${state.winner} WINS!`);
+                navigate('/endgame', { state: { winner: state.winner, mode } });
             } else {
                 addLog(`[T${state.turnCount + 1}] P${state.currentPlayer}'s turn`);
                 setMessage(`Player ${state.currentPlayer}'s turn — buy a hex or click END TURN.`);
@@ -439,7 +544,7 @@ export default function HexGridPage() {
                             <div className="game-over-text">
                                 {gameState.winner === 0 ? "It's a Tie!" : `Player ${gameState.winner} Wins!`}
                             </div>
-                            <button className="end-turn-btn" onClick={() => startFreshGame(minionKinds)} disabled={loading}>
+                            <button className="end-turn-btn" onClick={() => startFreshGame(minionKinds, mode)} disabled={loading}>
                                 NEW GAME
                             </button>
                         </div>
@@ -471,19 +576,26 @@ export default function HexGridPage() {
                                 </span>
                             </div>
                             <div className="action-buttons">
-                                {turnStep === 'buy' && (
+                                {turnStep === 'buy' && (mode === 'DUEL' || (mode === 'SOLITAIRE' && isP1Active)) && (
                                     <button className="action-btn" onClick={handleSkipBuy} disabled={loading}>
                                         Skip Buy
                                     </button>
                                 )}
-                                {turnStep === 'spawn' && selectedKindIdx !== null && (
+                                {turnStep === 'spawn' && mode !== 'AUTO' && selectedKindIdx !== null && (
                                     <button className="action-btn" onClick={() => setSelectedKindIdx(null)} disabled={loading}>
                                         Cancel
                                     </button>
                                 )}
-                                <button className="end-turn-btn" onClick={handleEndTurn} disabled={loading}>
-                                    END TURN
-                                </button>
+
+                                {((mode === 'SOLITAIRE' && !isP1Active) || mode === 'AUTO') ? (
+                                    <button className="action-btn" onClick={handleBotMove} disabled={loading}>
+                                        BOT MOVE
+                                    </button>
+                                ) : (
+                                    <button className="end-turn-btn" onClick={handleEndTurn} disabled={loading}>
+                                        END TURN
+                                    </button>
+                                )}
                             </div>
                         </div>
                     )}
