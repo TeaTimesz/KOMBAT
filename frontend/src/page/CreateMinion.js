@@ -7,7 +7,6 @@ function CreateMinion() {
     const navigate = useNavigate();
     
     const amount = location.state?.amount || 1;
-    const mode = location.state?.mode || 'DUEL';
 
     const [selectedMinions, setSelectedMinions] = useState([]);
 
@@ -35,7 +34,7 @@ function CreateMinion() {
 
     const handleConfirm = () => {
         if (selectedMinions.length === amount) {
-            navigate('/strategy-input', { state: { selectedIds: selectedMinions, mode } });
+            navigate('/strategy-input', { state: { selectedIds: selectedMinions } });
         } else {
             alert(`Please select exactly ${amount} minions before confirming.`);
         }

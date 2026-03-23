@@ -15,7 +15,6 @@ import Parser.StrategyEvaluator;
 import Parser.Direction;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 public class TurnManager {
@@ -27,35 +26,11 @@ public class TurnManager {
     private final StrategyEvaluator evaluator;
     private final Random random;
     private final Statement defaultStrategy;
-    private final List<Map<String, Object>> kinds;
 
-    // Bot minion types (choose different stats/behaviors)
-    private static class BotMinionType {
-        final String name;
-        final long hp;
-        final long defense;
-        final String strategyCode;
-
-        BotMinionType(String name, long hp, long defense, String strategyCode) {
-            this.name = name;
-            this.hp = hp;
-            this.defense = defense;
-            this.strategyCode = strategyCode;
-        }
-    }
-
-    private final BotMinionType[] botTypes;
-
-    public TurnManager(GameEnvironment env, GameMode mode, List<Map<String, Object>> kinds) {
+    public TurnManager(GameEnvironment env, GameMode mode) {
         this.env = env;
         this.config = GameConfig.getInstance();
-        this.botTypes = new BotMinionType[] {
-            new BotMinionType("Aggressive", config.init_hp, Math.max(1, config.init_hp / 15), "if (Budget - 100) then { move down; shoot down 50 } else { done }"),
-            new BotMinionType("Defensive", config.init_hp, Math.max(1, config.init_hp / 4), "done"),
-            new BotMinionType("Cautious", config.init_hp, Math.max(1, config.init_hp / 8), "if (Budget - 30) then { move down; shoot down 10 } else { move down }")
-        };
         this.mode = mode;
-        this.kinds = kinds;
         this.evaluator = new StrategyEvaluator(env);
         this.random = new Random();
 
@@ -77,18 +52,12 @@ public class TurnManager {
         return false;
     }
 
-    public List<String> startTurn(Player currentPlayer, int playerIndex) {
-        double budgetBefore = currentPlayer.getBudget();
+    public void startTurn(Player currentPlayer , int playerIndex) {
         applyEconomy(currentPlayer);
-        long gained = Math.round(currentPlayer.getBudget() - budgetBefore);
-
-        List<String> logs = new java.util.ArrayList<>();
-        logs.add("Budget: +" + gained + " → " + (long) currentPlayer.getBudget());
 
         if (isBot(playerIndex)) {
-            logs.addAll(handleBotTurn(currentPlayer, playerIndex));
+            handleBotTurn(currentPlayer, playerIndex);
         }
-        return logs;
     }
 
     public void endTurn() {
@@ -117,149 +86,56 @@ public class TurnManager {
         }
     }
 
-    private List<String> handleBotTurn(Player player, int playerIndex) {
-        List<String> logs = new java.util.ArrayList<>();
-
+    private void handleBotTurn(Player player, int playerIndex) {
         if (random.nextBoolean()) { // coin flip 50/50 random
-            String buyLog = maybeBuyHexBot(player, playerIndex);
-            if (buyLog != null) logs.add(buyLog);
+            maybeBuyHexBot(player, playerIndex);
         }
-
-        // Snapshot existing minions BEFORE spawning so new spawns don't execute this turn
-        List<Minion> minionsToEvaluate = List.copyOf(player.getMinions());
 
         if (player.getMinions().isEmpty()) {
-            String spawnLog = maybeSpawnBot(player, playerIndex);
-            if (spawnLog != null) logs.add(spawnLog);
+            maybeSpawnBot(player, playerIndex);
         } else if (random.nextBoolean()) {
-            String spawnLog = maybeSpawnBot(player, playerIndex);
-            if (spawnLog != null) logs.add(spawnLog);
+            maybeSpawnBot(player, playerIndex);
         }
 
-        Player opponent = (playerIndex == 1) ? env.getPlayer2() : env.getPlayer1();
-
-        // Snapshot opponent state (keyed by stable ID) before any evaluation
-        java.util.Map<String, int[]> oppPosBefore = new java.util.HashMap<>();
-        java.util.Map<String, Long>  oppHpBefore  = new java.util.HashMap<>();
-        List<Minion> oppSnapshot = List.copyOf(opponent.getMinions());
-        for (Minion opp : oppSnapshot) {
-            if (opp.getLocation() != null)
-                oppPosBefore.put(opp.getId(), new int[]{opp.getLocation().getRow(), opp.getLocation().getCol()});
-            oppHpBefore.put(opp.getId(), opp.getHp());
-        }
-
-        for (Minion m : minionsToEvaluate) {
-            if (m.getStrategy() == null || m.getLocation() == null) continue;
-
-            int[] prevPos = { m.getLocation().getRow(), m.getLocation().getCol() };
-
+        for (Minion m : List.copyOf(player.getMinions())) {
+            if (m.getStrategy() == null) {
+                continue;
+            }
             try {
                 evaluator.evaluate(m);
             } catch (DoneException ignored) {
             }
-
-            if (m.getLocation() != null) {
-                int r = m.getLocation().getRow(), c = m.getLocation().getCol();
-                if (prevPos[0] != r || prevPos[1] != c) {
-                    logs.add("  Minion (" + prevPos[0] + "," + prevPos[1] + ") moved → (" + r + "," + c + ")");
-                }
-            }
-        }
-
-        for (Minion opp : oppSnapshot) {
-            Long hpBefore = oppHpBefore.get(opp.getId());
-            if (hpBefore == null) continue;
-            if (!opponent.getMinions().contains(opp)) {
-                int[] pos = oppPosBefore.get(opp.getId());
-                String posStr = pos != null ? pos[0] + "," + pos[1] : "?";
-                logs.add("  Eliminated enemy at (" + posStr + ")!");
-            } else if (opp.getHp() < hpBefore) {
-                logs.add("  Shot enemy at (" + opp.getLocation().getRow() + "," + opp.getLocation().getCol()
-                    + "): " + hpBefore + " → " + opp.getHp() + " HP");
-            }
-        }
-
-        if (logs.isEmpty()) {
-            logs.add("Bot " + playerIndex + ": no action this turn.");
-        }
-        return logs;
-    }
-
-    BotMinionType chooseBotMinionType(Player player, int playerIndex) {
-        if (kinds != null && !kinds.isEmpty()) {
-            Map<String, Object> kind = kinds.get(random.nextInt(kinds.size()));
-            long hp = config.init_hp;
-            Object defObj = kind.get("defense");
-            long defense;
-            if (defObj instanceof Number) {
-                defense = ((Number) defObj).longValue();
-            } else if (defObj != null) {
-                try { defense = Long.parseLong(defObj.toString()); } catch (NumberFormatException e) { defense = Math.max(1, hp / 10); }
-            } else {
-                defense = Math.max(1, hp / 10);
-            }
-            String strategyCode = (String) kind.get("strategy");
-            return new BotMinionType((String) kind.get("name"), hp, defense, strategyCode);
-        }
-
-        Player opponent = (playerIndex == 1) ? env.getPlayer2() : env.getPlayer1();
-
-        int ownCount = player.getMinions().size();
-        int oppCount = opponent.getMinions().size();
-
-        if (ownCount < oppCount) {
-            return botTypes[0]; // Aggressive to catch up
-        }
-        if (player.getBudget() < opponent.getBudget()) {
-            return botTypes[1]; // Defensive when budget is weaker
-        }
-
-        return botTypes[random.nextInt(botTypes.length)];
-    }
-
-    private Strategy parseBotStrategy(String code) {
-        if (code == null || code.isBlank()) {
-            return defaultStrategy == null ? null : new Strategy(defaultStrategy);
-        }
-        try {
-            return new Strategy(new Parser(code).parse());
-        } catch (Exception e) {
-            return defaultStrategy == null ? null : new Strategy(defaultStrategy);
         }
     }
 
-    private String maybeBuyHexBot(Player player, int playerIndex) {
+    private void maybeBuyHexBot(Player player, int playerIndex) {
         if (player.getBudget() < config.hex_purchase_cost) {
-            return null;
+            return;
         }
 
         Hex hexToBuy = findRandomAdjacentEmptyHexForPlayer(player);
         if (hexToBuy == null) {
-            return null;
+            return;
         }
 
-        if (buyHex(player, hexToBuy)) {
-            return "Bot " + playerIndex + " bought hex (" + hexToBuy.getRow() + "," + hexToBuy.getCol() + ")";
-        }
-        return null;
+        buyHex(player, hexToBuy);
     }
 
-    private String maybeSpawnBot(Player player, int playerIndex) {
+    private void maybeSpawnBot(Player player, int playerIndex) {
         if (!player.canSpawn() || player.getBudget() < config.spawn_cost) {
-            return null;
+            return;
         }
 
         Hex spawnHex = pickRandomEmptyHexForPlayer(playerIndex);
         if (spawnHex == null) {
-            return null;
+            return;
         }
 
-        BotMinionType botType = chooseBotMinionType(player, playerIndex);
-        Strategy strat = parseBotStrategy(botType.strategyCode);
-
+        long hp = config.init_hp;
+        long def = Math.max(1, config.init_hp / 10);
+        Strategy strat = defaultStrategy == null ? null : new Strategy(defaultStrategy);
         spawnHex.setTerritory(player);
-        new Minion(botType.hp, botType.defense, spawnHex, player, strat);
-        return "Bot " + playerIndex + " spawned " + botType.name + " at (" + spawnHex.getRow() + "," + spawnHex.getCol() + ")";
+        new Minion(hp, def, spawnHex, player, strat);
     }
 
     private Hex findRandomAdjacentEmptyHexForPlayer(Player player) {
@@ -458,10 +334,10 @@ public class TurnManager {
         }
 
         Hex spawnHex = ownedEmpty.get(random.nextInt(ownedEmpty.size()));
+        long hp = config.init_hp;
+        long def = Math.max(1, config.init_hp / 10);
+        Strategy strat = new Strategy(new Parser("done").parseStatement());
 
-        BotMinionType botType = chooseBotMinionType(botPlayer, botPlayerIndex);
-        Strategy strat = parseBotStrategy(botType.strategyCode);
-
-        spawnFreeMinion(botPlayer, spawnHex, botType.hp, botType.defense, strat);
+        spawnFreeMinion(botPlayer, spawnHex, hp, def, strat);
     }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { parseStrategy } from '../api/gameApi';
@@ -6,61 +6,59 @@ import '../css/strategy-input.css';
 
 // ── Preset Strategies ─────────────────────────────────────────────────────────
 const PRESET_STRATEGIES = {
-    Attack: {
-        defenseFactor: '5',
-        strategy:
-`if (nearby up) then shoot up 10
-else if (nearby upright) then shoot upright 10
-else if (nearby downright) then shoot downright 10
-else if (nearby down) then shoot down 10
-else if (nearby downleft) then shoot downleft 10
-else if (nearby upleft) then shoot upleft 10
-else {
-    d = opponent % 10
-    if (d - 1) then {
-        if (d - 2) then {
-            if (d - 3) then {
-                if (d - 4) then {
-                    if (d - 5) then move upleft
-                    else move downleft
-                } else move down
-            } else move downright
-        } else move upright
-    } else move up
-}
-done
-`,
-    },
-    Support: {
-        defenseFactor: '3',
-        strategy:
-`steps = steps + 1
-pwr = Budget / 3
-if (steps - 2) then {
-    steps = 0
-    if (nearby up) then shoot up pwr
-    else if (nearby upright) then shoot upright pwr
-    else if (nearby downright) then shoot downright pwr
-    else if (nearby down) then shoot down pwr
-    else if (nearby downleft) then shoot downleft pwr
-    else if (nearby upleft) then shoot upleft pwr
+    Attack:
+`# Attack — scan nearby, shoot on sight, pursue relentlessly
+{
+
+    if (Budget - 100) then
+        if (nearby up) then shoot up Budget / 2
+        else if (nearby upright) then shoot upright Budget / 2
+        else if (nearby downright) then shoot downright Budget / 2
+        else if (nearby down) then shoot down Budget / 2
+        else if (nearby downleft) then shoot downleft Budget / 2
+        else if (nearby upleft) then shoot upleft Budget / 2
+        else {
+            opponentLoc = opponent
+            opponentDir = opponentLoc % 10
+            if (opponentLoc) then
+                if (opponentDir - 5) then move downleft
+                else if (opponentDir - 4) then move down
+                else if (opponentDir - 3) then move downright
+                else if (opponentDir - 2) then move upright
+                else if (opponentDir - 1) then move up
+                else move upleft
+            else move downright
+        }
     else done
-} else {
-    d = opponent % 10
-    if (d - 1) then {
-        if (d - 2) then {
-            if (d - 3) then {
-                if (d - 4) then {
-                    if (d - 5) then move upleft
-                    else move downleft
-                } else move down
-            } else move downright
-        } else move upright
-    } else move up
-}
-done
-`,
-    },
+}`,
+    Support:
+`# Support — strategic movement, conserve budget, shoot when adjacent
+{
+    opponentLoc  = opponent
+    opponentDist = opponentLoc / 10
+    opponentDir  = opponentLoc % 10
+
+    if (Budget - 200) then
+        if (opponentLoc) then
+            if (opponentDist - 1) then
+                if (opponentDir - 5) then move downleft
+                else if (opponentDir - 4) then move down
+                else if (opponentDir - 3) then move downright
+                else if (opponentDir - 2) then move upright
+                else if (opponentDir - 1) then move up
+                else move upleft
+            else {
+                if (nearby up) then shoot up Budget / 3
+                else if (nearby upright) then shoot upright Budget / 3
+                else if (nearby downright) then shoot downright Budget / 3
+                else if (nearby down) then shoot down Budget / 3
+                else if (nearby downleft) then shoot downleft Budget / 3
+                else if (nearby upleft) then shoot upleft Budget / 3
+                else done
+            }
+        else done
+    else done
+}`,
 };
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -118,7 +116,6 @@ function Strategyinput() {
     const navigate = useNavigate();
 
     const selectedIds = location.state?.selectedIds || [1];
-    const mode = location.state?.mode || 'DUEL';
     const [currentIndex, setCurrentIndex]   = useState(0);
     const [minionDataMap, setMinionDataMap] = useState({});
     const [charName, setCharName]           = useState('');
@@ -131,14 +128,6 @@ function Strategyinput() {
     const [checkResult, setCheckResult]         = useState(null); // null | 'ok' | 'error'
     const [checkError, setCheckError]           = useState('');
     const [checkLoading, setCheckLoading]       = useState(false);
-    const [savedPresets, setSavedPresets]       = useState(
-        () => { try { return JSON.parse(localStorage.getItem('kombat_presets')) || []; } catch { return []; } }
-    );
-    const [expandedPresetIdx, setExpandedPresetIdx] = useState(null);
-
-    useEffect(() => {
-        localStorage.setItem('kombat_presets', JSON.stringify(savedPresets));
-    }, [savedPresets]);
 
     const currentMinionId = selectedIds[currentIndex];
 
@@ -161,22 +150,10 @@ function Strategyinput() {
             setCheckResult(null);
             setCheckError('');
         }
-        setExpandedPresetIdx(null);
         setEditorKey(k => k + 1);
     };
 
-    const hasUnsavedInput = () => {
-        const saved = minionDataMap[currentIndex];
-        const dirty = charName.trim() !== '' || defenseInfo.trim() !== '' || defenseFactor.toString().trim() !== '';
-        if (!dirty) return false;
-        if (!saved) return true;
-        return saved.name !== charName || saved.strategy !== defenseInfo || saved.defenseFactor.toString() !== defenseFactor.toString();
-    };
-
     const handleBack = () => {
-        if (!showSummary && hasUnsavedInput()) {
-            if (!window.confirm('ข้อมูลที่กรอกยังไม่ได้ Record จะสูญหาย ต้องการกลับหรือไม่?')) return;
-        }
         if (showSummary) {
             const lastIdx = selectedIds.length - 1;
             setShowSummary(false);
@@ -197,57 +174,17 @@ function Strategyinput() {
         setCheckError('');
     };
 
-    const applyPreset = (preset) => {
-        setDefenseInfo(preset.strategy);
-        setDefenseFactor(preset.defenseFactor ?? '');
-        setEditorKey(k => k + 1);
-        if (preset.valid) {
-            setStrategyChecked(true);
-            setCheckResult('ok');
-            setCheckError('');
-        } else {
-            resetCheckState();
-        }
-    };
-
     const handleSelectStat = (type) => {
         setSelectedStat(prev => {
-            setExpandedPresetIdx(null);
-            if (prev === type) {
-                setDefenseInfo('');
-                setDefenseFactor('');
-                setEditorKey(k => k + 1);
-                resetCheckState();
-                return null;
-            }
+            if (prev === type) return null;
             const preset = PRESET_STRATEGIES[type];
             if (preset) {
-                setDefenseInfo(preset.strategy);
-                setDefenseFactor(preset.defenseFactor ?? '');
+                setDefenseInfo(preset);
                 setEditorKey(k => k + 1);
                 resetCheckState();
             }
             return type;
         });
-    };
-
-    const handleAddPreset = () => {
-        if (defenseInfo.trim() === '' || defenseFactor.toString().trim() === '') {
-            alert('กรุณากรอก Strategy และ Defense Factor ก่อนบันทึก Preset');
-            return;
-        }
-        if (!strategyChecked) {
-            alert('กรุณากด Check Strategy ก่อนบันทึก Preset');
-            return;
-        }
-        const name = prompt('ตั้งชื่อ Preset:');
-        if (!name || name.trim() === '') return;
-        setSavedPresets(prev => [...prev, {
-            name: name.trim(),
-            strategy: defenseInfo,
-            defenseFactor: defenseFactor,
-            valid: true,
-        }]);
     };
 
     const handleCheckStrategy = async () => {
@@ -264,11 +201,6 @@ function Strategyinput() {
             if (res.valid) {
                 setCheckResult('ok');
                 setStrategyChecked(true);
-                if (expandedPresetIdx !== null) {
-                    setSavedPresets(prev => prev.map((p, i) =>
-                        i === expandedPresetIdx ? { ...p, valid: true } : p
-                    ));
-                }
             } else {
                 setCheckResult('error');
                 setCheckError(res.error || 'Parse error');
@@ -282,35 +214,9 @@ function Strategyinput() {
         setCheckLoading(false);
     };
 
-    const handleCreateCustomStrategy = handleAddPreset;
-
-    const handlePresetClick = (p, i) => {
-        if (expandedPresetIdx === i) {
-            setExpandedPresetIdx(null);
-        } else {
-            setExpandedPresetIdx(i);
-            setSelectedStat(null);
-            applyPreset(p);
-        }
-    };
-
-    const handleStrategyChange = (val) => {
-        setDefenseInfo(val);
-        resetCheckState();
-        if (expandedPresetIdx !== null) {
-            setSavedPresets(prev => prev.map((p, i) =>
-                i === expandedPresetIdx ? { ...p, strategy: val, valid: false } : p
-            ));
-        }
-    };
-
-    const handleDefenseFactorChange = (val) => {
-        setDefenseFactor(val);
-        if (expandedPresetIdx !== null) {
-            setSavedPresets(prev => prev.map((p, i) =>
-                i === expandedPresetIdx ? { ...p, defenseFactor: val } : p
-            ));
-        }
+    const handleCreateCustomStrategy = () => {
+        const customStat = prompt('ระบุชื่อ Stat Type ของคุณ:');
+        if (customStat && customStat.trim() !== '') setSelectedStat(customStat);
     };
 
     // ── Record / proceed ──────────────────────────────────────────────────────
@@ -361,7 +267,6 @@ function Strategyinput() {
                         Minion {currentIndex + 1} of {selectedIds.length}
                     </div>
 
-                    <div className="game-layout">
                     <div className="main-board" style={{ backgroundImage: "url('/images/strategy.png')" }}>
                         {/* Stat Type */}
                         <div className="stat-type-header">
@@ -425,7 +330,7 @@ function Strategyinput() {
                                     <img src="/images/Strategydetail.png" alt="Header" className="detail-header-img" />
                                     <StrategyEditor
                                         key={editorKey}
-                                        onChange={handleStrategyChange}
+                                        onChange={val => { setDefenseInfo(val); resetCheckState(); }}
                                         defaultValue={defenseInfo}
                                     />
                                 </div>
@@ -441,7 +346,7 @@ function Strategyinput() {
                                         className="strat-input"
                                         placeholder="Enter factor..."
                                         value={defenseFactor}
-                                        onChange={e => handleDefenseFactorChange(e.target.value)}
+                                        onChange={e => setDefenseFactor(e.target.value)}
                                     />
                                 </div>
                             </div>
@@ -465,34 +370,12 @@ function Strategyinput() {
                         <button
                             className="record-btn-container"
                             onClick={handleRecordNext}
-                            disabled={!strategyChecked || charName.trim() === '' || defenseInfo.trim() === '' || defenseFactor.toString().trim() === ''}
-                            style={{ opacity: (strategyChecked && charName.trim() !== '' && defenseInfo.trim() !== '' && defenseFactor.toString().trim() !== '') ? 1 : 0.4, cursor: (strategyChecked && charName.trim() !== '' && defenseInfo.trim() !== '' && defenseFactor.toString().trim() !== '') ? 'pointer' : 'not-allowed' }}
+                            disabled={!strategyChecked}
+                            style={{ opacity: strategyChecked ? 1 : 0.4, cursor: strategyChecked ? 'pointer' : 'not-allowed' }}
                         >
                             <img src="/images/Record.png" alt="Record" />
                         </button>
                     </div>
-
-                    {/* Preset Panel */}
-                    <div className="preset-panel">
-                        <div className="preset-panel-title">PRESETS</div>
-                        <div className="preset-list">
-                            {savedPresets.length === 0 ? (
-                                <div className="preset-empty">ยังไม่มี Preset</div>
-                            ) : (
-                                savedPresets.map((p, i) => (
-                                    <button
-                                        key={i}
-                                        className={`preset-item ${expandedPresetIdx === i ? 'preset-expanded' : ''}`}
-                                        onClick={() => handlePresetClick(p, i)}
-                                    >
-                                        <span className="preset-item-name">{p.name}</span>
-                                    </button>
-                                ))
-                            )}
-                        </div>
-                    </div>
-
-                    </div>{/* end game-layout */}
                 </>
             ) : (
                 <div className="summary-container">
@@ -522,7 +405,7 @@ function Strategyinput() {
                                 </div>
                             ))}
                         </div>
-                        <button className="final-start-btn" onClick={() => navigate('/hexgrid', { state: { minions: selectedIds.map((_, i) => minionDataMap[i]).filter(Boolean), mode } })}>
+                        <button className="final-start-btn" onClick={() => navigate('/hexgrid', { state: { minions: selectedIds.map((_, i) => minionDataMap[i]).filter(Boolean) } })}>
                             <img src="/images/startgame.png" alt="Start Duel" />
                         </button>
                     </div>
