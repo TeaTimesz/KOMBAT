@@ -49,15 +49,28 @@ public class GameService {
         }
     }
 
-    public Map<String, Object> createGame(String modeStr) {
+    public Map<String, Object> createGame(String modeStr, List<Map<String, Object>> kinds) {
         String gameId = UUID.randomUUID().toString().substring(0, 8);
         String p1Token = UUID.randomUUID().toString();
 
         GameMode mode = GameMode.valueOf(modeStr.toUpperCase());
         GameEnvironment env = new GameEnvironment();
-        TurnManager manager = new TurnManager(env, mode);
+        TurnManager manager = new TurnManager(env, mode, kinds);
 
         GameSession session = new GameSession(gameId, env, manager, mode, p1Token);
+
+        // Mode-specific setup
+        if (mode == GameMode.SOLITAIRE) {
+            // Human is player1, bot is player2
+            manager.handleBotFreeSpawn(env.getPlayer2(), 2);
+        }
+        if (mode == GameMode.AUTO) {
+            // Both bots should be seeded automatically
+            manager.handleBotFreeSpawn(env.getPlayer1(), 1);
+            manager.handleBotFreeSpawn(env.getPlayer2(), 2);
+            session.phase = "PLAYING";
+        }
+
         sessions.put(gameId, session);
 
         Map<String, Object> result = new HashMap<>();
@@ -82,16 +95,18 @@ public class GameService {
         return toStateDTO(getSession(gameId));
     }
 
-    public GameStateDTO spawnFree(String gameId, String playerToken, int row, int col) {
+    public GameStateDTO spawnFree(String gameId, String playerToken, int row, int col,
+                                  String strategyStr, Long defenseFactor) {
         GameSession session = getSession(gameId);
         Player player = resolvePlayer(session, playerToken);
 
         Hex hex = session.env.getGrid().getHex(row, col);
         long hp = GameConfig.getInstance().init_hp;
-        long def = Math.max(1, hp / 10);
-        Strategy strategy = makeDefaultStrategy();
+        long def = (defenseFactor != null && defenseFactor >= 1) ? defenseFactor : Math.max(1, hp / 10);
+        Strategy strategy = makeStrategy(strategyStr);
 
-        session.manager.spawnFreeMinion(player, hex, hp, def, strategy);
+        boolean ok = session.manager.spawnFreeMinion(player, hex, hp, def, strategy);
+        if (!ok) throw new RuntimeException("Cannot spawn free minion here.");
         return toStateDTO(session);
     }
 
@@ -100,7 +115,33 @@ public class GameService {
         resolvePlayer(session, playerToken);
         session.phase = "PLAYING";
 
-        session.manager.startTurn(session.env.getPlayer1(), 1);
+        if (session.mode == GameMode.AUTO) {
+            // Ensure both bots have at least one starter minion
+            if (session.env.getPlayer1().getMinions().isEmpty()) {
+                session.manager.handleBotFreeSpawn(session.env.getPlayer1(), 1);
+            }
+            if (session.env.getPlayer2().getMinions().isEmpty()) {
+                session.manager.handleBotFreeSpawn(session.env.getPlayer2(), 2);
+            }
+            return toStateDTO(session);
+        }
+
+        List<String> startLogs = session.manager.startTurn(session.env.getPlayer1(), 1);
+        GameStateDTO dto = toStateDTO(session);
+        dto.setActionLog(startLogs);
+        return dto;
+    }
+
+    private GameStateDTO runAutoMatch(GameSession session) {
+        while (!session.env.isGameOver()) {
+            Player current = session.env.getCurrentPlayer();
+            int currentPlayerIndex = (current == session.env.getPlayer1()) ? 1 : 2;
+            session.manager.startTurn(current, currentPlayerIndex);
+
+            // Execute minion strategies and then switch turn
+            session.manager.executeStrategies(current);
+            session.manager.endTurn();
+        }
         return toStateDTO(session);
     }
 
@@ -109,43 +150,118 @@ public class GameService {
         Player player = resolvePlayer(session, playerToken);
 
         Hex hex = session.env.getGrid().getHex(row, col);
-        session.manager.buyHex(player, hex);
+        boolean ok = session.manager.buyHex(player, hex);
+        if (!ok) throw new RuntimeException("Cannot buy that hex — must be unclaimed, adjacent to your territory, and you need enough budget.");
         return toStateDTO(session);
     }
 
     public GameStateDTO spawnMinion(String gameId, String playerToken, int row, int col,
-                                    String strategyStr) {
+                                    String strategyStr, Long defenseFactor) {
         GameSession session = getSession(gameId);
         Player player = resolvePlayer(session, playerToken);
 
         Hex hex = session.env.getGrid().getHex(row, col);
         long hp = GameConfig.getInstance().init_hp;
-        long def = Math.max(1, hp / 10);
+        long def = (defenseFactor != null && defenseFactor >= 1) ? defenseFactor : Math.max(1, hp / 10);
         Strategy strategy = makeStrategy(strategyStr);
 
-        session.manager.spawnMinion(player, hex, hp, def, strategy);
+        boolean ok = session.manager.spawnMinion(player, hex, hp, def, strategy);
+        if (!ok) throw new RuntimeException("Cannot spawn here — check territory, occupancy, budget, and spawn count.");
         return toStateDTO(session);
     }
 
     public GameStateDTO endTurn(String gameId, String playerToken) {
         GameSession session = getSession(gameId);
         Player currentPlayer = resolvePlayer(session, playerToken);
+        int currentPlayerIndex = (currentPlayer == session.env.getPlayer1()) ? 1 : 2;
+        Player opponent = (currentPlayer == session.env.getPlayer1())
+                ? session.env.getPlayer2() : session.env.getPlayer1();
 
-        session.manager.executeStrategies(currentPlayer);
-        session.manager.endTurn();
+        List<String> log = new ArrayList<>();
 
-        while (!session.env.isGameOver()) {
-            Player nextPlayer = session.env.getCurrentPlayer();
-            int nextPlayerIndex = (nextPlayer == session.env.getPlayer1()) ? 1 : 2;
-            session.manager.startTurn(nextPlayer, nextPlayerIndex);
-
-            if (!session.manager.isBot(nextPlayerIndex)) {
-                break;
-            }
-            session.manager.endTurn();
+        // Snapshot positions before strategy execution
+        java.util.IdentityHashMap<Minion, int[]> locBefore = new java.util.IdentityHashMap<>();
+        for (Minion m : currentPlayer.getMinions()) {
+            if (m.getLocation() != null)
+                locBefore.put(m, new int[]{m.getLocation().getRow(), m.getLocation().getCol()});
         }
 
-        return toStateDTO(session);
+        // Snapshot opponent HP before
+        java.util.IdentityHashMap<Minion, Long> oppHpBefore = new java.util.IdentityHashMap<>();
+        List<Minion> oppMinionsBefore = List.copyOf(opponent.getMinions());
+        for (Minion m : oppMinionsBefore) oppHpBefore.put(m, m.getHp());
+
+        session.manager.executeStrategies(currentPlayer);
+
+        // Log movements
+        int actions = 0;
+        for (Minion m : List.copyOf(currentPlayer.getMinions())) {
+            int[] prev = locBefore.get(m);
+            if (prev != null && m.getLocation() != null) {
+                int r = m.getLocation().getRow(), c = m.getLocation().getCol();
+                if (prev[0] != r || prev[1] != c) {
+                    log.add("  Minion (" + prev[0] + "," + prev[1] + ") moved → (" + r + "," + c + ")");
+                    actions++;
+                }
+            }
+        }
+        // Log shots / eliminations
+        for (Minion m : oppMinionsBefore) {
+            Long hpBefore = oppHpBefore.get(m);
+            if (hpBefore == null) continue;
+            if (!opponent.getMinions().contains(m)) {
+                String pos = m.getLocation() != null
+                        ? m.getLocation().getRow() + "," + m.getLocation().getCol() : "?";
+                log.add("  Minion at (" + pos + ") was eliminated!");
+                actions++;
+            } else if (m.getHp() < hpBefore) {
+                log.add("  Shot enemy (" + m.getLocation().getRow() + "," + m.getLocation().getCol()
+                        + "): " + hpBefore + " → " + m.getHp() + " HP");
+                actions++;
+            }
+        }
+        if (actions == 0) log.add("  Minions took no action (done)");
+
+        session.manager.endTurn();
+
+        // Apply economy for the next player if they are human (DUEL: both players human)
+        Player nextPlayer = session.env.getCurrentPlayer();
+        int nextIndex = (nextPlayer == session.env.getPlayer1()) ? 1 : 2;
+        if (!session.manager.isBot(nextIndex)) {
+            log.addAll(session.manager.startTurn(nextPlayer, nextIndex));
+        }
+
+        GameStateDTO dto = toStateDTO(session);
+        dto.setActionLog(log);
+        return dto;
+    }
+
+    public GameStateDTO botStep(String gameId) {
+        GameSession session = getSession(gameId);
+        if (session.env.isGameOver()) {
+            return toStateDTO(session);
+        }
+
+        Player current = session.env.getCurrentPlayer();
+        int currentIndex = current == session.env.getPlayer1() ? 1 : 2;
+
+        if (!session.manager.isBot(currentIndex)) {
+            throw new RuntimeException("Current player is not a bot");
+        }
+
+        List<String> botActions = new ArrayList<>(session.manager.startTurn(current, currentIndex));
+        session.manager.endTurn();
+
+        // Apply economy for the next player if they are human (fixes SOLITAIRE mid-game economy)
+        Player nextPlayer = session.env.getCurrentPlayer();
+        int nextIndex = (nextPlayer == session.env.getPlayer1()) ? 1 : 2;
+        if (!session.manager.isBot(nextIndex)) {
+            botActions.addAll(session.manager.startTurn(nextPlayer, nextIndex));
+        }
+
+        GameStateDTO dto = toStateDTO(session);
+        dto.setActionLog(botActions);
+        return dto;
     }
 
     // ── helpers ────────────────────────────────────────────────────────────────
@@ -172,6 +288,18 @@ public class GameService {
         }
     }
 
+    public Map<String, Object> parseStrategy(String strategyStr) {
+        if (strategyStr == null || strategyStr.isBlank()) {
+            return Map.of("valid", false, "error", "Strategy is empty");
+        }
+        try {
+            new Parser(strategyStr).parse();
+            return Map.of("valid", true);
+        } catch (Exception e) {
+            return Map.of("valid", false, "error", e.getMessage() != null ? e.getMessage() : "Parse error");
+        }
+    }
+
     private Strategy makeStrategy(String strategyStr) {
         if (strategyStr == null || strategyStr.isBlank()) {
             return makeDefaultStrategy();
@@ -193,8 +321,9 @@ public class GameService {
         dto.setPhase(session.phase);
         dto.setTurnCount(env.getTurnCount());
         dto.setCurrentPlayer(env.getCurrentPlayer() == env.getPlayer1() ? 1 : 2);
-        dto.setGameOver(env.isGameOver());
-        dto.setWinner(env.isGameOver() ? session.manager.getWinner() : 0);
+        boolean over = session.phase.equals("PLAYING") && env.isGameOver();
+        dto.setGameOver(over);
+        dto.setWinner(over ? session.manager.getWinner() : 0);
         dto.setPlayer1(toPlayerDTO(env.getPlayer1(), 1, env));
         dto.setPlayer2(toPlayerDTO(env.getPlayer2(), 2, env));
 
@@ -244,10 +373,12 @@ public class GameService {
             dto.setHasMinion(true);
             dto.setMinionOwner(occupant.getOwner() == env.getPlayer1() ? 1 : 2);
             dto.setMinionHp(occupant.getHp());
+            dto.setMinionId(occupant.getId());
         } else {
             dto.setHasMinion(false);
             dto.setMinionOwner(0);
             dto.setMinionHp(0);
+            dto.setMinionId(null);
         }
         return dto;
     }

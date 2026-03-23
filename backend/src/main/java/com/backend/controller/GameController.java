@@ -1,4 +1,4 @@
-package Controller;
+package com.backend.controller;
 
 import com.backend.dto.ActionRequest;
 import com.backend.dto.GameCreateRequest;
@@ -26,9 +26,14 @@ public class GameController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+    @PostMapping("/parse-strategy")
+    public Map<String, Object> parseStrategy(@RequestBody Map<String, String> body) {
+        return gameService.parseStrategy(body.get("strategy"));
+    }
+
     @PostMapping("/create")
     public Map<String, Object> createGame(@RequestBody GameCreateRequest request) {
-        return gameService.createGame(request.getMode());
+        return gameService.createGame(request.getMode(), request.getKinds());
     }
 
     @PostMapping("/{gameId}/join")
@@ -45,7 +50,8 @@ public class GameController {
     public GameStateDTO spawnFree(@PathVariable String gameId,
                                   @RequestBody ActionRequest request) {
         GameStateDTO state = gameService.spawnFree(
-                gameId, request.getPlayerToken(), request.getRow(), request.getCol());
+                gameId, request.getPlayerToken(), request.getRow(), request.getCol(),
+                request.getStrategy(), request.getDefenseFactor());
         broadcast(gameId, state);
         return state;
     }
@@ -72,7 +78,7 @@ public class GameController {
                                     @RequestBody ActionRequest request) {
         GameStateDTO state = gameService.spawnMinion(
                 gameId, request.getPlayerToken(), request.getRow(), request.getCol(),
-                request.getStrategy());
+                request.getStrategy(), request.getDefenseFactor());
         broadcast(gameId, state);
         return state;
     }
@@ -81,6 +87,13 @@ public class GameController {
     public GameStateDTO endTurn(@PathVariable String gameId,
                                 @RequestBody ActionRequest request) {
         GameStateDTO state = gameService.endTurn(gameId, request.getPlayerToken());
+        broadcast(gameId, state);
+        return state;
+    }
+
+    @PostMapping("/{gameId}/action/bot-move")
+    public GameStateDTO botMove(@PathVariable String gameId) {
+        GameStateDTO state = gameService.botStep(gameId);
         broadcast(gameId, state);
         return state;
     }

@@ -92,6 +92,12 @@ body { font-family: 'Mali', cursive, sans-serif; overflow: hidden; }
     z-index: 2;
 }
 
+.char-slot.slot-locked {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+}
+
 .board-container { padding: 80px 120px; display: flex; justify-content: center; align-items: center;}
 .hex-grid { position: relative; }
 
@@ -113,9 +119,247 @@ body { font-family: 'Mali', cursive, sans-serif; overflow: hidden; }
 .hex.p2-zone:hover .hex-inner { filter: brightness(1.2); }
 
 .placed-character {
+    position: absolute;
     width: 100%; height: 100%;
     background-size: cover; background-position: center; background-repeat: no-repeat;
     clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
     cursor: pointer;
 }
 .placed-character:hover { filter: brightness(0.8); }
+
+.minion-hp-overlay {
+    position: absolute;
+    bottom: 1px;
+    left: 0; right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.55);
+    /* padding: 1px 0; */
+}
+
+/* ── Active player highlight ── */
+.active-turn {
+    box-shadow: 0 0 0 3px var(--gold), 0 4px 10px rgba(0,0,0,0.4) !important;
+    transform: scale(1.02);
+}
+
+/* ── Minion markers on the board ── */
+.minion-marker {
+    width: 100%; height: 100%;
+    display: flex; justify-content: center; align-items: center;
+    cursor: default;
+}
+.p1-minion { background: linear-gradient(135deg, #3a7ab5cc, #1a4a8acc); }
+.p2-minion { background: linear-gradient(135deg, #cc4242cc, #8b1a1acc); }
+.minion-hp {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem; font-weight: bold;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+    pointer-events: none;
+}
+
+/* ── Interactive hex (hoverable when in action mode) ── */
+.hex.hex-interactive { cursor: pointer; }
+.hex.hex-interactive:hover .hex-inner { filter: brightness(1.25); }
+
+/* ── Center control column ── */
+.center-controls {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 8px; padding: 0 10px;
+}
+
+.phase-panel {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 8px;
+}
+
+.turn-info {
+    font-family: 'Cinzel', serif;
+    font-size: 1.05rem; font-weight: bold;
+    color: #4a3b10;
+}
+
+/* ── Action buttons ── */
+.action-buttons { display: flex; gap: 10px; align-items: center; }
+
+.action-btn {
+    background: linear-gradient(to bottom, #f0ead8, #d0c8a8);
+    border: 2px solid #a89f8c; border-radius: 14px;
+    padding: 8px 18px;
+    font-family: 'Cinzel', serif; font-size: 0.95rem; font-weight: bold;
+    color: #4a3b10; cursor: pointer;
+    transition: filter 0.15s, transform 0.1s;
+}
+.action-btn:hover:not(:disabled) { filter: brightness(1.1); }
+.action-btn:active:not(:disabled) { transform: scale(0.97); }
+.action-btn:disabled { opacity: 0.5; cursor: default; }
+.action-btn-active {
+    background: linear-gradient(to bottom, #f9e596, #d4af37);
+    border-color: var(--gold);
+    color: #3a2800;
+    box-shadow: 0 0 8px rgba(212,175,55,0.6);
+}
+
+/* ── Strategy input ── */
+.strategy-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.88rem; color: #4a3b10;
+}
+.strategy-input {
+    width: 260px;
+    border: 2px solid #a89f8c; border-radius: 8px;
+    padding: 4px 8px; font-size: 0.85rem;
+    background: #fdfaf0;
+}
+
+/* ── Status message bar ── */
+.message-bar {
+    font-size: 0.82rem; color: #4a3b10;
+    text-align: center; padding: 3px 12px;
+    background: rgba(253,250,240,0.85); border-radius: 10px;
+    border: 1px solid #d4af3766;
+    min-height: 22px; max-width: 340px;
+}
+.msg-loading { color: #888; font-style: italic; }
+
+/* ── Game-over text ── */
+.game-over-text {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem; font-weight: bold;
+    color: #7a1c1c;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.25);
+}
+
+/* ── Reduce board padding so the grid fits better without sidebars ── */
+.board-container { padding: 40px 60px; }
+
+/* ── Kind selector (inside center-controls of top bar) ── */
+.kind-selector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.kind-panel-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.88rem;
+    font-weight: bold;
+    color: #4a3b10;
+    white-space: nowrap;
+}
+
+.kind-cards {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.kind-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 10px;
+    border: 2px solid #a89f8c;
+    border-radius: 10px;
+    background: #fdfaf0;
+    cursor: pointer;
+    transition: all 0.15s;
+    min-width: 70px;
+}
+
+.kind-card:hover {
+    border-color: var(--gold);
+    filter: brightness(1.05);
+}
+
+.kind-card-active {
+    border-color: var(--gold);
+    background: linear-gradient(to bottom, #fff8d6, #f5e08a);
+    box-shadow: 0 0 8px rgba(212,175,55,0.6);
+    transform: scale(1.05);
+}
+
+.kind-card-img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+}
+
+.kind-card-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #4a3b10;
+    text-align: center;
+}
+
+.kind-card-def {
+    font-size: 0.65rem;
+    color: #7a5c2e;
+}
+
+/* ── Turn Log  ── */
+.turn-log {
+    position: fixed;
+    left: 12px;
+    bottom: 12px;
+    height: 720px;
+    width: 250px;
+    z-index: 20;
+    background-color: var(--board-bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.turn-log-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #4a3b10;
+    text-align: center;
+    padding: 10px 6px 3px;
+    border-bottom: 1px solid #d4af3766;
+    flex-shrink: 0;
+}
+
+.turn-log-entries {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 4px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    scrollbar-width: thin;
+    scrollbar-color: #d4af37 #fdfaf0;
+}
+
+.log-entry {
+    font-size: 0.65rem;
+    color: #4a3b10;
+    line-height: 1.35;
+    word-break: break-word;
+}
+
+.log-divider {
+    color: #8f6c1f;
+    font-weight: bold;
+    text-align: center;
+    margin: 2px 0;
+}
+
+/* ── Turn step badge ── */
+.turn-step-badge {
+    font-family: 'Mali', cursive;
+    font-size: 0.85rem;
+    font-weight: normal;
+    color: #7a5c2e;
+}

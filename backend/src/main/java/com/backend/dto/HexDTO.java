@@ -12,5 +12,6 @@ public class HexDTO {
     private boolean hasMinion;
     private int minionOwner; // 0 if no minion
     private long minionHp;
+    private String minionId;  // unique ID for tracking images across moves
 
 }

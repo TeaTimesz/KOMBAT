@@ -11,5 +11,6 @@ public class ActionRequest {
     private Integer row;
     private Integer col;
     private String strategy;
+    private Long defenseFactor;
 
 }

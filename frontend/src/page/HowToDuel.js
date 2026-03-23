@@ -31,7 +31,7 @@ function HowToDuel() {
                 <button className="img-btn-footer" onClick={() => navigate('/select-mode')}>
                     <img src="/images/Back.png" alt="Back" />
                 </button>
-                <button className="img-btn-footer btn-confirm" onClick={() => navigate('/create-room')}>
+                <button className="img-btn-footer btn-confirm" onClick={() => navigate('/select-amount', { state: { mode: 'DUEL' } })}>
                     <img src="/images/confirm.png" alt="Confirm" />
                 </button>
             </div>

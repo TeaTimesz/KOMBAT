@@ -17,5 +17,6 @@ public class GameStateDTO {
     private PlayerDTO player1;
     private PlayerDTO player2;
     private List<HexDTO> grid;
+    private List<String> actionLog;
 
 }

@@ -337,16 +337,39 @@
     border-radius: 12px;
     margin-bottom: 20px;
     display: flex;
+<<<<<<< HEAD
     padding: 25px;
     border: 2px solid #634732;
     gap: 30px;
 }
 
 .summary-left {
+=======
+    padding: 15px;
+    border: 2px solid #4a3728;
+}
+
+/* ── Strategyinput redesign (sk-*) ───────────────────────────────────────── */
+
+.sk-board {
+    display: flex;
+    gap: 40px;
+    background: rgba(253, 245, 220, 0.92);
+    border: 6px solid #8d6e63;
+    border-radius: 20px;
+    padding: 40px 50px;
+    width: 900px;
+    min-height: 480px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+}
+
+.sk-left {
+>>>>>>> 3d966e2cf38560b111c48fa59df0646a86a4b790
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+<<<<<<< HEAD
     width: 160px;
     flex-shrink: 0;
     gap: 15px; /* เว้นระยะระหว่างกรอบรูปกับป้าย */
@@ -460,3 +483,388 @@
 .final-start-btn:hover {
     transform: scale(1.1);
 }
+=======
+    flex-shrink: 0;
+    width: 220px;
+}
+
+.sk-minion-frame {
+    width: 200px;
+    height: 220px;
+    border: 4px solid #8d6e63;
+    border-radius: 16px;
+    background: #fff8f0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.sk-minion-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.sk-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.sk-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sk-field-grow {
+    flex: 1;
+}
+
+.sk-label {
+    font-family: 'Cinzel', 'Henny Penny', serif;
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: #5d4037;
+    letter-spacing: 0.04em;
+}
+
+.sk-hint {
+    font-size: 0.78rem;
+    font-weight: normal;
+    color: #8d6e63;
+    font-family: sans-serif;
+}
+
+.sk-text-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #a1887f;
+    border-radius: 10px;
+    background: #fff8f0;
+    font-size: 1.05rem;
+    color: #3e2723;
+    font-family: 'Mali', sans-serif;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.sk-text-input:focus {
+    border-color: #5d4037;
+}
+
+.sk-short {
+    width: 140px;
+}
+
+.sk-textarea {
+    flex: 1;
+    width: 100%;
+    min-height: 130px;
+    padding: 10px 14px;
+    border: 2px solid #a1887f;
+    border-radius: 10px;
+    background: #fff8f0;
+    font-size: 0.9rem;
+    color: #3e2723;
+    font-family: 'Courier New', monospace;
+    resize: vertical;
+    outline: none;
+    line-height: 1.5;
+    transition: border-color 0.15s;
+}
+
+.sk-textarea:focus {
+    border-color: #5d4037;
+}
+
+/* Summary board — CSS-only, no background image needed */
+.sk-summary-board {
+    width: 900px;
+    max-height: 80vh;
+    background: rgba(253, 245, 220, 0.95);
+    border: 6px solid #8d6e63;
+    border-radius: 20px;
+    padding: 40px 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+}
+
+.sk-strategy-preview {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 80px;
+    overflow-y: auto;
+}
+/* ── Game Layout: main board + preset panel ──────────────────────────────── */
+.game-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+/* ── Preset Panel ─────────────────────────────────────────────────────────── */
+.preset-panel {
+    width: 180px;
+    min-height: 400px;
+    max-height: 680px;
+    background: rgba(74, 55, 40, 0.88);
+    border: 3px solid #c8a84b;
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 10px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+    margin-top: 20px;
+}
+
+.preset-panel-title {
+    font-family: 'Henny Penny', cursive;
+    color: #ffd700;
+    font-size: 1rem;
+    text-align: center;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #c8a84b;
+    padding-bottom: 6px;
+}
+
+.preset-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.preset-empty {
+    color: #c8a84b99;
+    font-size: 0.82rem;
+    text-align: center;
+    margin-top: 16px;
+    font-family: sans-serif;
+}
+
+.preset-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background: rgba(200, 168, 75, 0.15);
+    cursor: pointer;
+    font-family: 'Henny Penny', cursive;
+    font-size: 0.82rem;
+    color: #fff8e1;
+    transition: background 0.15s, border-color 0.15s;
+    text-align: left;
+    word-break: break-word;
+}
+
+.preset-item:hover {
+    background: rgba(200, 168, 75, 0.35);
+}
+
+.preset-item.preset-valid {
+    border-color: #4caf5088;
+}
+
+.preset-item.preset-invalid {
+    border-color: #e5393588;
+}
+
+.preset-item-name {
+    flex: 1;
+}
+
+.preset-item-status {
+    font-size: 0.9rem;
+    margin-left: 6px;
+    flex-shrink: 0;
+}
+
+.preset-item.preset-valid .preset-item-status  { color: #81c784; }
+.preset-item.preset-invalid .preset-item-status { color: #ef9a9a; }
+
+.preset-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #fff8e1;
+    font-family: 'Henny Penny', cursive;
+    font-size: 0.82rem;
+    padding: 7px 10px;
+    text-align: left;
+}
+
+.preset-item-header:hover {
+    background: rgba(200, 168, 75, 0.2);
+    border-radius: 6px;
+}
+
+.preset-expand-arrow {
+    font-size: 0.7rem;
+    color: #c8a84b;
+    flex-shrink: 0;
+    margin-left: 4px;
+}
+
+.preset-item.preset-expanded {
+    border-color: #ffd700;
+    background: rgba(200, 168, 75, 0.35);
+    box-shadow: 0 0 10px #ffd70088;
+}
+
+.preset-edit-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 6px 10px 10px;
+}
+
+.preset-edit-label {
+    font-size: 0.72rem;
+    color: #c8a84b;
+    font-family: sans-serif;
+}
+
+.preset-edit-input {
+    background: rgba(255,248,225,0.15);
+    border: 1px solid #c8a84b88;
+    border-radius: 5px;
+    color: #fff8e1;
+    font-size: 0.8rem;
+    padding: 4px 7px;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.preset-edit-textarea {
+    background: rgba(255,248,225,0.12);
+    border: 1px solid #c8a84b88;
+    border-radius: 5px;
+    color: #fff8e1;
+    font-size: 0.75rem;
+    font-family: 'Courier New', monospace;
+    padding: 5px 7px;
+    resize: vertical;
+    min-height: 80px;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.preset-save-btn {
+    margin-top: 4px;
+    padding: 5px 0;
+    background: #c8a84b;
+    color: #3a2200;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    font-family: 'Henny Penny', cursive;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.preset-save-btn:hover {
+    background: #ffd700;
+}
+
+/* ── Add Preset button ────────────────────────────────────────────────────── */
+.add-preset-btn {
+    padding: 6px 18px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    border-radius: 8px;
+    border: 2px solid #c8a84b;
+    background: rgba(200, 168, 75, 0.18);
+    color: #3a2200;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: 'Henny Penny', cursive;
+}
+
+.add-preset-btn:hover:not(:disabled) {
+    background: rgba(200, 168, 75, 0.45);
+}
+
+.add-preset-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.check-add-preset-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+.check-record-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.check-strategy-btn {
+    padding: 8px 28px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    border: 2px solid #7a4e10;
+    background: #f5dfa0;
+    color: #3a2200;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.check-strategy-btn:hover:not(:disabled) {
+    background: #e8c96a;
+}
+
+.check-strategy-btn.check-ok {
+    background: #4caf50;
+    border-color: #2e7d32;
+    color: #fff;
+}
+
+.check-strategy-btn.check-fail {
+    background: #e53935;
+    border-color: #b71c1c;
+    color: #fff;
+}
+
+.check-strategy-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.check-error-msg {
+    font-size: 0.85rem;
+    color: #c62828;
+    background: #ffebee;
+    border: 1px solid #ef9a9a;
+    border-radius: 6px;
+    padding: 4px 12px;
+    max-width: 340px;
+    text-align: center;
+    word-break: break-word;
+}
+>>>>>>> 3d966e2cf38560b111c48fa59df0646a86a4b790
