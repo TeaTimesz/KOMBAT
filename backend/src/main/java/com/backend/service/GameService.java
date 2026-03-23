@@ -49,15 +49,28 @@ public class GameService {
         }
     }
 
-    public Map<String, Object> createGame(String modeStr) {
+    public Map<String, Object> createGame(String modeStr, List<Map<String, Object>> kinds) {
         String gameId = UUID.randomUUID().toString().substring(0, 8);
         String p1Token = UUID.randomUUID().toString();
 
         GameMode mode = GameMode.valueOf(modeStr.toUpperCase());
         GameEnvironment env = new GameEnvironment();
-        TurnManager manager = new TurnManager(env, mode);
+        TurnManager manager = new TurnManager(env, mode, kinds);
 
         GameSession session = new GameSession(gameId, env, manager, mode, p1Token);
+
+        // Mode-specific setup
+        if (mode == GameMode.SOLITAIRE) {
+            // Human is player1, bot is player2
+            manager.handleBotFreeSpawn(env.getPlayer2(), 2);
+        }
+        if (mode == GameMode.AUTO) {
+            // Both bots should be seeded automatically
+            manager.handleBotFreeSpawn(env.getPlayer1(), 1);
+            manager.handleBotFreeSpawn(env.getPlayer2(), 2);
+            session.phase = "PLAYING";
+        }
+
         sessions.put(gameId, session);
 
         Map<String, Object> result = new HashMap<>();
@@ -102,7 +115,33 @@ public class GameService {
         resolvePlayer(session, playerToken);
         session.phase = "PLAYING";
 
-        session.manager.startTurn(session.env.getPlayer1(), 1);
+        if (session.mode == GameMode.AUTO) {
+            // Ensure both bots have at least one starter minion
+            if (session.env.getPlayer1().getMinions().isEmpty()) {
+                session.manager.handleBotFreeSpawn(session.env.getPlayer1(), 1);
+            }
+            if (session.env.getPlayer2().getMinions().isEmpty()) {
+                session.manager.handleBotFreeSpawn(session.env.getPlayer2(), 2);
+            }
+            return toStateDTO(session);
+        }
+
+        List<String> startLogs = session.manager.startTurn(session.env.getPlayer1(), 1);
+        GameStateDTO dto = toStateDTO(session);
+        dto.setActionLog(startLogs);
+        return dto;
+    }
+
+    private GameStateDTO runAutoMatch(GameSession session) {
+        while (!session.env.isGameOver()) {
+            Player current = session.env.getCurrentPlayer();
+            int currentPlayerIndex = (current == session.env.getPlayer1()) ? 1 : 2;
+            session.manager.startTurn(current, currentPlayerIndex);
+
+            // Execute minion strategies and then switch turn
+            session.manager.executeStrategies(current);
+            session.manager.endTurn();
+        }
         return toStateDTO(session);
     }
 
@@ -185,22 +224,43 @@ public class GameService {
 
         session.manager.endTurn();
 
-        while (!session.env.isGameOver()) {
-            Player nextPlayer = session.env.getCurrentPlayer();
-            int nextPlayerIndex = (nextPlayer == session.env.getPlayer1()) ? 1 : 2;
-            double budgetBefore = nextPlayer.getBudget();
-            session.manager.startTurn(nextPlayer, nextPlayerIndex);
-            double interest = nextPlayer.getBudget() - budgetBefore;
-            if (interest > 0.5) {
-                log.add("P" + nextPlayerIndex + " earned +" + Math.round(interest)
-                        + " interest (total: " + Math.round(nextPlayer.getBudget()) + ")");
-            }
-            if (!session.manager.isBot(nextPlayerIndex)) break;
-            session.manager.endTurn();
+        // Apply economy for the next player if they are human (DUEL: both players human)
+        Player nextPlayer = session.env.getCurrentPlayer();
+        int nextIndex = (nextPlayer == session.env.getPlayer1()) ? 1 : 2;
+        if (!session.manager.isBot(nextIndex)) {
+            log.addAll(session.manager.startTurn(nextPlayer, nextIndex));
         }
 
         GameStateDTO dto = toStateDTO(session);
         dto.setActionLog(log);
+        return dto;
+    }
+
+    public GameStateDTO botStep(String gameId) {
+        GameSession session = getSession(gameId);
+        if (session.env.isGameOver()) {
+            return toStateDTO(session);
+        }
+
+        Player current = session.env.getCurrentPlayer();
+        int currentIndex = current == session.env.getPlayer1() ? 1 : 2;
+
+        if (!session.manager.isBot(currentIndex)) {
+            throw new RuntimeException("Current player is not a bot");
+        }
+
+        List<String> botActions = new ArrayList<>(session.manager.startTurn(current, currentIndex));
+        session.manager.endTurn();
+
+        // Apply economy for the next player if they are human (fixes SOLITAIRE mid-game economy)
+        Player nextPlayer = session.env.getCurrentPlayer();
+        int nextIndex = (nextPlayer == session.env.getPlayer1()) ? 1 : 2;
+        if (!session.manager.isBot(nextIndex)) {
+            botActions.addAll(session.manager.startTurn(nextPlayer, nextIndex));
+        }
+
+        GameStateDTO dto = toStateDTO(session);
+        dto.setActionLog(botActions);
         return dto;
     }
 

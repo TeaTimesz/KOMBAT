@@ -5,6 +5,7 @@ function EndGame() {
     const location = useLocation();
     const navigate = useNavigate();
     const winner = location.state?.winner ?? null; // 0 = draw, 1 = player1, 2 = player2
+    const mode   = location.state?.mode   ?? 'DUEL';
 
     const bgImage =
         winner === 1 ? '/images/player1win.png' :
@@ -20,7 +21,7 @@ function EndGame() {
                 <button className="endgame-btn" onClick={() => { localStorage.removeItem('kombat_presets'); navigate('/'); }}>
                     GO TO MENU
                 </button>
-                <button className="endgame-btn" onClick={() => navigate('/select-amount')}>
+                <button className="endgame-btn" onClick={() => navigate('/select-amount', { state: { mode } })}>
                     PLAY AGAIN
                 </button>
             </div>

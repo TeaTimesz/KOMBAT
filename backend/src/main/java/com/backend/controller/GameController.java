@@ -33,7 +33,7 @@ public class GameController {
 
     @PostMapping("/create")
     public Map<String, Object> createGame(@RequestBody GameCreateRequest request) {
-        return gameService.createGame(request.getMode());
+        return gameService.createGame(request.getMode(), request.getKinds());
     }
 
     @PostMapping("/{gameId}/join")
@@ -87,6 +87,13 @@ public class GameController {
     public GameStateDTO endTurn(@PathVariable String gameId,
                                 @RequestBody ActionRequest request) {
         GameStateDTO state = gameService.endTurn(gameId, request.getPlayerToken());
+        broadcast(gameId, state);
+        return state;
+    }
+
+    @PostMapping("/{gameId}/action/bot-move")
+    public GameStateDTO botMove(@PathVariable String gameId) {
+        GameStateDTO state = gameService.botStep(gameId);
         broadcast(gameId, state);
         return state;
     }

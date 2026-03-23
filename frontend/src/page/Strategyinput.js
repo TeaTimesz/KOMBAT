@@ -116,6 +116,7 @@ function Strategyinput() {
     const navigate = useNavigate();
 
     const selectedIds = location.state?.selectedIds || [1];
+    const mode = location.state?.mode || 'DUEL';
     const [currentIndex, setCurrentIndex]   = useState(0);
     const [minionDataMap, setMinionDataMap] = useState({});
     const [charName, setCharName]           = useState('');
@@ -498,7 +499,7 @@ function Strategyinput() {
                                 </div>
                             ))}
                         </div>
-                        <button className="final-start-btn" onClick={() => navigate('/hexgrid', { state: { minions: selectedIds.map((_, i) => minionDataMap[i]).filter(Boolean) } })}>
+                        <button className="final-start-btn" onClick={() => navigate('/hexgrid', { state: { minions: selectedIds.map((_, i) => minionDataMap[i]).filter(Boolean), mode } })}>
                             <img src="/images/startgame.png" alt="Start Duel" />
                         </button>
                     </div>
