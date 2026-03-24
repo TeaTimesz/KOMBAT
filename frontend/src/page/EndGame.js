@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
+import { loadLobbyInfo } from '../api/gameWsApi';
 import '../css/endgame.css';
 
 function EndGame() {
@@ -21,7 +22,14 @@ function EndGame() {
                 <button className="endgame-btn" onClick={() => { localStorage.removeItem('kombat_presets'); navigate('/'); }}>
                     GO TO MENU
                 </button>
-                <button className="endgame-btn" onClick={() => navigate('/select-amount', { state: { mode } })}>
+                <button className="endgame-btn" onClick={() => {
+                    const lobby = loadLobbyInfo();
+                    if (mode === 'DUEL' && lobby?.lobbyId) {
+                        navigate('/status-room', { state: { lobbyId: lobby.lobbyId, role: lobby.role } });
+                    } else {
+                        navigate('/select-amount', { state: { mode } });
+                    }
+                }}>
                     PLAY AGAIN
                 </button>
             </div>

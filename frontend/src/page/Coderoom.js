@@ -1,54 +1,68 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createLobby, saveLobbyInfo } from '../api/gameWsApi';
 import '../css/code-room.css';
 
 function Coderoom() {
     const navigate = useNavigate();
-    const [roomCode, setRoomCode] = useState("");
+
+    const [roomCode, setRoomCode] = useState('');
+    const [status,   setStatus]   = useState('Creating room…');
+    const [error,    setError]    = useState('');
 
     useEffect(() => {
-        const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        let result = '';
-        for (let i = 0; i < 6; i++) {
-            result += characters.charAt(Math.floor(Math.random() * characters.length));
-        }
-        setRoomCode(result);
-    }, []);
+        let cancelled = false;
+        createLobby()
+            .then((lobbyId) => {
+                if (cancelled) return;
+                saveLobbyInfo({ lobbyId, role: 'host' });
+                setRoomCode(lobbyId);
+                setStatus('Share this code with Player 2.');
+            })
+            .catch((e) => {
+                if (!cancelled) setError('Failed to create room: ' + e.message);
+            });
+        return () => { cancelled = true; };
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const copyToClipboard = () => {
         navigator.clipboard.writeText(roomCode);
-        alert("Copied to clipboard: " + roomCode);
+        alert('Copied: ' + roomCode);
+    };
+
+    const goToStatusRoom = () => {
+        navigate('/status-room', { state: { lobbyId: roomCode, role: 'host' } });
     };
 
     return (
         <div className="create-screen" style={{ backgroundImage: "url('/images/lobby.png')" }}>
-            
-            {/* กรอบสีขาวโปร่งแสงกลางหน้าจอ */}
             <div className="white-glass-panel">
-                
-                {/* ป้าย CREATE ROOM ด้านบนสุด (ลอยทับขอบกรอบขาว) */}
                 <div className="header-container">
                     <img src="/images/createroom.png" alt="Create Room" className="top-banner" />
                 </div>
 
-                {/* ตัวหนังสือ Room code */}
                 <h2 className="room-text-label">Room code</h2>
 
-                {/* แถบโชว์รหัส พร้อมปุ่ม COPY */}
                 <div className="code-row-wrapper" style={{ backgroundImage: "url('/images/code_bg.png')" }}>
-                    <span className="code-text">{roomCode}</span>
-                    <button className="copy-action-btn" onClick={copyToClipboard}>
-                        <img src="/images/coppy.png" alt="Copy" />
-                    </button>
+                    <span className="code-text">{roomCode || '…'}</span>
+                    {roomCode && (
+                        <button className="copy-action-btn" onClick={copyToClipboard}>
+                            <img src="/images/coppy.png" alt="Copy" />
+                        </button>
+                    )}
                 </div>
 
-                {/* ปุ่ม JOIN ROOM ด้านล่างสุด (ลอยทับขอบกรอบขาว) */}
-                <button className="join-action-btn" onClick={() => navigate('/join-room', { state: { roomCode: roomCode } })}>
-                    <img src="/images/joinroom2.png" alt="Join Room" />
-                </button>
+                {error
+                    ? <p style={{ color: 'red', marginTop: 12 }}>{error}</p>
+                    : <p style={{ marginTop: 12, color: '#555' }}>{status}</p>
+                }
 
+                {roomCode && (
+                    <button className="join-action-btn" onClick={goToStatusRoom}>
+                        <img src="/images/joinroom2.png" alt="Join Room" />
+                    </button>
+                )}
             </div>
-            
         </div>
     );
 }
