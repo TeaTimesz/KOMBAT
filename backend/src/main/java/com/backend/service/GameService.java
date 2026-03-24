@@ -53,6 +53,8 @@ public class GameService {
         String gameId = UUID.randomUUID().toString().substring(0, 8);
         String p1Token = UUID.randomUUID().toString();
 
+        if (modeStr == null || modeStr.isBlank())
+            throw new RuntimeException("Game mode is required (DUEL, SOLITAIRE, or AUTO)");
         GameMode mode = GameMode.valueOf(modeStr.toUpperCase());
         GameEnvironment env = new GameEnvironment();
         TurnManager manager = new TurnManager(env, mode);

@@ -194,7 +194,8 @@ public class TurnManager {
         if (player.getBudget() < config.hex_purchase_cost) {
             return false;
         }
-        if (hex == null || !hex.isEmpty() || hex.getTerritory() != null) {
+        // A hex can be bought even if a minion is standing on it — only territory matters
+        if (hex == null || hex.getTerritory() != null) {
             return false;
         }
         if (!isAdjacentToTerritory(hex, player)) {

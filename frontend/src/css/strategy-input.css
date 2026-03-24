@@ -103,17 +103,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
-<<<<<<< HEAD
-    margin-bottom: 10px;
-    margin-top: -20px;  /* ติดลบเพื่อดึงขึ้น */
-    position: relative;
-    top: 0;
-=======
     margin-bottom: 20px;
     margin-top: 30px;
     position: relative;  /* เพิ่ม */
     top: 10px;           /* ปรับตัวเลขนี้ ยิ่งมากยิ่งลง */
->>>>>>> 33cc90b
 }
 
 .char-img {
@@ -164,9 +157,6 @@
     flex: 1;
 }
 
-<<<<<<< HEAD
-/* ป้าย "Strategy Detail" */
-=======
 .defense-factor-box {
     
     position: absolute;
@@ -179,7 +169,6 @@
 
 /* ป้าย "Strategy Detail" — absolute ขยับอิสระ ไม่กระทบ editor
    ปรับ top เพื่อขยับขึ้น/ลง */
->>>>>>> 33cc90b
 .detail-header-img {
     position: absolute;
     top: -55px;
@@ -192,8 +181,6 @@
     height: 530px;
 }
 
-<<<<<<< HEAD
-=======
 .defense-factor-box {
     display: flex;
     flex-direction: column;
@@ -209,22 +196,15 @@
     mix-blend-mode: multiply;
 }
 
->>>>>>> 33cc90b
 /* ========================================
    MONACO CODE EDITOR
    ======================================== */
 
 .monaco-wrapper {
-<<<<<<< HEAD
-    width: 100%;
-    margin-top: 60px;
-    margin-left: -200px;
-=======
     width: 90%;
     height: 550px;
     margin-top: 30px;
     margin-left: -450px;
->>>>>>> 33cc90b
     border-radius: 4px;
     overflow: hidden;
     background: transparent;
@@ -273,10 +253,6 @@
 }
 
 /* --- ปุ่ม Record และ Back --- */
-<<<<<<< HEAD
-
-=======
->>>>>>> 33cc90b
 .back-btn-global {
     position: fixed;
     bottom: 30px;
@@ -319,19 +295,6 @@
     filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.35));
     display: block;
 }
-<<<<<<< HEAD
-
-.back-btn-global:hover,
-.record-btn-container:hover {
-    transform: scale(1.1);
-}
-
-.back-btn-global:active,
-.record-btn-container:active {
-    transform: scale(0.95);
-}
-=======
->>>>>>> 33cc90b
 
 .back-btn-global:hover,
 .record-btn-container:hover {
@@ -400,14 +363,6 @@
     border-radius: 12px;
     margin-bottom: 20px;
     display: flex;
-<<<<<<< HEAD
-    padding: 25px;
-    border: 2px solid #634732;
-    gap: 30px;
-}
-
-.summary-left {
-=======
     padding: 15px;
     border: 2px solid #4a3728;
 }
@@ -427,12 +382,10 @@
 }
 
 .sk-left {
->>>>>>> 3d966e2cf38560b111c48fa59df0646a86a4b790
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-<<<<<<< HEAD
     width: 160px;
     flex-shrink: 0;
     gap: 15px; /* เว้นระยะระหว่างกรอบรูปกับป้าย */
@@ -545,8 +498,6 @@
 
 .final-start-btn:hover {
     transform: scale(1.1);
-}
-=======
     flex-shrink: 0;
     width: 220px;
 }
@@ -666,8 +617,6 @@
     max-height: 80px;
     overflow-y: auto;
 }
-<<<<<<< HEAD
-=======
 /* ── Game Layout: main board + preset panel ──────────────────────────────── */
 .game-layout {
     display: flex;
@@ -882,7 +831,6 @@
     margin-bottom: 4px;
 }
 
->>>>>>> 33cc90b
 .check-record-row {
     display: flex;
     flex-direction: column;
@@ -955,4 +903,3 @@
     width: 100%;
     display: block;
 }
->>>>>>> 33cc90b

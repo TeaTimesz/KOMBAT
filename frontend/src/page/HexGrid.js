@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import * as api from '../api/gameApi';
+import { useLocation, useNavigate } from 'react-router-dom';
+import * as api from '../api/gameWsApi';
 import '../css/hexgrid.css';
 
 const ROWS = 8, COLS = 8, R = 40;
@@ -15,13 +15,13 @@ const DEFAULT_KINDS = [
 const STORAGE_KEY = 'kombat_session';
 
 function saveSession(data) {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (_) {}
+    try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (_) {}
 }
 function loadSession() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (_) { return null; }
+    try { return JSON.parse(sessionStorage.getItem(STORAGE_KEY)); } catch (_) { return null; }
 }
 function clearSession() {
-    localStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(STORAGE_KEY);
 }
 
 const toBackend = (fCol, fRow) => ({ row: fRow + 1, col: fCol + 1 });
@@ -69,6 +69,10 @@ export default function HexGridPage() {
     const [minionImgMap, setMinionImgMap] = useState({});
     const [turnLog, setTurnLog] = useState([]);
     const logEndRef = useRef(null);
+    const pendingStateRef = useRef(null);
+    // Tracks the last (turnCount, currentPlayer) that was written to the turn log,
+    // so passive WS updates don't repeat the turn header on every intermediate action.
+    const lastLoggedTurnRef = useRef({ player: null, count: null });
 
     const addLog = (text) => setTurnLog(prev => [...prev, text]);
 
@@ -76,6 +80,104 @@ export default function HexGridPage() {
         if (turnLog.length > 0) persist({ turnLog });
         logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [turnLog]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    /** Waits for the next state broadcast from the persistent subscription. */
+    const waitForNextState = (ms = 10000) => new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+            pendingStateRef.current = null;
+            reject(new Error('No response from server (timeout)'));
+        }, ms);
+        pendingStateRef.current = {
+            resolve: (state) => { clearTimeout(timeout); resolve(state); },
+            reject:  (err)   => { clearTimeout(timeout); reject(err); },
+        };
+    });
+
+    // ── Persistent WS subscription — keeps state live for two-device DUEL ────
+    useEffect(() => {
+        if (!gameId) return;
+        let unsubscribe;
+        api.subscribeToGame(
+            gameId,
+            (state) => {
+                if (pendingStateRef.current) {
+                    // Active path: this device performed an action — handler owns state updates
+                    pendingStateRef.current.resolve(state);
+                    pendingStateRef.current = null;
+                } else {
+                    // Passive path: other device took an action — sync everything here
+                    setGameState(state);
+                    setLoading(false);
+
+                    // Assign images to minions spawned by the other player
+                    setMinionImgMap(prev => {
+                        const updated = { ...prev };
+                        let changed = false;
+                        state.grid?.forEach(h => {
+                            if (h.hasMinion && h.minionId && !updated[h.minionId]) {
+                                const kind = minionKinds[Math.floor(Math.random() * minionKinds.length)];
+                                if (kind) { updated[h.minionId] = kind.img; changed = true; }
+                            }
+                        });
+                        return changed ? updated : prev;
+                    });
+
+                    if (state.gameOver) {
+                        const result = state.winner === 0 ? 'Tie!' : `P${state.winner} wins!`;
+                        addLog(`── Game over — ${result} ──`);
+                        navigate('/endgame', { state: { winner: state.winner, mode } });
+                        return;
+                    }
+
+                    if (state.phase !== 'PLAYING') return;
+
+                    // Only emit the turn header + action log when the turn actually changes.
+                    // Without this guard every intermediate action (buyHex, spawnMinion)
+                    // would repeat the header because the server broadcasts after each one.
+                    const prev = lastLoggedTurnRef.current;
+                    const turnJustChanged =
+                        state.currentPlayer !== prev.player || state.turnCount !== prev.count;
+
+                    if (turnJustChanged) {
+                        // Strategy results + next-turn budget are in actionLog after endTurn
+                        if (state.actionLog?.length) {
+                            if (prev.player !== null) addLog(`── P${prev.player} strategies ──`);
+                            state.actionLog.forEach(e => addLog(e));
+                        }
+                        addLog(`[T${state.turnCount + 1}] P${state.currentPlayer}'s turn`);
+                        lastLoggedTurnRef.current = { player: state.currentPlayer, count: state.turnCount };
+                        setTurnStep('buy');
+                        setSelectedKindIdx(null);
+                        if (isTwoDevice) {
+                            setMessage(state.currentPlayer === myPlayer
+                                ? `Your turn (Player ${myPlayer}) — buy a hex or click END TURN.`
+                                : `Waiting for Player ${state.currentPlayer}…`);
+                        } else {
+                            setMessage(`Player ${state.currentPlayer}'s turn — buy a hex or click END TURN.`);
+                        }
+                    }
+                }
+            },
+            (err) => {
+                if (pendingStateRef.current) {
+                    pendingStateRef.current.reject(new Error(err.message));
+                    pendingStateRef.current = null;
+                }
+                setMessage('Error: ' + err.message);
+                setLoading(false);
+            }
+        ).then(unsub => { unsubscribe = unsub; }).catch(() => {});
+        return () => unsubscribe?.();
+    }, [gameId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // ── 2-device DUEL: sync setupStep from game state ────────────────────────
+    // When the other device spawns, advance local setupStep to reflect it
+    useEffect(() => {
+        if (gameState?.phase !== 'SETUP') return;
+        const p1Done = gameState.grid?.some(h => h.minionOwner === 1);
+        const p2Done = gameState.grid?.some(h => h.minionOwner === 2);
+        if (p1Done && p2Done) setSetupStep(3);
+    }, [gameState]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // ── Persist helpers ───────────────────────────────────────────────────────
 
@@ -144,7 +246,56 @@ export default function HexGridPage() {
         setLoading(false);
     };
 
+    // ── Lobby join — HexGrid received an already-created game from Coderoom/Joinroom ─
+    const startLobbyGame = async (gId, t1, t2, kinds, selectedMode) => {
+        setLoading(true);
+        setMode(selectedMode);
+        setMinionKinds(kinds ?? DEFAULT_KINDS);
+        setSetupStep(t2 && !t1 ? 2 : 1); // P2-only device starts at step 2
+        setSetupKindIdx(0);
+        setTurnStep('buy');
+        setGameId(gId);
+        setP1Token(t1 ?? null);
+        setP2Token(t2 ?? null);
+        setMinionImgMap({});
+        setTurnLog(['── Lobby game joined ──']);
+        clearSession();
+        try {
+            const state = await api.getState(gId);
+            setGameState(state);
+            saveSession({ gameId: gId, p1Token: t1, p2Token: t2,
+                minionKinds: kinds ?? DEFAULT_KINDS, mode: selectedMode,
+                setupStep: t2 && !t1 ? 2 : 1, setupKindIdx: 0,
+                turnStep: 'buy', minionImgMap: {} });
+            setMessage(t1
+                ? 'You are Player 1. Set up your minion then click START GAME.'
+                : 'You are Player 2. Wait for Player 1 or set up your minion.');
+        } catch (e) {
+            setMessage('Could not load game: ' + e.message);
+        }
+        setLoading(false);
+    };
+
     useEffect(() => {
+        const initialMode = location.state?.mode || (loadSession()?.mode) || 'DUEL';
+
+        // ── Lobby path: game already exists (from Coderoom / Joinroom) ──
+        const lobbyGameId = location.state?.gameId;
+        if (lobbyGameId) {
+            window.history.replaceState({}, '');
+            const rawKinds = location.state?.minionKinds;
+            const kinds = rawKinds?.map(m => ({
+                id:       m.id,
+                img:      m.img ?? `/images/minion${m.id}.png`,
+                name:     m.name,
+                defense:  Number(m.defense ?? m.defenseFactor) || 1,
+                strategy: m.strategy,
+            }));
+            startLobbyGame(lobbyGameId, location.state?.p1Token ?? null,
+                location.state?.p2Token ?? null, kinds, initialMode);
+            return;
+        }
+
         const rawMinions = location.state?.minions ?? location.state?.minionKinds;
         const navKinds = rawMinions?.map(m => ({
             id:      m.id,
@@ -189,6 +340,11 @@ export default function HexGridPage() {
         // ── SETUP ──
         if (gameState.phase === 'SETUP') {
             if (setupStep > 2) return;
+            // 2-device: only allow spawning your own player
+            if (isTwoDevice && !canSpawnInSetup) {
+                setMessage(`Wait — it's Player ${myPlayer === 1 ? 2 : 1}'s turn to set up.`);
+                return;
+            }
             const playerNum = setupStep;
             const token = playerNum === 1 ? p1Token : p2Token;
             const kind  = minionKinds[setupKindIdx];
@@ -204,7 +360,8 @@ export default function HexGridPage() {
 
             setLoading(true);
             try {
-                const state = await api.spawnFree(gameId, token, bRow, bCol, kind.strategy, kind.defense);
+                await api.spawnFree(gameId, token, bRow, bCol, kind.strategy, kind.defense);
+                const state = await waitForNextState();
                 const spawnedHex = state.grid?.find(h => h.row === bRow && h.col === bCol);
                 const newImgMap = spawnedHex?.minionId
                     ? { ...minionImgMap, [spawnedHex.minionId]: kind.img }
@@ -221,7 +378,9 @@ export default function HexGridPage() {
                     setSetupStep(3);
                     persist({ setupStep: 3, minionImgMap: newImgMap });
                     addLog(`[Setup] P2 spawned "${kind.name}" at (${bRow},${bCol})`);
-                    setMessage('Both players ready! Click START GAME.');
+                    setMessage(isTwoDevice && myPlayer === 2
+                        ? 'Both players ready! Waiting for Player 1 to start…'
+                        : 'Both players ready! Click START GAME.');
                 }
             } catch (e) {
                 setMessage('Spawn failed: ' + e.message);
@@ -231,6 +390,8 @@ export default function HexGridPage() {
         }
 
         // ── PLAYING ──
+        if (isTwoDevice && gameState.currentPlayer !== myPlayer) return;
+
         if (turnStep === 'buy') {
             if ((hexData?.territory ?? 0) !== 0) {
                 setMessage('Buy Hex: click an unclaimed hex adjacent to your territory.');
@@ -238,7 +399,8 @@ export default function HexGridPage() {
             }
             setLoading(true);
             try {
-                const state = await api.buyHex(gameId, getCurrentToken(), bRow, bCol);
+                await api.buyHex(gameId, getCurrentToken(), bRow, bCol);
+                const state = await waitForNextState();
                 setGameState(state);
                 setTurnStep('spawn');
                 persist({ turnStep: 'spawn' });
@@ -265,9 +427,8 @@ export default function HexGridPage() {
             const kind = minionKinds[selectedKindIdx];
             setLoading(true);
             try {
-                const state = await api.spawnMinion(
-                    gameId, getCurrentToken(), bRow, bCol, kind.strategy, kind.defense
-                );
+                await api.spawnMinion(gameId, getCurrentToken(), bRow, bCol, kind.strategy, kind.defense);
+                const state = await waitForNextState();
                 const spawnedHex = state.grid?.find(h => h.row === bRow && h.col === bCol);
                 const newImgMap = spawnedHex?.minionId
                     ? { ...minionImgMap, [spawnedHex.minionId]: kind.img }
@@ -290,13 +451,23 @@ export default function HexGridPage() {
         if (loading) return;
         setLoading(true);
         try {
-            const state = await api.startGame(gameId, p1Token);
+            await api.startGame(gameId, p1Token);
+            const state = await waitForNextState();
             setGameState(state);
             setTurnStep('buy');
             persist({ turnStep: 'buy', setupStep: 3 });
             addLog('── Game started ──');
-            addLog("[T1] P1's turn");
-            setMessage("Game started! Player 1 — buy a hex or click END TURN.");
+            if (state.actionLog?.length) state.actionLog.forEach(e => addLog(e));
+            if (mode === 'AUTO') {
+                addLog("[T1] P1's turn (bot)");
+                setMessage("Auto mode: click BOT MOVE to advance bot turn.");
+            } else {
+                addLog(`[T1] P${state.currentPlayer}'s turn`);
+                lastLoggedTurnRef.current = { player: state.currentPlayer, count: state.turnCount };
+                setMessage(isTwoDevice && myPlayer !== state.currentPlayer
+                    ? `Waiting for Player ${state.currentPlayer}…`
+                    : `Game started! Player ${state.currentPlayer} — buy a hex or click END TURN.`);
+            }
         } catch (e) {
             setMessage('Start failed: ' + e.message);
         }
@@ -304,14 +475,64 @@ export default function HexGridPage() {
     };
 
     const handleSkipBuy = () => {
+        if (isTwoDevice && gameState?.currentPlayer !== myPlayer) return;
         setTurnStep('spawn');
         persist({ turnStep: 'spawn' });
         addLog(`[T${gameState.turnCount + 1}] P${gameState.currentPlayer} skipped buying`);
         setMessage(`Player ${gameState?.currentPlayer} — spawn a minion or click END TURN.`);
     };
 
+    const handleBotMove = async () => {
+        if (loading || !gameState || gameState.gameOver) return;
+        const actingPlayer = gameState.currentPlayer;
+        setLoading(true);
+        try {
+            await api.botMove(gameId);
+            const state = await waitForNextState();
+            setGameState(state);
+            setTurnStep('buy');
+            setSelectedKindIdx(null);
+            persist({ turnStep: 'buy' });
+            addLog(`── Bot ${actingPlayer} acting ──`);
+
+            // Assign images to newly spawned bot minions
+            const newImgMap = { ...minionImgMap };
+            if (state.actionLog?.length) {
+                for (const entry of state.actionLog) {
+                    const m = entry.match(/^Bot \d+ spawned (.+) at \((\d+),(\d+)\)/);
+                    if (m) {
+                        const [, kindName, rowStr, colStr] = m;
+                        const row = parseInt(rowStr), col = parseInt(colStr);
+                        const hex = state.grid?.find(h => h.row === row && h.col === col);
+                        if (hex?.minionId) {
+                            const kind = minionKinds.find(k => k.name === kindName) ?? minionKinds[0];
+                            if (kind) newImgMap[hex.minionId] = kind.img;
+                        }
+                    }
+                }
+                state.actionLog.forEach(e => addLog(e));
+            }
+            setMinionImgMap(newImgMap);
+            persist({ minionImgMap: newImgMap });
+
+            if (state.gameOver) {
+                const result = state.winner === 0 ? 'Tie!' : `P${state.winner} wins!`;
+                addLog(`── Game over — ${result} ──`);
+                navigate('/endgame', { state: { winner: state.winner, mode } });
+            } else {
+                addLog(`[T${state.turnCount + 1}] P${state.currentPlayer}'s turn`);
+                lastLoggedTurnRef.current = { player: state.currentPlayer, count: state.turnCount };
+                setMessage(`Bot ${actingPlayer} done. Next: Player ${state.currentPlayer}.`);
+            }
+        } catch (e) {
+            setMessage('Bot move failed: ' + e.message);
+        }
+        setLoading(false);
+    };
+
     const handleEndTurn = async () => {
         if (loading || !gameState || gameState.gameOver) return;
+        if (isTwoDevice && gameState.currentPlayer !== myPlayer) return;
         setLoading(true);
         try {
             const prevPlayer = gameState.currentPlayer;
@@ -319,7 +540,8 @@ export default function HexGridPage() {
             if (turnStep === 'buy')   addLog(`[T${prevTurn}] P${prevPlayer} passed buy & spawn`);
             else if (turnStep === 'spawn') addLog(`[T${prevTurn}] P${prevPlayer} passed spawn`);
             addLog(`── P${prevPlayer} strategies ──`);
-            const state = await api.endTurn(gameId, getCurrentToken());
+            await api.endTurn(gameId, getCurrentToken());
+            const state = await waitForNextState();
             if (state.actionLog?.length) state.actionLog.forEach(e => addLog(e));
             setGameState(state);
             setTurnStep('buy');
@@ -331,7 +553,10 @@ export default function HexGridPage() {
                 setMessage(state.winner === 0 ? "Game Over — It's a tie!" : `Game Over — Player ${state.winner} WINS!`);
             } else {
                 addLog(`[T${state.turnCount + 1}] P${state.currentPlayer}'s turn`);
-                setMessage(`Player ${state.currentPlayer}'s turn — buy a hex or click END TURN.`);
+                lastLoggedTurnRef.current = { player: state.currentPlayer, count: state.turnCount };
+                setMessage(isTwoDevice && state.currentPlayer !== myPlayer
+                    ? `Waiting for Player ${state.currentPlayer}…`
+                    : `Player ${state.currentPlayer}'s turn — buy a hex or click END TURN.`);
             }
         } catch (e) {
             setMessage('End turn failed: ' + e.message);
@@ -368,6 +593,18 @@ export default function HexGridPage() {
     const isP1Turn   = isP1Active;
     const isP2Turn   = isP2Active;
 
+    // 2-device DUEL: each device was given only its own token from the lobby
+    const myPlayer = (p1Token && !p2Token) ? 1 : (!p1Token && p2Token) ? 2 : null;
+    const isTwoDevice = myPlayer !== null;
+    const isMyTurn = !isTwoDevice || gameState?.currentPlayer === myPlayer;
+
+    // Used to determine which device can spawn during setup
+    const p1HasMinion = gameState?.grid?.some(h => h.minionOwner === 1) ?? false;
+    const p2HasMinion = gameState?.grid?.some(h => h.minionOwner === 2) ?? false;
+    const canSpawnInSetup = !isTwoDevice
+        ? setupStep <= 2
+        : myPlayer === 1 ? !p1HasMinion : !p2HasMinion;
+
     const hexElems = [];
     for (let fCol = 0; fCol < COLS; fCol++) {
         for (let fRow = 0; fRow < ROWS; fRow++) {
@@ -384,9 +621,9 @@ export default function HexGridPage() {
 
             const isClickable =
                 !loading && gameState && !gameState.gameOver && (
-                    gameState.phase === 'SETUP' ||
-                    (isPlaying && turnStep === 'buy') ||
-                    (isPlaying && turnStep === 'spawn' && selectedKindIdx !== null)
+                    (gameState.phase === 'SETUP' && canSpawnInSetup) ||
+                    (isPlaying && isMyTurn && turnStep === 'buy') ||
+                    (isPlaying && isMyTurn && turnStep === 'spawn' && selectedKindIdx !== null)
                 );
 
             const minionImg = hexData?.minionId ? minionImgMap[hexData.minionId] : undefined;
@@ -450,13 +687,16 @@ export default function HexGridPage() {
                         <div className="phase-panel">
                             <div className="turn-info">
                                 {setupStep <= 2
-                                    ? `Setup — Player ${setupStep}: pick a kind from the sidebar, then click your territory hex`
+                                    ? `Setup — Player ${isTwoDevice ? myPlayer : setupStep}: pick a kind, then click your territory hex`
                                     : 'Setup complete!'}
                             </div>
-                            {setupStep === 3 && (
+                            {setupStep === 3 && (!isTwoDevice || myPlayer === 1) && (
                                 <button className="end-turn-btn" onClick={handleStartGame} disabled={loading}>
                                     START GAME
                                 </button>
+                            )}
+                            {setupStep === 3 && isTwoDevice && myPlayer === 2 && (
+                                <div className="turn-step-badge">Waiting for Player 1 to start…</div>
                             )}
                         </div>
                     )}
@@ -471,19 +711,33 @@ export default function HexGridPage() {
                                 </span>
                             </div>
                             <div className="action-buttons">
-                                {turnStep === 'buy' && (
-                                    <button className="action-btn" onClick={handleSkipBuy} disabled={loading}>
-                                        Skip Buy
-                                    </button>
+                                {isTwoDevice && !isMyTurn ? (
+                                    <div className="turn-step-badge">
+                                        Waiting for Player {gameState.currentPlayer}…
+                                    </div>
+                                ) : (
+                                    <>
+                                        {turnStep === 'buy' && (mode === 'DUEL' || (mode === 'SOLITAIRE' && isP1Active)) && (
+                                            <button className="action-btn" onClick={handleSkipBuy} disabled={loading}>
+                                                Skip Buy
+                                            </button>
+                                        )}
+                                        {turnStep === 'spawn' && mode !== 'AUTO' && selectedKindIdx !== null && (
+                                            <button className="action-btn" onClick={() => setSelectedKindIdx(null)} disabled={loading}>
+                                                Cancel
+                                            </button>
+                                        )}
+                                        {((mode === 'SOLITAIRE' && !isP1Active) || mode === 'AUTO') ? (
+                                            <button className="action-btn" onClick={handleBotMove} disabled={loading}>
+                                                BOT MOVE
+                                            </button>
+                                        ) : (
+                                            <button className="end-turn-btn" onClick={handleEndTurn} disabled={loading}>
+                                                END TURN
+                                            </button>
+                                        )}
+                                    </>
                                 )}
-                                {turnStep === 'spawn' && selectedKindIdx !== null && (
-                                    <button className="action-btn" onClick={() => setSelectedKindIdx(null)} disabled={loading}>
-                                        Cancel
-                                    </button>
-                                )}
-                                <button className="end-turn-btn" onClick={handleEndTurn} disabled={loading}>
-                                    END TURN
-                                </button>
                             </div>
                         </div>
                     )}

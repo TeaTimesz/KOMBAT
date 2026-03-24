@@ -1,7 +1,16 @@
+<<<<<<< HEAD
+import React, { useState, useEffect, useRef } from 'react';
+=======
 import React, { useState } from 'react';
+>>>>>>> main
 import { useLocation, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { parseStrategy } from '../api/gameApi';
+import {
+    lobbySetupDone,
+    subscribeToLobbyStatus,
+    loadLobbyInfo,
+} from '../api/gameWsApi';
 import '../css/strategy-input.css';
 
 // ── Preset Strategies ─────────────────────────────────────────────────────────
@@ -128,6 +137,20 @@ function Strategyinput() {
     const [checkResult, setCheckResult]         = useState(null); // null | 'ok' | 'error'
     const [checkError, setCheckError]           = useState('');
     const [checkLoading, setCheckLoading]       = useState(false);
+<<<<<<< HEAD
+    const [savedPresets, setSavedPresets]       = useState(
+        () => { try { return JSON.parse(localStorage.getItem('kombat_presets')) || []; } catch { return []; } }
+    );
+    const [expandedPresetIdx, setExpandedPresetIdx] = useState(null);
+    const [lobbySubmitting, setLobbySubmitting] = useState(false);
+    const [lobbyError, setLobbyError]           = useState('');
+    const lobbyUnsubRef = useRef(null);
+
+    useEffect(() => {
+        localStorage.setItem('kombat_presets', JSON.stringify(savedPresets));
+    }, [savedPresets]);
+=======
+>>>>>>> main
 
     const currentMinionId = selectedIds[currentIndex];
 
@@ -453,9 +476,67 @@ function Strategyinput() {
                                 </div>
                             ))}
                         </div>
+<<<<<<< HEAD
+                        {(() => {
+                            const lobbyInfo = loadLobbyInfo();
+                            const isLobbyHost = mode === 'DUEL' && lobbyInfo?.role === 'host';
+
+                            if (isLobbyHost) {
+                                const handleLobbySubmit = async () => {
+                                    const kinds = selectedIds.map((_, i) => minionDataMap[i]).filter(Boolean).map(m => ({
+                                        id: m.id, name: m.name,
+                                        defense: Number(m.defenseFactor) || 1,
+                                        strategy: m.strategy,
+                                    }));
+                                    setLobbySubmitting(true);
+                                    setLobbyError('');
+                                    try {
+                                        const unsub = await subscribeToLobbyStatus(lobbyInfo.lobbyId, (msg) => {
+                                            if (msg.event === 'GAME_READY') {
+                                                unsub();
+                                                navigate('/hexgrid', {
+                                                    // Host is always P1 — pass only p1Token so HexGrid treats this as a 2-device game
+                                                    state: { gameId: msg.gameId, p1Token: msg.p1Token, p2Token: null, minionKinds: msg.kinds, mode: 'DUEL' },
+                                                });
+                                            }
+                                            if (msg.event === 'ERROR') {
+                                                setLobbyError(msg.message || 'Failed to start game.');
+                                                setLobbySubmitting(false);
+                                            }
+                                        });
+                                        lobbyUnsubRef.current = unsub;
+                                        await lobbySetupDone(lobbyInfo.lobbyId, kinds);
+                                    } catch (e) {
+                                        setLobbyError(e.message || 'Could not send setup.');
+                                        setLobbySubmitting(false);
+                                    }
+                                };
+
+                                return lobbySubmitting ? (
+                                    <div style={{ color: '#fff', textAlign: 'center', marginTop: 16, fontSize: 18 }}>
+                                        Starting game… {lobbyError && <span style={{ color: 'red' }}>{lobbyError}</span>}
+                                    </div>
+                                ) : (
+                                    <>
+                                        <button className="final-start-btn" onClick={handleLobbySubmit}>
+                                            <img src="/images/startgame.png" alt="Submit & Start" />
+                                        </button>
+                                        {lobbyError && <div style={{ color: 'red', textAlign: 'center', marginTop: 8 }}>{lobbyError}</div>}
+                                    </>
+                                );
+                            }
+
+                            return (
+                                <button className="final-start-btn" onClick={() => navigate('/hexgrid', { state: { minions: selectedIds.map((_, i) => minionDataMap[i]).filter(Boolean), mode } })}>
+                                    <img src="/images/startgame.png" alt="Start Game" />
+                                </button>
+                            );
+                        })()}
+=======
                         <button className="final-start-btn" onClick={() => navigate('/hexgrid', { state: { minions: selectedIds.map((_, i) => minionDataMap[i]).filter(Boolean) } })}>
                             <img src="/images/startgame.png" alt="Start Duel" />
                         </button>
+>>>>>>> main
                     </div>
                 </div>
             )}
