@@ -140,8 +140,13 @@ function Statusroom() {
         return () => clearInterval(interval);
     }, [lobbyId, role]); // eslint-disable-line react-hooks/exhaustive-deps
 
+    // ── Derived ready state ───────────────────────────────────────────────────
+    const isReadyP1 = status.hostReady;
+    const isReadyP2 = status.guestReady;
+
     // ── Actions ───────────────────────────────────────────────────────────────
     const handleReady = () => setReady(lobbyId, role);
+    const handleReadyClick = () => handleReady();
 
     const handleStart = () => {
         lobbyStartSetup(lobbyId, role);
@@ -151,62 +156,77 @@ function Statusroom() {
     // ── Render ────────────────────────────────────────────────────────────────
     return (
         <div className="status-screen" style={{ backgroundImage: "url('/images/lobby.png')" }}>
+            {error && (
+                <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)',
+                              background: 'rgba(180,0,0,0.85)', color: '#fff', padding: '10px 24px',
+                              borderRadius: 8, zIndex: 100, fontSize: 16 }}>
+                    {error}
+                </div>
+            )}
 
             {/* Room code banner */}
             <div className="room-code-banner" style={{ backgroundImage: "url('/images/RoomCode.png')" }}>
-                {/* 1. ลบ {roomCode} ออกจากตรงนี้ */}
-                <span className="banner-text"> </span> 
+                <span className="banner-text">{lobbyId}</span>
             </div>
 
-            <div className="status-panel" style={{ backgroundImage: "url('/images/2room.png')" }}>
-                {/* Player 1 Section */}
-                <div className="player-section p1">
-                    {/* 2. ลบบรรทัด enter-label ออก */}
-                    <div className="name-tag" style={{ backgroundImage: "url('/images/player1.png')" }}></div>
-                    <button 
-                        className={`ready-btn ${isReadyP1 ? 'is-ready' : ''}`}
-                        onClick={() => handleReadyClick('P1')}
-                        style={{ backgroundImage: `url(${isReadyP1 ? '/images/ready.png' : '/images/notready.png'})` }}
-                    >
-                    </button>
+            {phase === 'SETUP' ? (
+                /* Guest waiting screen while host creates minion kinds */
+                <div style={{ textAlign: 'center', color: '#fff', fontSize: 20, marginTop: 40 }}>
+                    <div style={{ fontSize: 28, marginBottom: 16 }}>⚔️</div>
+                    Waiting for host to create minion kinds…
                 </div>
+            ) : (
+                <>
+                    <div className="status-panel" style={{ backgroundImage: "url('/images/2room.png')" }}>
+                        {/* Player 1 Section */}
+                        <div className="player-section p1">
+                            <div className="name-tag" style={{ backgroundImage: "url('/images/player1.png')" }}></div>
+                            <button
+                                className={`ready-btn ${isReadyP1 ? 'is-ready' : ''}`}
+                                onClick={isHost ? handleReadyClick : undefined}
+                                disabled={!isHost}
+                                style={{ backgroundImage: `url(${isReadyP1 ? '/images/ready.png' : '/images/notready.png'})`, cursor: isHost ? 'pointer' : 'default' }}
+                            >
+                            </button>
+                        </div>
 
-                {/* Player 2 Section */}
-                <div className="player-section p2">
-                    {/* 3. ลบบรรทัด enter-label ออก */}
-                    <div className="name-tag" style={{ backgroundImage: "url('/images/player2.png')" }}></div>
-                    <button 
-                        className={`ready-btn ${isReadyP2 ? 'is-ready' : ''}`}
-                        onClick={() => handleReadyClick('P2')}
-                        style={{ backgroundImage: `url(${isReadyP2 ? '/images/ready.png' : '/images/notready.png'})` }}
-                    >
-                    </button>
-                </div>
-            </div>
+                        {/* Player 2 Section */}
+                        <div className="player-section p2">
+                            <div className="name-tag" style={{ backgroundImage: "url('/images/player2.png')" }}></div>
+                            <button
+                                className={`ready-btn ${isReadyP2 ? 'is-ready' : ''}`}
+                                onClick={!isHost ? handleReadyClick : undefined}
+                                disabled={isHost}
+                                style={{ backgroundImage: `url(${isReadyP2 ? '/images/ready.png' : '/images/notready.png'})`, cursor: !isHost ? 'pointer' : 'default' }}
+                            >
+                            </button>
+                        </div>
+                    </div>
 
-            {/* ส่วนปุ่ม Start คงเดิม */}
-            {isReadyP1 && isReadyP2 && (
-                <div className="start-container">
-                    <button className="btn-start" onClick={handleStart}>
-                        <img src="/images/start.png" alt="START" />
-                    </button>
-                </div>
-            )}
+                    {/* Start button — host only, both ready */}
+                    {isHost && isReadyP1 && isReadyP2 && (
+                        <div className="start-container">
+                            <button className="btn-start" onClick={handleStart}>
+                                <img src="/images/start.png" alt="START" />
+                            </button>
+                        </div>
+                    )}
 
-            {/* Guest: waiting message when both ready */}
-            {!isHost && status.bothReady && phase === 'READY' && (
-                <div style={{ color: '#fff', textAlign: 'center', marginTop: 16, fontSize: 18 }}>
-                    Both ready! Waiting for host to start…
-                </div>
-            )}
+                    {/* Guest: waiting messages */}
+                    {!isHost && status.bothReady && phase === 'READY' && (
+                        <div style={{ color: '#fff', textAlign: 'center', marginTop: 16, fontSize: 18 }}>
+                            Both ready! Waiting for host to start…
+                        </div>
+                    )}
 
-            {/* New Game button (shown after a finished game returns here) */}
-            {phase === 'LOBBY' && (
-                <div style={{ textAlign: 'center', marginTop: 24, color: '#fff', fontSize: 18 }}>
-                    {isHost
-                        ? `Waiting for Player 2 to join with code: ${lobbyId}`
-                        : 'Connected. Click Ready when you are prepared.'}
-                </div>
+                    {phase === 'LOBBY' && (
+                        <div style={{ textAlign: 'center', marginTop: 24, color: '#fff', fontSize: 18 }}>
+                            {isHost
+                                ? `Waiting for Player 2 to join with code: ${lobbyId}`
+                                : 'Connected. Click Ready when you are prepared.'}
+                        </div>
+                    )}
+                </>
             )}
         </div>
     );

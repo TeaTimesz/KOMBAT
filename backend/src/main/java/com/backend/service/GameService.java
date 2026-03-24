@@ -49,6 +49,10 @@ public class GameService {
         }
     }
 
+    public Map<String, Object> createGame(String modeStr, List<Map<String, Object>> kinds) {
+        return createGame(modeStr);
+    }
+
     public Map<String, Object> createGame(String modeStr) {
         String gameId = UUID.randomUUID().toString().substring(0, 8);
         String p1Token = UUID.randomUUID().toString();
@@ -184,6 +188,75 @@ public class GameService {
             }
         }
         if (actions == 0) log.add("  Minions took no action (done)");
+
+        session.manager.endTurn();
+
+        while (!session.env.isGameOver()) {
+            Player nextPlayer = session.env.getCurrentPlayer();
+            int nextPlayerIndex = (nextPlayer == session.env.getPlayer1()) ? 1 : 2;
+            double budgetBefore = nextPlayer.getBudget();
+            session.manager.startTurn(nextPlayer, nextPlayerIndex);
+            double interest = nextPlayer.getBudget() - budgetBefore;
+            if (interest > 0.5) {
+                log.add("P" + nextPlayerIndex + " earned +" + Math.round(interest)
+                        + " interest (total: " + Math.round(nextPlayer.getBudget()) + ")");
+            }
+            if (!session.manager.isBot(nextPlayerIndex)) break;
+            session.manager.endTurn();
+        }
+
+        GameStateDTO dto = toStateDTO(session);
+        dto.setActionLog(log);
+        return dto;
+    }
+
+    public GameStateDTO botStep(String gameId) {
+        GameSession session = getSession(gameId);
+        Player currentPlayer = session.env.getCurrentPlayer();
+        int currentPlayerIndex = (currentPlayer == session.env.getPlayer1()) ? 1 : 2;
+        Player opponent = (currentPlayer == session.env.getPlayer1())
+                ? session.env.getPlayer2() : session.env.getPlayer1();
+
+        List<String> log = new ArrayList<>();
+
+        java.util.IdentityHashMap<Minion, int[]> locBefore = new java.util.IdentityHashMap<>();
+        for (Minion m : currentPlayer.getMinions()) {
+            if (m.getLocation() != null)
+                locBefore.put(m, new int[]{m.getLocation().getRow(), m.getLocation().getCol()});
+        }
+
+        java.util.IdentityHashMap<Minion, Long> oppHpBefore = new java.util.IdentityHashMap<>();
+        List<Minion> oppMinionsBefore = List.copyOf(opponent.getMinions());
+        for (Minion m : oppMinionsBefore) oppHpBefore.put(m, m.getHp());
+
+        session.manager.executeStrategies(currentPlayer);
+
+        int actions = 0;
+        for (Minion m : List.copyOf(currentPlayer.getMinions())) {
+            int[] prev = locBefore.get(m);
+            if (prev != null && m.getLocation() != null) {
+                int r = m.getLocation().getRow(), c = m.getLocation().getCol();
+                if (prev[0] != r || prev[1] != c) {
+                    log.add("  Minion (" + prev[0] + "," + prev[1] + ") moved → (" + r + "," + c + ")");
+                    actions++;
+                }
+            }
+        }
+        for (Minion m : oppMinionsBefore) {
+            Long hpBefore = oppHpBefore.get(m);
+            if (hpBefore == null) continue;
+            if (!opponent.getMinions().contains(m)) {
+                String pos = m.getLocation() != null
+                        ? m.getLocation().getRow() + "," + m.getLocation().getCol() : "?";
+                log.add("  Minion at (" + pos + ") was eliminated!");
+                actions++;
+            } else if (m.getHp() < hpBefore) {
+                log.add("  Shot enemy (" + m.getLocation().getRow() + "," + m.getLocation().getCol()
+                        + "): " + hpBefore + " → " + m.getHp() + " HP");
+                actions++;
+            }
+        }
+        if (actions == 0) log.add("  Bot P" + currentPlayerIndex + " took no action (done)");
 
         session.manager.endTurn();
 

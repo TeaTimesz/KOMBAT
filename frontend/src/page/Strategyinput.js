@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import React, { useState, useEffect, useRef } from 'react';
-=======
-import React, { useState } from 'react';
->>>>>>> main
 import { useLocation, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { parseStrategy } from '../api/gameApi';
@@ -74,11 +70,8 @@ const PRESET_STRATEGIES = {
 // ── Monaco Code Editor component ──────────────────────────────────────────────
 function StrategyEditor({ onChange, defaultValue }) {
     const handleMount = (editor, monaco) => {
-<<<<<<< HEAD
-=======
         if (defaultValue) editor.setValue(defaultValue);
         // กำหนด theme พื้นหลังใส
->>>>>>> 3d966e2cf38560b111c48fa59df0646a86a4b790
         monaco.editor.defineTheme('fantasy-transparent', {
             base: 'vs-dark',
             inherit: true,
@@ -125,6 +118,7 @@ function Strategyinput() {
     const navigate = useNavigate();
 
     const selectedIds = location.state?.selectedIds || [1];
+    const mode = location.state?.mode || 'SOLITAIRE';
     const [currentIndex, setCurrentIndex]   = useState(0);
     const [minionDataMap, setMinionDataMap] = useState({});
     const [charName, setCharName]           = useState('');
@@ -137,8 +131,7 @@ function Strategyinput() {
     const [checkResult, setCheckResult]         = useState(null); // null | 'ok' | 'error'
     const [checkError, setCheckError]           = useState('');
     const [checkLoading, setCheckLoading]       = useState(false);
-<<<<<<< HEAD
-    const [savedPresets, setSavedPresets]       = useState(
+    const [savedPresets]                        = useState(
         () => { try { return JSON.parse(localStorage.getItem('kombat_presets')) || []; } catch { return []; } }
     );
     const [expandedPresetIdx, setExpandedPresetIdx] = useState(null);
@@ -149,8 +142,6 @@ function Strategyinput() {
     useEffect(() => {
         localStorage.setItem('kombat_presets', JSON.stringify(savedPresets));
     }, [savedPresets]);
-=======
->>>>>>> main
 
     const currentMinionId = selectedIds[currentIndex];
 
@@ -242,6 +233,14 @@ function Strategyinput() {
         if (customStat && customStat.trim() !== '') setSelectedStat(customStat);
     };
 
+    const handlePresetClick = (preset, idx) => {
+        setDefenseInfo(preset.strategy || '');
+        setSelectedStat(preset.statType || null);
+        setExpandedPresetIdx(prev => prev === idx ? null : idx);
+        setEditorKey(k => k + 1);
+        resetCheckState();
+    };
+
     // ── Record / proceed ──────────────────────────────────────────────────────
 
     const handleRecordNext = () => {
@@ -290,31 +289,9 @@ function Strategyinput() {
                         Minion {currentIndex + 1} of {selectedIds.length}
                     </div>
 
-<<<<<<< HEAD
-                    <div className="main-board" style={{ backgroundImage: "url('/images/strategy.png')" }}>
-                        {/* Stat Type */}
-                        <div className="stat-type-header">
-                            <img src="/images/Stattype.png" alt="Stat Type" className="stat-label-img" />
-                            <div className="stat-buttons-row">
-                                <button className={`stat-btn ${selectedStat === 'Attack' ? 'active-stat' : ''}`} onClick={() => handleSelectStat('Attack')}>
-                                    <img src="/images/attack-btn.png" alt="Attack" />
-                                </button>
-                                <button className={`stat-btn ${selectedStat === 'Support' ? 'active-stat' : ''}`} onClick={() => handleSelectStat('Support')}>
-                                    <img src="/images/support-btn.png" alt="Support" />
-                                </button>
-                                <button className="stat-btn btn-plus" onClick={handleCreateCustomStrategy}>
-                                    <img src="/images/plus-btn.png" alt="Add" />
-                                </button>
-                                {selectedStat && !['Attack', 'Support'].includes(selectedStat) && (
-                                    <span className="custom-stat-label">{selectedStat}</span>
-                                )}
-                            </div>
-                        </div>
-=======
                     <div className="game-layout">
                     <div className="main-board" style={{ backgroundImage: "url('/images/Createminion.png')" }}>
                          
->>>>>>> 33cc90b
 
                         {/* Content */}
                         <div className="content-body">
@@ -363,24 +340,7 @@ function Strategyinput() {
                                         defaultValue={defenseInfo}
                                     />
                                 </div>
-<<<<<<< HEAD
-=======
 
-                        <div className="defense-factor-box">
-                            <img src="/images/defasefactor.png" alt="Defense Factor" className="defense-factor-label-img" />
-                            <div className="name-input-group">
-                                <div className="input-box-bg" style={{ backgroundImage: "url('/images/ช่อง.png')" }}>
-                                    <input
-                                        type="number"
-                                        className="strat-input"
-                                        placeholder="Enter factor..."
-                                        value={defenseFactor}
-                                        onChange={e => setDefenseFactor(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                        </div>
->>>>>>> 3d966e2cf38560b111c48fa59df0646a86a4b790
                             </div>
                         </div>
 
@@ -406,9 +366,6 @@ function Strategyinput() {
                         >
                             <img src="/images/Record.png" alt="Record" />
                         </button>
-<<<<<<< HEAD
-                    </div>
-=======
                     
 
                     
@@ -446,7 +403,6 @@ function Strategyinput() {
 
                     </div>{/* end main-board */}
                     </div>{/* end game-layout */}
->>>>>>> 33cc90b
                 </>
             ) : (
                 <div className="summary-container">
@@ -476,7 +432,6 @@ function Strategyinput() {
                                 </div>
                             ))}
                         </div>
-<<<<<<< HEAD
                         {(() => {
                             const lobbyInfo = loadLobbyInfo();
                             const isLobbyHost = mode === 'DUEL' && lobbyInfo?.role === 'host';
@@ -532,11 +487,6 @@ function Strategyinput() {
                                 </button>
                             );
                         })()}
-=======
-                        <button className="final-start-btn" onClick={() => navigate('/hexgrid', { state: { minions: selectedIds.map((_, i) => minionDataMap[i]).filter(Boolean) } })}>
-                            <img src="/images/startgame.png" alt="Start Duel" />
-                        </button>
->>>>>>> main
                     </div>
                 </div>
             )}

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../css/select-amount.css';
 
 function SelectAmount() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const mode = location.state?.mode || 'DUEL';
     const [selectedAmount, setSelectedAmount] = useState(null);
 
     const leafOptions = [
@@ -16,7 +18,7 @@ function SelectAmount() {
 
     const handleConfirm = () => {
     if (selectedAmount) {
-        navigate('/create-minion', { state: { amount: selectedAmount } });
+        navigate('/create-minion', { state: { amount: selectedAmount, mode } });
     } else {
         alert("Please select an amount first!");
     }

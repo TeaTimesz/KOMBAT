@@ -51,7 +51,9 @@ function PlayerPanel({ num, data, isActive }) {
 
 export default function HexGridPage() {
     const location = useLocation();
+    const navigate = useNavigate();
 
+    const [mode, setMode] = useState('DUEL');
     const [minionKinds, setMinionKinds] = useState(DEFAULT_KINDS);
     const [gameId, setGameId]           = useState(null);
     const [p1Token, setP1Token]         = useState(null);
@@ -188,8 +190,9 @@ export default function HexGridPage() {
 
     // ── Init ──────────────────────────────────────────────────────────────────
 
-    const startFreshGame = async (kinds) => {
+    const startFreshGame = async (kinds, modeStr = 'DUEL') => {
         setLoading(true);
+        setMode(modeStr);
         setMinionKinds(kinds);
         setSetupStep(1);
         setSetupKindIdx(0);
@@ -201,7 +204,7 @@ export default function HexGridPage() {
         setMessage('Starting new game…');
         clearSession();
         try {
-            const created = await api.createGame('DUEL');
+            const created = await api.createGame(modeStr);
             const gId = created.gameId;
             const t1  = created.p1Token;
             const joined = await api.joinGame(gId);
@@ -212,7 +215,7 @@ export default function HexGridPage() {
             setP2Token(t2);
             setGameState(joined.state);
             saveSession({ gameId: gId, p1Token: t1, p2Token: t2, minionKinds: kinds,
-                          setupStep: 1, setupKindIdx: 0, turnStep: 'buy', minionImgMap: {} });
+                          mode: modeStr, setupStep: 1, setupKindIdx: 0, turnStep: 'buy', minionImgMap: {} });
             addLog(`Game ID: ${gId}`);
             setMessage('SETUP — Player 1: pick a kind from the sidebar, then click a blue hex to spawn.');
         } catch (e) {
@@ -230,6 +233,7 @@ export default function HexGridPage() {
             setGameId(saved.gameId);
             setP1Token(saved.p1Token);
             setP2Token(saved.p2Token);
+            setMode(saved.mode ?? 'DUEL');
             setMinionKinds(saved.minionKinds ?? DEFAULT_KINDS);
             setSetupStep(saved.setupStep ?? 1);
             setSetupKindIdx(saved.setupKindIdx ?? 0);
@@ -241,7 +245,7 @@ export default function HexGridPage() {
         } catch (e) {
             // Backend was restarted — session is gone, start fresh
             clearSession();
-            await startFreshGame(saved.minionKinds ?? DEFAULT_KINDS);
+            await startFreshGame(saved.minionKinds ?? DEFAULT_KINDS, saved.mode ?? 'DUEL');
         }
         setLoading(false);
     };
@@ -307,13 +311,13 @@ export default function HexGridPage() {
         if (navKinds?.length) {
             // Clear history state immediately so a page refresh won't re-trigger fresh start
             window.history.replaceState({}, '');
-            startFreshGame(navKinds);
+            startFreshGame(navKinds, initialMode);
         } else {
             const saved = loadSession();
             if (saved?.gameId) {
                 restoreGame(saved);
             } else {
-                startFreshGame(DEFAULT_KINDS);
+                startFreshGame(DEFAULT_KINDS, initialMode);
             }
         }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps

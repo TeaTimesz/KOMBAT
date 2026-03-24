@@ -43,10 +43,6 @@
     width: auto;
     max-width: 85vw; 
     height: auto;
-<<<<<<< HEAD
-    /* ลดความสูงสูงสุดลงเล็กน้อยเพื่อไม่ให้ป้ายหัวข้อที่ใหญ่ขึ้นมาเบียด */
-=======
->>>>>>> 33cc90b
     max-height: 55vh; 
     filter: drop-shadow(10px 15px 25px rgba(0,0,0,0.6));
     object-fit: contain;
@@ -73,10 +69,6 @@
     padding: 0;
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     
-<<<<<<< HEAD
-    /* บังคับขนาดกล่องปุ่มให้เท่ากันเป๊ะ */
-=======
->>>>>>> 33cc90b
     width: 180px; 
     height: 65px;
     display: flex;
@@ -85,15 +77,10 @@
 }
 
 .img-btn-footer img {
-<<<<<<< HEAD
     /* บังคับให้รูปภาพยืดเต็มขนาดกล่อง 180x65px */
     width: 100%;
     height: 100%;
     /* ใช้ fill เพื่อแก้ปัญหาไฟล์รูปปุ่มสั้นยาวไม่เท่ากัน */
-=======
-    width: 100%;
-    height: 100%;
->>>>>>> 33cc90b
     object-fit: fill; 
     filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.5));
     display: block;
