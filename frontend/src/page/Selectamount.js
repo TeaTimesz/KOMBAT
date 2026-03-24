@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import '../css/select-amount.css';
 
 function SelectAmount() {
     const navigate = useNavigate();
-    const location = useLocation();
     const [selectedAmount, setSelectedAmount] = useState(null);
 
     const leafOptions = [
@@ -15,15 +14,13 @@ function SelectAmount() {
         { id: 5, img: '/images/5.png' }
     ];
 
-    const mode = location.state?.mode || 'DUEL';
-
     const handleConfirm = () => {
-        if (selectedAmount) {
-            navigate('/create-minion', { state: { amount: selectedAmount, mode } });
-        } else {
-            alert("Please select an amount first!");
-        }
-    };
+    if (selectedAmount) {
+        navigate('/create-minion', { state: { amount: selectedAmount } });
+    } else {
+        alert("Please select an amount first!");
+    }
+};
 
     return (
         <div className="select-amount-screen" style={{ backgroundImage: "url('/images/index.PNG')" }}>

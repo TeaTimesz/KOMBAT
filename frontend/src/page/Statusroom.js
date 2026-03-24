@@ -154,53 +154,38 @@ function Statusroom() {
 
             {/* Room code banner */}
             <div className="room-code-banner" style={{ backgroundImage: "url('/images/RoomCode.png')" }}>
-                <span className="banner-text">{lobbyId}</span>
+                {/* 1. ลบ {roomCode} ออกจากตรงนี้ */}
+                <span className="banner-text"> </span> 
             </div>
 
-            {error && (
-                <div style={{ color: 'red', textAlign: 'center', marginTop: 16, fontWeight: 'bold' }}>
-                    {error}
+            <div className="status-panel" style={{ backgroundImage: "url('/images/2room.png')" }}>
+                {/* Player 1 Section */}
+                <div className="player-section p1">
+                    {/* 2. ลบบรรทัด enter-label ออก */}
+                    <div className="name-tag" style={{ backgroundImage: "url('/images/player1.png')" }}></div>
+                    <button 
+                        className={`ready-btn ${isReadyP1 ? 'is-ready' : ''}`}
+                        onClick={() => handleReadyClick('P1')}
+                        style={{ backgroundImage: `url(${isReadyP1 ? '/images/ready.png' : '/images/notready.png'})` }}
+                    >
+                    </button>
                 </div>
-            )}
 
-            {phase === 'SETUP' && !isHost && (
-                <div style={{ color: '#fff', textAlign: 'center', marginTop: 24, fontSize: 20 }}>
-                    Host is creating minions… Please wait.
+                {/* Player 2 Section */}
+                <div className="player-section p2">
+                    {/* 3. ลบบรรทัด enter-label ออก */}
+                    <div className="name-tag" style={{ backgroundImage: "url('/images/player2.png')" }}></div>
+                    <button 
+                        className={`ready-btn ${isReadyP2 ? 'is-ready' : ''}`}
+                        onClick={() => handleReadyClick('P2')}
+                        style={{ backgroundImage: `url(${isReadyP2 ? '/images/ready.png' : '/images/notready.png'})` }}
+                    >
+                    </button>
                 </div>
-            )}
+            </div>
 
-            {phase !== 'SETUP' && (
-                <div className="status-panel" style={{ backgroundImage: "url('/images/2room.png')" }}>
-                    {/* Host section */}
-                    <div className="player-section p1">
-                        <div className="name-tag" style={{ backgroundImage: "url('/images/player1.png')" }} />
-                        <button
-                            className={`ready-btn ${status.hostReady ? 'is-ready' : ''}`}
-                            style={{ backgroundImage: `url(${status.hostReady ? '/images/ready.png' : '/images/notready.png'})` }}
-                            onClick={isHost ? handleReady : undefined}
-                            disabled={!isHost}
-                        />
-                    </div>
-
-                    {/* Guest section */}
-                    <div className="player-section p2">
-                        <div className="name-tag" style={{ backgroundImage: "url('/images/player2.png')" }} />
-                        {status.hasGuest ? (
-                            <button
-                                className={`ready-btn ${status.guestReady ? 'is-ready' : ''}`}
-                                style={{ backgroundImage: `url(${status.guestReady ? '/images/ready.png' : '/images/notready.png'})` }}
-                                onClick={!isHost ? handleReady : undefined}
-                                disabled={isHost}
-                            />
-                        ) : (
-                            <p style={{ color: '#fff', marginTop: 16 }}>Waiting for Player 2…</p>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {/* Host: START button when both ready */}
-            {isHost && status.bothReady && phase === 'READY' && (
+            {/* ส่วนปุ่ม Start คงเดิม */}
+            {isReadyP1 && isReadyP2 && (
                 <div className="start-container">
                     <button className="btn-start" onClick={handleStart}>
                         <img src="/images/start.png" alt="START" />

@@ -27,14 +27,15 @@ function HowToDuel() {
             </div>
 
             {/* ปุ่ม Back และ Confirm ด้านล่าง */}
-            <div className="navigation-footer">
-                <button className="img-btn-footer" onClick={() => navigate('/select-mode')}>
+                <div className="navigation-footer">
+                {/* เพิ่ม class btn-back ตรงนี้ */}
+                <button className="img-btn-footer btn-back" onClick={() => navigate('/select-mode')}>
                     <img src="/images/Back.png" alt="Back" />
                 </button>
-                <button className="img-btn-footer btn-confirm" onClick={() => navigate('/select-amount', { state: { mode: 'AUTO' } })}>
+                <button className="img-btn-footer btn-confirm" onClick={() => navigate('/select-amount')}>
                     <img src="/images/confirm.png" alt="Confirm" />
                 </button>
-            </div>
+                </div>
         </div>
     );
 }

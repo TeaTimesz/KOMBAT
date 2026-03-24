@@ -28,7 +28,7 @@ function HowtoSolitaire() {
                 <button className="img-btn-footer" onClick={() => navigate('/select-mode')}>
                     <img src="/images/Back.png" alt="Back" />
                 </button>
-                <button className="img-btn-footer btn-confirm" onClick={() => navigate('/select-amount', { state: { mode: 'SOLITAIRE' } })}>
+                <button className="img-btn-footer btn-confirm" onClick={() => navigate('/select-amount')}>
                     <img src="/images/confirm.png" alt="Confirm" />
                 </button>
             </div>

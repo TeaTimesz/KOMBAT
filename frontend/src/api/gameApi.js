@@ -18,11 +18,11 @@ export const parseStrategy = (strategy) =>
     body: JSON.stringify({ strategy }),
   }).then(checkOk);
 
-export const createGame = (mode, kinds) =>
+export const createGame = (mode) =>
   fetch(`${BASE}/game/create`, {
     method: "POST",
     headers: JSON_HEADERS,
-    body: JSON.stringify({ mode, kinds }),
+    body: JSON.stringify({ mode }),
   }).then(checkOk);
 
 export const joinGame = (gameId) =>
@@ -67,10 +67,4 @@ export const endTurn = (gameId, playerToken) =>
     method: "POST",
     headers: JSON_HEADERS,
     body: JSON.stringify({ playerToken }),
-  }).then(checkOk);
-
-export const botMove = (gameId) =>
-  fetch(`${BASE}/game/${gameId}/action/bot-move`, {
-    method: "POST",
-    headers: JSON_HEADERS,
   }).then(checkOk);
