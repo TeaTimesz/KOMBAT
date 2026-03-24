@@ -360,25 +360,8 @@ function Strategyinput() {
                     </div>
 
                     <div className="game-layout">
-                    <div className="main-board" style={{ backgroundImage: "url('/images/strategy.png')" }}>
-                        {/* Stat Type */}
-                        <div className="stat-type-header">
-                            <img src="/images/Stattype.png" alt="Stat Type" className="stat-label-img" />
-                            <div className="stat-buttons-row">
-                                <button className={`stat-btn ${selectedStat === 'Attack' ? 'active-stat' : ''}`} onClick={() => handleSelectStat('Attack')}>
-                                    <img src="/images/attack-btn.png" alt="Attack" />
-                                </button>
-                                <button className={`stat-btn ${selectedStat === 'Support' ? 'active-stat' : ''}`} onClick={() => handleSelectStat('Support')}>
-                                    <img src="/images/support-btn.png" alt="Support" />
-                                </button>
-                                <button className="stat-btn" onClick={handleCreateCustomStrategy}>
-                                    <img src="/images/plus-btn.png" alt="Add" />
-                                </button>
-                                {selectedStat && !['Attack', 'Support'].includes(selectedStat) && (
-                                    <span className="custom-stat-label">{selectedStat}</span>
-                                )}
-                            </div>
-                        </div>
+                    <div className="main-board" style={{ backgroundImage: "url('/images/Createminion.png')" }}>
+                         
 
                         {/* Content */}
                         <div className="content-body">
@@ -388,14 +371,14 @@ function Strategyinput() {
                                     <img src={`/images/minion${currentMinionId}.png`} alt="Character" className="char-img" />
                                 </div>
                                 <div className="name-input-group">
-                                    <img src="/images/Charactername.png" alt="Label" className="label-text-img" />
+                                    <img src="/images/Minionname.png" alt="Label" className="label-text-img" />
                                     <div className="input-box-bg" style={{ backgroundImage: "url('/images/ช่อง.png')" }}>
                                         <input
                                             type="text"
                                             className="strat-input"
                                             value={charName}
                                             onChange={e => setCharName(e.target.value)}
-                                            placeholder="Character Name"
+                                            placeholder="Minion Name"
                                         />
                                     </div>
                                 </div>
@@ -435,7 +418,9 @@ function Strategyinput() {
                                 onClick={handleCheckStrategy}
                                 disabled={checkLoading}
                             >
+                                
                                 {checkLoading ? 'Checking…' : checkResult === 'ok' ? '✓ Passed' : checkResult === 'error' ? '✗ Failed' : 'Check Strategy'}
+                                
                             </button>
                             {checkResult === 'error' && (
                                 <div className="check-error-msg">{checkError}</div>
@@ -449,11 +434,24 @@ function Strategyinput() {
                         >
                             <img src="/images/Record.png" alt="Record" />
                         </button>
-                    </div>
+                    
 
+                    
                     {/* Preset Panel */}
                     <div className="preset-panel">
+                        
                         <div className="preset-panel-title">PRESETS</div>
+                        <div className="preset-stat-type">
+                            <button className={`stat-btn ${selectedStat === 'Attack' ? 'active-stat' : ''}`} onClick={() => handleSelectStat('Attack')}>
+                                <img src="/images/attack-btn.png" alt="Attack" />
+                            </button>
+                            <button className={`stat-btn ${selectedStat === 'Support' ? 'active-stat' : ''}`} onClick={() => handleSelectStat('Support')}>
+                                <img src="/images/support-btn.png" alt="Support" />
+                            </button>
+                            <button className="stat-btn" onClick={handleCreateCustomStrategy}>
+                                <img src="/images/plus-btn.png" alt="Add" />
+                            </button>
+                        </div>
                         <div className="preset-list">
                             {savedPresets.length === 0 ? (
                                 <div className="preset-empty">ยังไม่มี Preset</div>
@@ -471,6 +469,7 @@ function Strategyinput() {
                         </div>
                     </div>
 
+                    </div>{/* end main-board */}
                     </div>{/* end game-layout */}
                 </>
             ) : (

@@ -15,14 +15,14 @@
 
 /* --- บอร์ดไม้หลัก --- */
 .main-board {
-    width: 1150px; 
+    width: 1400px; 
     height: 700px;
     background-size: 100% 100%;
     background-repeat: no-repeat;
     position: relative; 
     display: flex;
     flex-direction: column;
-    padding: 60px 80px;
+    padding: 100px 80px 60px;
     box-sizing: border-box;
 }
 
@@ -66,6 +66,7 @@
     gap: 40px;
     align-items: flex-start;
     height: 900px;
+    margin-top: 80px;
 }
 
 /* ฝั่งซ้าย */
@@ -86,7 +87,7 @@
     margin-bottom: 20px;
     margin-top: 30px;
     position: relative;  /* เพิ่ม */
-    top: 30px;           /* ปรับตัวเลขนี้ ยิ่งมากยิ่งลง */
+    top: 10px;           /* ปรับตัวเลขนี้ ยิ่งมากยิ่งลง */
 }
 
 .char-img {
@@ -141,8 +142,8 @@
 .defense-factor-box {
     
     position: absolute;
-    top: 165px;        /* ปรับขึ้น/ลง */
-    left: 65px;         /* ปรับซ้าย/ขวา */
+    top: 130px;        /* ปรับขึ้น/ลง */
+    left: 80px;         /* ปรับซ้าย/ขวา */
     width: 280px;
     z-index: 5;
     overflow: visible;
@@ -152,14 +153,14 @@
    ปรับ top เพื่อขยับขึ้น/ลง */
 .detail-header-img {
     position: absolute;
-    top: -18px;
-    left: 35%;
+    top: -55px;
+    left: 20%;
     transform: translateX(-50%);
-    width: 600px;
+    width: 700px;
     z-index: 3;
     mix-blend-mode: multiply;
     pointer-events: none;
-    height: 450px;
+    height: 530px;
 }
 
 .defense-factor-box {
@@ -171,7 +172,7 @@
 }
 
 .defense-factor-label-img {
-    width: 200px;
+    width: 300px;
     margin-bottom: -10px;
     z-index: 2;
     mix-blend-mode: multiply;
@@ -183,10 +184,10 @@
 
 /* Monaco wrapper — margin-top เว้นที่ให้ป้าย absolute */
 .monaco-wrapper {
-    width: 100%;
+    width: 90%;
     height: 550px;
-    margin-top: 60px;
-    margin-left: -200px;
+    margin-top: 30px;
+    margin-left: -450px;
     border-radius: 4px;
     overflow: hidden;
     background: transparent;
@@ -253,42 +254,58 @@
 }
 
 /* --- ปุ่ม Record และ Back --- */
-.record-btn-container {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.record-btn-container img {
-    width: 180px;
-    filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
-}
-
-.record-btn-container:hover {
-    transform: scale(1.1);
-}
-
 .back-btn-global {
     position: fixed;
     bottom: 30px;
-    left: 30px;
+    left: 40px; 
     background: transparent !important;
     border: none;
     cursor: pointer;
     z-index: 200;
+    padding: 0;
+    width: 180px; 
+    height: 65px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.back-btn-global img {
-    width: 150px;
-    transition: transform 0.2s;
+.record-btn-container {
+    position: fixed;
+    bottom: 30px;
+    right: 40px; 
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 200;
+    padding: 0;
+    width: 180px; 
+    height: 65px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.back-btn-global:hover img { transform: scale(1.1); }
+.back-btn-global img,
+.record-btn-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: fill; 
+    filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.35));
+    display: block;
+}
 
+.back-btn-global:hover,
+.record-btn-container:hover {
+    transform: scale(1.1);
+}
+
+.back-btn-global:active,
+.record-btn-container:active {
+    transform: scale(0.95);
+}
 /* --- Step Indicator --- */
 .step-indicator {
     position: absolute;
@@ -497,7 +514,9 @@
     align-items: stretch;
     padding: 12px 10px;
     box-shadow: 0 4px 18px rgba(0,0,0,0.45);
-    margin-top: 20px;
+    position: absolute;
+    top: 100px;
+    right: 90px;
 }
 
 .preset-panel-title {
@@ -695,33 +714,32 @@
     align-items: center;
     gap: 6px;
     margin-bottom: 8px;
+    margin-top: 30px;
 }
 
 .check-strategy-btn {
-    padding: 8px 28px;
-    font-size: 1rem;
-    font-weight: bold;
-    border-radius: 8px;
-    border: 2px solid #7a4e10;
-    background: #f5dfa0;
-    color: #3a2200;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
+    padding: 0;
+    font-size: 0;
+    width: 270px;
+    height: 65px;
+    background-image: url('../../public/images/Checkstrategy-btn.png');
+    background-size: 100% 100%;
+    background-color: transparent;
+    border: none;
+    position: relative;
+    mix-blend-mode: normal;
 }
-
-.check-strategy-btn:hover:not(:disabled) {
-    background: #e8c96a;
-}
-
 .check-strategy-btn.check-ok {
-    background: #4caf50;
+    background-image: url('../../public/images/Checkstrategy-btn.png');
     border-color: #2e7d32;
+    opacity: 0.9;
     color: #fff;
 }
 
 .check-strategy-btn.check-fail {
-    background: #e53935;
+    background-image: url('../../public/images/Checkstrategy-btn.png');
     border-color: #b71c1c;
+    opacity: 0.7;
     color: #fff;
 }
 
@@ -740,4 +758,22 @@
     max-width: 340px;
     text-align: center;
     word-break: break-word;
+}
+.preset-stat-type {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 0 8px 12px;
+}
+.preset-stat-type .stat-btn {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: block
+}
+
+.preset-stat-type .stat-btn img {
+    width: 100%;
+    display: block;
 }

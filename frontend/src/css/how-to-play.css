@@ -13,17 +13,21 @@
     overflow: hidden;
 }
 
-/* หัวข้อ How to Play ด้านบน */
+/* --- ปรับส่วนหัวข้อ How to Play ด้านบนให้ใหญ่ขึ้น --- */
 .header-box {
     z-index: 2;
     margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }
 
 .how-to-header-img {
-    width: 400px; 
-    max-width: 80vw;
+    /* ปรับความกว้างจาก 400px เป็น 650px ตามที่ต้องการ */
+    width: 650px; 
+    max-width: 90vw;
     height: auto;
-    filter: drop-shadow(2px 4px 10px rgba(0,0,0,0.5));
+    filter: drop-shadow(4px 6px 12px rgba(0,0,0,0.5));
 }
 
 /* แผ่นป้ายหินตรงกลาง */
@@ -39,20 +43,23 @@
     width: auto;
     max-width: 85vw; 
     height: auto;
-    max-height: 65vh;
+    max-height: 55vh; 
     filter: drop-shadow(10px 15px 25px rgba(0,0,0,0.6));
     object-fit: contain;
 }
 
-/* แถบปุ่ม Back / Confirm ด้านล่าง */
+/* --- แก้ไขส่วนแถบปุ่มด้านล่างให้เท่ากันและขนานกัน --- */
 .navigation-footer {
     position: absolute;
     bottom: 40px;
     width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; 
+    /* จัดให้ปุ่มขนานกันในแนวนอนเป๊ะๆ */
+    align-items: center; 
     padding: 0 60px; 
     box-sizing: border-box;
+    z-index: 10;
 }
 
 .img-btn-footer {
@@ -61,12 +68,20 @@
     cursor: pointer;
     padding: 0;
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    width: 180px; 
+    height: 65px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .img-btn-footer img {
-    width: 180px; 
-    height: auto;
+    width: 100%;
+    height: 100%;
+    object-fit: fill; 
     filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.5));
+    display: block;
 }
 
 .img-btn-footer:hover {
@@ -74,6 +89,5 @@
 }
 
 .img-btn-footer:active {
-    transform: scale(0.9);
+    transform: scale(0.95);
 }
-
