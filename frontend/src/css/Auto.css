@@ -8,7 +8,10 @@
 }
 
 .how-to-header-img {
+<<<<<<< HEAD
     /* ปรับความกว้างเพิ่มขึ้นเป็น 650px (จากเดิมประมาณ 400px) */
+=======
+>>>>>>> 33cc90b
     width: 650px; 
     max-width: 90vw; /* ยืดหยุ่นตามหน้าจอ */
     height: auto;
@@ -26,7 +29,11 @@
 
 .tablet-main-img {
     max-width: 85vw; 
+<<<<<<< HEAD
     max-height: 55vh; /* ปรับลดความสูงลงนิดหน่อยเพื่อไม่ให้ชนกับป้ายหัวข้อที่ใหญ่ขึ้น */
+=======
+    max-height: 55vh; 
+>>>>>>> 33cc90b
     filter: drop-shadow(10px 15px 25px rgba(0,0,0,0.6));
     object-fit: contain;
 }
@@ -38,7 +45,11 @@
     width: 100%;
     display: flex;
     justify-content: space-between; 
+<<<<<<< HEAD
     align-items: center; /* จัดให้ปุ่มขนานกันในแนวนอนเป๊ะๆ */
+=======
+    align-items: center; 
+>>>>>>> 33cc90b
     padding: 0 60px; 
     box-sizing: border-box;
     z-index: 10;
@@ -62,7 +73,11 @@
 .img-btn-footer img {
     width: 100%;
     height: 100%;
+<<<<<<< HEAD
     object-fit: fill; /* บังคับให้ภาพขยายเต็มพื้นที่กล่อง */
+=======
+    object-fit: fill; 
+>>>>>>> 33cc90b
     filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.5));
 }
 

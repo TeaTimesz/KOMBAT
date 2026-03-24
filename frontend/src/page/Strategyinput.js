@@ -267,6 +267,7 @@ function Strategyinput() {
                         Minion {currentIndex + 1} of {selectedIds.length}
                     </div>
 
+<<<<<<< HEAD
                     <div className="main-board" style={{ backgroundImage: "url('/images/strategy.png')" }}>
                         {/* Stat Type */}
                         <div className="stat-type-header">
@@ -286,6 +287,11 @@ function Strategyinput() {
                                 )}
                             </div>
                         </div>
+=======
+                    <div className="game-layout">
+                    <div className="main-board" style={{ backgroundImage: "url('/images/Createminion.png')" }}>
+                         
+>>>>>>> 33cc90b
 
                         {/* Content */}
                         <div className="content-body">
@@ -297,14 +303,14 @@ function Strategyinput() {
 
                                 {/* Character Name */}
                                 <div className="name-input-group">
-                                    <img src="/images/Charactername.png" alt="Label" className="label-text-img" />
+                                    <img src="/images/Minionname.png" alt="Label" className="label-text-img" />
                                     <div className="input-box-bg" style={{ backgroundImage: "url('/images/ช่อง.png')" }}>
                                         <input
                                             type="text"
                                             className="strat-input"
                                             value={charName}
                                             onChange={e => setCharName(e.target.value)}
-                                            placeholder="Character Name"
+                                            placeholder="Minion Name"
                                         />
                                     </div>
                                 </div>
@@ -361,7 +367,9 @@ function Strategyinput() {
                                 onClick={handleCheckStrategy}
                                 disabled={checkLoading}
                             >
+                                
                                 {checkLoading ? 'Checking…' : checkResult === 'ok' ? '✓ Passed' : checkResult === 'error' ? '✗ Failed' : 'Check Strategy'}
+                                
                             </button>
                             {checkResult === 'error' && (
                                 <div className="check-error-msg">{checkError}</div>
@@ -375,7 +383,47 @@ function Strategyinput() {
                         >
                             <img src="/images/Record.png" alt="Record" />
                         </button>
+<<<<<<< HEAD
                     </div>
+=======
+                    
+
+                    
+                    {/* Preset Panel */}
+                    <div className="preset-panel">
+                        
+                        <div className="preset-panel-title">PRESETS</div>
+                        <div className="preset-stat-type">
+                            <button className={`stat-btn ${selectedStat === 'Attack' ? 'active-stat' : ''}`} onClick={() => handleSelectStat('Attack')}>
+                                <img src="/images/attack-btn.png" alt="Attack" />
+                            </button>
+                            <button className={`stat-btn ${selectedStat === 'Support' ? 'active-stat' : ''}`} onClick={() => handleSelectStat('Support')}>
+                                <img src="/images/support-btn.png" alt="Support" />
+                            </button>
+                            <button className="stat-btn" onClick={handleCreateCustomStrategy}>
+                                <img src="/images/plus-btn.png" alt="Add" />
+                            </button>
+                        </div>
+                        <div className="preset-list">
+                            {savedPresets.length === 0 ? (
+                                <div className="preset-empty">ยังไม่มี Preset</div>
+                            ) : (
+                                savedPresets.map((p, i) => (
+                                    <button
+                                        key={i}
+                                        className={`preset-item ${expandedPresetIdx === i ? 'preset-expanded' : ''}`}
+                                        onClick={() => handlePresetClick(p, i)}
+                                    >
+                                        <span className="preset-item-name">{p.name}</span>
+                                    </button>
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    </div>{/* end main-board */}
+                    </div>{/* end game-layout */}
+>>>>>>> 33cc90b
                 </>
             ) : (
                 <div className="summary-container">

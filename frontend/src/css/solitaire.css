@@ -1,15 +1,25 @@
+<<<<<<< HEAD
 /* --- ส่วนหัวข้อ How to Play ด้านบน (ปรับให้ใหญ่ขึ้น) --- */
 .header-box {
     margin-bottom: 25px;
     z-index: 2;
     /* หากมี animation เดิมสามารถใส่ต่อได้ครับ */
+=======
+/* --- ส่วนหัวข้อ How to Play ด้านบน  --- */
+.header-box {
+    margin-bottom: 25px;
+    z-index: 2;
+>>>>>>> 33cc90b
     display: flex;
     justify-content: center;
     width: 100%;
 }
 
 .how-to-header-img {
+<<<<<<< HEAD
     /* ขยายขนาดเป็น 650px ตามไฟล์ก่อนหน้า */
+=======
+>>>>>>> 33cc90b
     width: 650px; 
     max-width: 90vw;
     height: auto;
@@ -25,10 +35,17 @@
 }
 
 .tablet-main-img {
+<<<<<<< HEAD
     /* ปรับขนาดให้สัมพันธ์กับป้ายหัวข้อที่ใหญ่ขึ้น */
     width: 800px; 
     max-width: 100vw;
     max-height: 55vh; /* จำกัดความสูงเพื่อไม่ให้เบียดกับป้ายด้านบนและปุ่มด้านล่าง */
+=======
+    
+    width: 800px; 
+    max-width: 100vw;
+    max-height: 55vh; 
+>>>>>>> 33cc90b
     object-fit: contain;
     filter: drop-shadow(8px 12px 20px rgba(0,0,0,0.6));
 }
@@ -55,21 +72,32 @@
     padding: 0;
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     
+<<<<<<< HEAD
     /* บังคับขนาดกล่องปุ่มให้เท่ากันเป๊ะ */
     width: 200px;  
     height: 75px;  
     
     /* จัดรูปภาพข้างในให้อยู่กึ่งกลางกล่อง */
+=======
+    width: 200px;  
+    height: 75px;  
+    
+>>>>>>> 33cc90b
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .img-btn-footer img {
+<<<<<<< HEAD
     /* บังคับให้รูปภาพยืดเต็มขนาดกล่อง 200x75px ที่เราล็อคไว้ */
     width: 100%;
     height: 100%;
     /* ใช้ fill เพื่อบังคับให้ปุ่มที่สั้นกว่ายืดออกจนเท่ากัน */
+=======
+    width: 100%;
+    height: 100%;
+>>>>>>> 33cc90b
     object-fit: fill; 
     filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.5));
     display: block;
