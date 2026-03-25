@@ -1,0 +1,41 @@
+.endgame-screen {
+    position: fixed;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 60px;
+}
+
+.endgame-buttons {
+    display: flex;
+    gap: 32px;
+}
+
+.endgame-btn {
+    padding: 16px 48px;
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    transition: background 0.2s, transform 0.15s, border-color 0.2s;
+    text-transform: uppercase;
+}
+
+.endgame-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #fff;
+    transform: translateY(-3px);
+}
+
+.endgame-btn:active {
+    transform: translateY(0);
+}

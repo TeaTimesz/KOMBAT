@@ -202,6 +202,7 @@ public class GameService {
                         + " interest (total: " + Math.round(nextPlayer.getBudget()) + ")");
             }
             if (!session.manager.isBot(nextPlayerIndex)) break;
+            session.manager.executeStrategies(nextPlayer);
             session.manager.endTurn();
         }
 
@@ -260,6 +261,7 @@ public class GameService {
 
         session.manager.endTurn();
 
+        boolean processedAdditionalBot = false;
         while (!session.env.isGameOver()) {
             Player nextPlayer = session.env.getCurrentPlayer();
             int nextPlayerIndex = (nextPlayer == session.env.getPlayer1()) ? 1 : 2;
@@ -270,8 +272,54 @@ public class GameService {
                 log.add("P" + nextPlayerIndex + " earned +" + Math.round(interest)
                         + " interest (total: " + Math.round(nextPlayer.getBudget()) + ")");
             }
+            // Human player: their turn is now set up; stop here
             if (!session.manager.isBot(nextPlayerIndex)) break;
+            // Already ran one extra bot; this bot's turn is set up for next botStep() call
+            if (processedAdditionalBot) break;
+
+            // Execute strategies for this additional bot and log actions
+            log.add("── Bot P" + nextPlayerIndex + " acting ──");
+            java.util.IdentityHashMap<Minion, int[]> loc2 = new java.util.IdentityHashMap<>();
+            Player opp2 = (nextPlayer == session.env.getPlayer1())
+                    ? session.env.getPlayer2() : session.env.getPlayer1();
+            for (Minion m : nextPlayer.getMinions())
+                if (m.getLocation() != null)
+                    loc2.put(m, new int[]{m.getLocation().getRow(), m.getLocation().getCol()});
+            java.util.IdentityHashMap<Minion, Long> opp2HpBefore = new java.util.IdentityHashMap<>();
+            List<Minion> opp2Before = List.copyOf(opp2.getMinions());
+            for (Minion m : opp2Before) opp2HpBefore.put(m, m.getHp());
+
+            session.manager.executeStrategies(nextPlayer);
+
+            int acts2 = 0;
+            for (Minion m : List.copyOf(nextPlayer.getMinions())) {
+                int[] prev = loc2.get(m);
+                if (prev != null && m.getLocation() != null) {
+                    int r = m.getLocation().getRow(), c = m.getLocation().getCol();
+                    if (prev[0] != r || prev[1] != c) {
+                        log.add("  Minion (" + prev[0] + "," + prev[1] + ") moved → (" + r + "," + c + ")");
+                        acts2++;
+                    }
+                }
+            }
+            for (Minion m : opp2Before) {
+                Long hpB = opp2HpBefore.get(m);
+                if (hpB == null) continue;
+                if (!opp2.getMinions().contains(m)) {
+                    String pos = m.getLocation() != null
+                            ? m.getLocation().getRow() + "," + m.getLocation().getCol() : "?";
+                    log.add("  Minion at (" + pos + ") was eliminated!");
+                    acts2++;
+                } else if (m.getHp() < hpB) {
+                    log.add("  Shot enemy (" + m.getLocation().getRow() + "," + m.getLocation().getCol()
+                            + "): " + hpB + " → " + m.getHp() + " HP");
+                    acts2++;
+                }
+            }
+            if (acts2 == 0) log.add("  Bot P" + nextPlayerIndex + " took no action (done)");
+
             session.manager.endTurn();
+            processedAdditionalBot = true;
         }
 
         GameStateDTO dto = toStateDTO(session);
