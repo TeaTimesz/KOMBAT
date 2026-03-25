@@ -222,6 +222,29 @@ export default function HexGridPage() {
         saveSession({ ...current, ...patch });
     };
 
+    /** Auto-spawn a bot minion for playerNum during SETUP phase. */
+    const botSetupSpawn = async (playerNum, token, gId, currentState, imgMapIn) => {
+        const candidates = currentState.grid?.filter(h => h.territory === playerNum && !h.hasMinion) ?? [];
+        if (!candidates.length) return { state: currentState, newImgMap: imgMapIn };
+        const hex = candidates[Math.floor(Math.random() * candidates.length)];
+        const kind = minionKinds[0];
+        try {
+            await api.spawnFree(gId, token, hex.row, hex.col, kind.strategy, kind.defense);
+            const state = await waitForNextState();
+            const spawnedHex = state.grid?.find(h => h.row === hex.row && h.col === hex.col);
+            const newImgMap = spawnedHex?.minionId != null
+                ? { ...imgMapIn, [spawnedHex.minionId]: getMinionImg(kind.img, playerNum) }
+                : imgMapIn;
+            setGameState(state);
+            setMinionImgMap(newImgMap);
+            addLog(`[Setup] Bot P${playerNum} spawned "${kind.name}" at (${hex.row},${hex.col})`);
+            return { state, newImgMap };
+        } catch (e) {
+            setMessage('Bot setup spawn failed: ' + e.message);
+            return { state: currentState, newImgMap: imgMapIn };
+        }
+    };
+
     // ── Init ──────────────────────────────────────────────────────────────────
 
     const startFreshGame = async (kinds, modeStr = 'DUEL') => {
@@ -251,7 +274,17 @@ export default function HexGridPage() {
             saveSession({ gameId: gId, p1Token: t1, p2Token: t2, minionKinds: kinds,
                           mode: modeStr, setupStep: 1, setupKindIdx: 0, turnStep: 'buy', minionImgMap: {} });
             addLog(`Game ID: ${gId}`);
-            setMessage('SETUP — Player 1: pick a kind from the sidebar, then click a blue hex to spawn.');
+            if (modeStr === 'AUTO') {
+                setMessage('Bot is placing minions…');
+                const { state: s1, newImgMap: im1 } = await botSetupSpawn(1, t1, gId, joined.state, {});
+                const { newImgMap: im2 } = await botSetupSpawn(2, t2, gId, s1, im1);
+                setSetupStep(3);
+                saveSession({ gameId: gId, p1Token: t1, p2Token: t2, minionKinds: kinds,
+                              mode: modeStr, setupStep: 3, setupKindIdx: 0, turnStep: 'buy', minionImgMap: im2 });
+                setMessage('Both players ready! Click START GAME.');
+            } else {
+                setMessage('SETUP — Player 1: pick a kind from the sidebar, then click a blue hex to spawn.');
+            }
         } catch (e) {
             console.error('[startFreshGame]', e);
             setMessage('Could not start game: ' + e.message);
@@ -407,11 +440,21 @@ export default function HexGridPage() {
                 setGameState(state);
                 setMinionImgMap(newImgMap);
                 if (setupStep === 1) {
-                    setSetupStep(2);
-                    setSetupKindIdx(0);
-                    persist({ setupStep: 2, setupKindIdx: 0, minionImgMap: newImgMap });
                     addLog(`[Setup] P1 spawned "${kind.name}" at (${bRow},${bCol})`);
-                    setMessage('SETUP — Player 2: pick a kind from the sidebar, then click a red hex to spawn.');
+                    if (mode === 'SOLITAIRE') {
+                        setSetupStep(2);
+                        persist({ setupStep: 2, setupKindIdx: 0, minionImgMap: newImgMap });
+                        setMessage('Bot is placing its minion…');
+                        const { newImgMap: im2 } = await botSetupSpawn(2, p2Token, gameId, state, newImgMap);
+                        setSetupStep(3);
+                        persist({ setupStep: 3, minionImgMap: im2 });
+                        setMessage('Both players ready! Click START GAME.');
+                    } else {
+                        setSetupStep(2);
+                        setSetupKindIdx(0);
+                        persist({ setupStep: 2, setupKindIdx: 0, minionImgMap: newImgMap });
+                        setMessage('SETUP — Player 2: pick a kind from the sidebar, then click a red hex to spawn.');
+                    }
                 } else {
                     setSetupStep(3);
                     persist({ setupStep: 3, minionImgMap: newImgMap });
@@ -677,7 +720,7 @@ export default function HexGridPage() {
 
             // Highlight unclaimed hexes adjacent to the current player's territory during buy step
             let buyableClass = '';
-            if (isPlaying && isMyTurn && turnStep === 'buy' && !loading && !gameState.gameOver
+            if (mode !== 'AUTO' && isPlaying && isMyTurn && turnStep === 'buy' && !loading && !gameState.gameOver
                     && hexData?.territory === 0) {
                 const adj = getHexNeighbors(fCol, fRow).some(
                     ([nc, nr]) => hexMap[`${nc}-${nr}`]?.territory === gameState.currentPlayer
@@ -688,8 +731,8 @@ export default function HexGridPage() {
             const isClickable =
                 !loading && gameState && !gameState.gameOver && (
                     (gameState.phase === 'SETUP' && canSpawnInSetup) ||
-                    (isPlaying && isMyTurn && turnStep === 'buy') ||
-                    (isPlaying && isMyTurn && turnStep === 'spawn' && selectedKindIdx !== null)
+                    (mode !== 'AUTO' && isPlaying && isMyTurn && turnStep === 'buy') ||
+                    (mode !== 'AUTO' && isPlaying && isMyTurn && turnStep === 'spawn' && selectedKindIdx !== null)
                 );
 
             const minionImg = hexData?.minionId ? minionImgMap[hexData.minionId] : undefined;
@@ -771,10 +814,12 @@ export default function HexGridPage() {
                     {!gameState?.gameOver && isPlaying && (
                         <div className="phase-panel">
                             <div className={`turn-info turn-info-p${gameState.currentPlayer}`}>
-                                Turn {gameState.turnCount + 1} — Player {gameState.currentPlayer}
-                                <span className="turn-step-badge">
-                                    {turnStep === 'buy' ? ' · Buy Hex?' : turnStep === 'spawn' ? ' · Spawn?' : ' · Done'}
-                                </span>
+                                Turn {gameState.turnCount + 1} — {mode === 'AUTO' ? `Bot P${gameState.currentPlayer}` : `Player ${gameState.currentPlayer}`}
+                                {mode !== 'AUTO' && (
+                                    <span className="turn-step-badge">
+                                        {turnStep === 'buy' ? ' · Buy Hex?' : turnStep === 'spawn' ? ' · Spawn?' : ' · Done'}
+                                    </span>
+                                )}
                             </div>
                             <div className="action-buttons">
                                 {isTwoDevice && !isMyTurn ? (
@@ -837,8 +882,8 @@ export default function HexGridPage() {
                 <div className={`character-sidebar gold-frame ${isP1Active || (gameState?.phase === 'SETUP' && setupStep === 1) ? 'active-p1' : ''}`}>
                     {minionKinds.map((kind, idx) => {
                         const isSetupP1 = gameState?.phase === 'SETUP' && setupStep === 1;
-                        const isSpawnActive = isP1Turn && turnStep === 'spawn';
-                        const canClick = isSetupP1 || isSpawnActive; 
+                        const isSpawnActive = mode !== 'AUTO' && isP1Turn && turnStep === 'spawn';
+                        const canClick = isSetupP1 || isSpawnActive;
                         const isSelected = isSetupP1
                             ? setupKindIdx === idx
                             : (isSpawnActive && selectedKindIdx === idx);
@@ -866,7 +911,7 @@ export default function HexGridPage() {
                 <div className={`character-sidebar gold-frame ${isP2Active || (gameState?.phase === 'SETUP' && setupStep === 2) ? 'active-p2' : ''}`}>
                     {minionKinds.map((kind, idx) => {
                         const isSetupP2 = gameState?.phase === 'SETUP' && setupStep === 2;
-                        const isSpawnActive = isP2Turn && turnStep === 'spawn';
+                        const isSpawnActive = mode !== 'AUTO' && isP2Turn && turnStep === 'spawn';
                         const canClick = isSetupP2 || isSpawnActive;
                         const isSelected = isSetupP2
                             ? setupKindIdx === idx
