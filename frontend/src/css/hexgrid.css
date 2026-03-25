@@ -20,28 +20,30 @@ body { font-family: 'Mali', cursive, sans-serif; overflow: hidden; }
     width: 100vw; height: 100vh;
     display: flex; flex-direction: column;
     /* เรียกใช้รูปพื้นหลังจากโฟลเดอร์ public/image/ */
-    background-image: url('../../public/images/playground.png');
+    background-image: linear-gradient(rgba(255,255,255,0.08), rgba(255,255,255,0.45)),
+                      url('../../public/images/playground.png');
     background-size: cover; background-position: center;
-    padding: 20px;
+    padding: clamp(6px, 1.5vh, 20px);
 }
 
-.top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: clamp(4px, 1vh, 10px); }
 
 .player-stats {
-    background: #e8eaed; border-radius: 15px; padding: 9px 30px; width: 350px; height: 100px;
+    background: #e8eaed; border-radius: 15px; padding: clamp(5px, 0.8vh, 9px) clamp(10px, 2vw, 30px);
+    width: clamp(160px, 22vw, 350px);
     box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 3px solid #ccc;
 }
 .p1-stats { border-color: var(--p1-blue); }
 .p2-stats { border-color: var(--p2-red); }
 
-.player-name { font-family: 'Cinzel', serif; font-size: 1.85rem; font-weight: bold; }
+.player-name { font-family: 'Cinzel', serif; font-size: clamp(0.85rem, 1.5vw, 1.85rem); font-weight: bold; }
 .p1-stats .player-name { color: var(--p1-dark); }
 .p2-stats .player-name { color: var(--p2-dark); text-align: right; }
 
-.stats-info { display: flex; justify-content: space-between; font-size: 1rem; text-align: center; }
-.stat-item { display: flex; align-items: center; gap: 10px; }
+.stats-info { display: flex; justify-content: space-between; font-size: clamp(0.65rem, 0.9vw, 1rem); text-align: center; }
+.stat-item { display: flex; align-items: center; gap: clamp(4px, 0.6vw, 10px); }
 
-.icon { width: 35px; height: 35px; background-size: contain; background-repeat: no-repeat; }
+.icon { width: clamp(18px, 2.5vw, 35px); height: clamp(18px, 2.5vw, 35px); background-size: contain; background-repeat: no-repeat; }
 .hex-icon { clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); }
 .hex-icon.p1-color { background-color: var(--p1-blue); }
 .hex-icon.p2-color { background-color: var(--p2-red); }
@@ -54,15 +56,15 @@ body { font-family: 'Mali', cursive, sans-serif; overflow: hidden; }
 
 .end-turn-btn {
     background: linear-gradient(to bottom, #fffadb, #e3c05c);
-    border: 4px solid var(--gold); border-radius: 25px; padding: 10px 30px;
-    font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: bold; color: #4a3b10;
+    border: 4px solid var(--gold); border-radius: 25px; padding: clamp(6px, 0.8vh, 10px) clamp(14px, 2vw, 30px);
+    font-family: 'Cinzel', serif; font-size: clamp(0.9rem, 1.2vw, 1.5rem); font-weight: bold; color: #4a3b10;
     cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
 }
 .end-turn-btn:hover { filter: brightness(1.1); transform: scale(1.02); }
 .end-turn-btn:active { transform: scale(0.98); }
 
 /* ปรับ gap เพิ่มระยะห่างระหว่างกรอบซ้าย-กลาง-ขวา */
-.main-area { display: flex; justify-content: center; align-items: stretch; flex: 1; gap: 40px; }
+.main-area { display: flex; justify-content: center; align-items: stretch; flex: 1; gap: clamp(8px, 2vw, 40px); }
 
 .gold-frame {
     background-color: var(--board-bg); border: 8px solid transparent;
@@ -74,7 +76,7 @@ body { font-family: 'Mali', cursive, sans-serif; overflow: hidden; }
     border: 2px solid var(--gold-light); z-index: -1;
 }
 
-.character-sidebar { width: 180px; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
+.character-sidebar { width: clamp(80px, 13vw, 180px); padding: clamp(6px, 1vw, 15px); display: flex; flex-direction: column; gap: clamp(6px, 1vw, 15px); }
 
 .char-slot {
     width: 100%; aspect-ratio: 1; background-color: #ddd; border: 3px solid; border-radius: 8px;
@@ -118,11 +120,18 @@ body { font-family: 'Mali', cursive, sans-serif; overflow: hidden; }
 .hex.p2-zone .hex-inner { background-color: var(--p2-red); cursor: pointer; }
 .hex.p2-zone:hover .hex-inner { filter: brightness(1.2); }
 
+.hex.buyable-p1 .hex-inner { background-color: #d6ecf9; }
+.hex.buyable-p1:hover .hex-inner { background-color: #b8daf3; }
+
+.hex.buyable-p2 .hex-inner { background-color: #ffafaf; }
+.hex.buyable-p2:hover .hex-inner { background-color: #f5b8b8; }
+
 .placed-character {
     position: absolute;
-    width: 100%; height: 100%;
-    background-size: cover; background-position: center; background-repeat: no-repeat;
-    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    width: 70%; height: 70%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background-size: contain; background-position: center; background-repeat: no-repeat;
     cursor: pointer;
 }
 .placed-character:hover { filter: brightness(0.8); }
@@ -140,8 +149,14 @@ body { font-family: 'Mali', cursive, sans-serif; overflow: hidden; }
 }
 
 /* ── Active player highlight ── */
-.active-turn {
-    box-shadow: 0 0 0 3px var(--gold), 0 4px 10px rgba(0,0,0,0.4) !important;
+.active-p1 {
+    box-shadow: 0 0 8px 3px var(--p1-blue), 0 0 20px 6px rgba(123,181,227,0.5) !important;
+    border-color: var(--p1-blue) !important;
+    transform: scale(1.02);
+}
+.active-p2 {
+    box-shadow: 0 0 8px 3px var(--p2-red), 0 0 20px 6px rgba(240,123,123,0.5) !important;
+    border-color: var(--p2-red) !important;
     transform: scale(1.02);
 }
 
@@ -181,7 +196,20 @@ body { font-family: 'Mali', cursive, sans-serif; overflow: hidden; }
 .turn-info {
     font-family: 'Cinzel', serif;
     font-size: 1.05rem; font-weight: bold;
-    color: #4a3b10;
+    color: #000000;
+    padding: 6px 20px;
+    border-radius: 20px;
+    border: 2px solid transparent;
+}
+.turn-info-p1 {
+    border-color: var(--p1-blue);
+    background: rgba(123, 181, 227, 0.7);
+    box-shadow: 0 0 8px rgba(123, 181, 227, 0.5);
+}
+.turn-info-p2 {
+    border-color: var(--p2-red);
+    background: rgba(240, 123, 123, 0.7);
+    box-shadow: 0 0 8px rgba(240, 123, 123, 0.5);
 }
 
 /* ── Action buttons ── */
@@ -310,8 +338,8 @@ body { font-family: 'Mali', cursive, sans-serif; overflow: hidden; }
     position: fixed;
     left: 12px;
     bottom: 12px;
-    height: 720px;
-    width: 250px;
+    height: clamp(200px, 55vh, 720px);
+    width: clamp(130px, 14vw, 250px);
     z-index: 20;
     background-color: var(--board-bg);
     display: flex;

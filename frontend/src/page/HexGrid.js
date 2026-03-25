@@ -27,11 +27,28 @@ function clearSession() {
 const toBackend = (fCol, fRow) => ({ row: fRow + 1, col: fCol + 1 });
 const toKey     = (bRow, bCol) => `${bCol - 1}-${bRow - 1}`;
 
+// Even columns (fCol % 2 === 0) are shifted down by HEX_H/2 in this grid.
+// Adjacent-column neighbours shift row by +1 (even) or -1 (odd).
+const getHexNeighbors = (fCol, fRow) => {
+    const rowOffset = fCol % 2 === 0 ? 1 : -1;
+    return [
+        [fCol,     fRow - 1], [fCol,     fRow + 1],
+        [fCol - 1, fRow],     [fCol - 1, fRow + rowOffset],
+        [fCol + 1, fRow],     [fCol + 1, fRow + rowOffset],
+    ].filter(([c, r]) => c >= 0 && c < COLS && r >= 0 && r < ROWS);
+};
+
+// Convert minion{N}.png → p{player}_{N}.png based on owning player
+const getMinionImg = (kindImg, ownerPlayer) => {
+    if (!kindImg || !ownerPlayer) return kindImg;
+    return kindImg.replace(/\/images\/minion(\d+)\.png$/, `/images/p${ownerPlayer}_$1.png`);
+};
+
 // ─── Player Stats Panel ────────────────────────────────────────────────────────
 
 function PlayerPanel({ num, data, isActive }) {
     return (
-        <div className={`player-stats ${num === 1 ? 'p1-stats' : 'p2-stats'} ${isActive ? 'active-turn' : ''}`}>
+        <div className={`player-stats ${num === 1 ? 'p1-stats' : 'p2-stats'} ${isActive ? (num === 1 ? 'active-p1' : 'active-p2') : ''}`}>
             <div className="player-name">Player {num}</div>
             <div className="stats-info">
                 <div className="stat-item">
@@ -70,6 +87,7 @@ export default function HexGridPage() {
 
     const [minionImgMap, setMinionImgMap] = useState({});
     const [turnLog, setTurnLog] = useState([]);
+    const [boardScale, setBoardScale] = useState(1);
     const logEndRef = useRef(null);
     const pendingStateRef = useRef(null);
     // Tracks the last (turnCount, currentPlayer) that was written to the turn log,
@@ -82,6 +100,22 @@ export default function HexGridPage() {
         if (turnLog.length > 0) persist({ turnLog });
         logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [turnLog]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    useEffect(() => {
+        // Natural board size: R=40 → boardW=500, boardH≈589, with padding 120×80
+        const NATURAL_W = (COLS - 1) * COL_SPACING + HEX_W + 120;
+        const NATURAL_H = (ROWS - 1) * HEX_H + HEX_H + HEX_H / 2 + 80;
+        const calc = () => {
+            const sidebarW = Math.min(180, Math.max(90, window.innerWidth * 0.13)) * 2 + 40;
+            const availW = window.innerWidth - sidebarW - 40;
+            const availH = window.innerHeight - 130 - 40; // minus topbar and padding
+            const scale = Math.min(availW / NATURAL_W, availH / NATURAL_H, 1);
+            setBoardScale(Math.max(scale, 0.35));
+        };
+        calc();
+        window.addEventListener('resize', calc);
+        return () => window.removeEventListener('resize', calc);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     /** Waits for the next state broadcast from the persistent subscription. */
     const waitForNextState = (ms = 10000) => new Promise((resolve, reject) => {
@@ -116,9 +150,9 @@ export default function HexGridPage() {
                         const updated = { ...prev };
                         let changed = false;
                         state.grid?.forEach(h => {
-                            if (h.hasMinion && h.minionId && !updated[h.minionId]) {
+                            if (h.hasMinion && h.minionId != null && !updated[h.minionId]) {
                                 const kind = minionKinds[Math.floor(Math.random() * minionKinds.length)];
-                                if (kind) { updated[h.minionId] = kind.img; changed = true; }
+                                if (kind) { updated[h.minionId] = getMinionImg(kind.img, h.minionOwner); changed = true; }
                             }
                         });
                         return changed ? updated : prev;
@@ -367,8 +401,8 @@ export default function HexGridPage() {
                 await api.spawnFree(gameId, token, bRow, bCol, kind.strategy, kind.defense);
                 const state = await waitForNextState();
                 const spawnedHex = state.grid?.find(h => h.row === bRow && h.col === bCol);
-                const newImgMap = spawnedHex?.minionId
-                    ? { ...minionImgMap, [spawnedHex.minionId]: kind.img }
+                const newImgMap = spawnedHex?.minionId != null
+                    ? { ...minionImgMap, [spawnedHex.minionId]: getMinionImg(kind.img, playerNum) }
                     : minionImgMap;
                 setGameState(state);
                 setMinionImgMap(newImgMap);
@@ -434,8 +468,8 @@ export default function HexGridPage() {
                 await api.spawnMinion(gameId, getCurrentToken(), bRow, bCol, kind.strategy, kind.defense);
                 const state = await waitForNextState();
                 const spawnedHex = state.grid?.find(h => h.row === bRow && h.col === bCol);
-                const newImgMap = spawnedHex?.minionId
-                    ? { ...minionImgMap, [spawnedHex.minionId]: kind.img }
+                const newImgMap = spawnedHex?.minionId != null
+                    ? { ...minionImgMap, [spawnedHex.minionId]: getMinionImg(kind.img, gameState.currentPlayer) }
                     : minionImgMap;
                 setGameState(state);
                 setMinionImgMap(newImgMap);
@@ -508,14 +542,21 @@ export default function HexGridPage() {
                         const [, kindName, rowStr, colStr] = m;
                         const row = parseInt(rowStr), col = parseInt(colStr);
                         const hex = state.grid?.find(h => h.row === row && h.col === col);
-                        if (hex?.minionId) {
+                        if (hex?.minionId != null) {
                             const kind = minionKinds.find(k => k.name === kindName) ?? minionKinds[0];
-                            if (kind) newImgMap[hex.minionId] = kind.img;
+                            if (kind) newImgMap[hex.minionId] = getMinionImg(kind.img, hex.minionOwner);
                         }
                     }
                 }
                 state.actionLog.forEach(e => addLog(e));
             }
+            // Fallback: assign image to any minion on the grid that still has no entry
+            state.grid?.forEach(h => {
+                if (h.hasMinion && h.minionId != null && !newImgMap[h.minionId]) {
+                    const kind = minionKinds[Math.floor(Math.random() * minionKinds.length)];
+                    if (kind) newImgMap[h.minionId] = getMinionImg(kind.img, h.minionOwner);
+                }
+            });
             setMinionImgMap(newImgMap);
             persist({ minionImgMap: newImgMap });
 
@@ -548,13 +589,24 @@ export default function HexGridPage() {
             const state = await waitForNextState();
             if (state.actionLog?.length) state.actionLog.forEach(e => addLog(e));
             setGameState(state);
+            setMinionImgMap(prev => {
+                const updated = { ...prev };
+                let changed = false;
+                state.grid?.forEach(h => {
+                    if (h.hasMinion && h.minionId != null && !updated[h.minionId]) {
+                        const kind = minionKinds[Math.floor(Math.random() * minionKinds.length)];
+                        if (kind) { updated[h.minionId] = getMinionImg(kind.img, h.minionOwner); changed = true; }
+                    }
+                });
+                return changed ? updated : prev;
+            });
             setTurnStep('buy');
             setSelectedKindIdx(null);
             persist({ turnStep: 'buy' });
             if (state.gameOver) {
                 const result = state.winner === 0 ? 'Tie!' : `P${state.winner} wins!`;
                 addLog(`── Game over — ${result} ──`);
-                setMessage(state.winner === 0 ? "Game Over — It's a tie!" : `Game Over — Player ${state.winner} WINS!`);
+                navigate('/endgame', { state: { winner: state.winner, mode } });
             } else {
                 addLog(`[T${state.turnCount + 1}] P${state.currentPlayer}'s turn`);
                 lastLoggedTurnRef.current = { player: state.currentPlayer, count: state.turnCount };
@@ -623,6 +675,16 @@ export default function HexGridPage() {
             if (hexData?.territory === 1) zoneClass = 'p1-zone';
             else if (hexData?.territory === 2) zoneClass = 'p2-zone';
 
+            // Highlight unclaimed hexes adjacent to the current player's territory during buy step
+            let buyableClass = '';
+            if (isPlaying && isMyTurn && turnStep === 'buy' && !loading && !gameState.gameOver
+                    && hexData?.territory === 0) {
+                const adj = getHexNeighbors(fCol, fRow).some(
+                    ([nc, nr]) => hexMap[`${nc}-${nr}`]?.territory === gameState.currentPlayer
+                );
+                if (adj) buyableClass = gameState.currentPlayer === 1 ? 'buyable-p1' : 'buyable-p2';
+            }
+
             const isClickable =
                 !loading && gameState && !gameState.gameOver && (
                     (gameState.phase === 'SETUP' && canSpawnInSetup) ||
@@ -635,7 +697,7 @@ export default function HexGridPage() {
             hexElems.push(
                 <div
                     key={key}
-                    className={`hex ${zoneClass} ${isClickable ? 'hex-interactive' : ''}`}
+                    className={`hex ${zoneClass} ${buyableClass} ${isClickable ? 'hex-interactive' : ''}`}
                     style={{ width: `${HEX_W}px`, height: `${HEX_H}px`, left: `${x}px`, top: `${y}px` }}
                     onClick={() => handleHexClick(fCol, fRow)}
                 >
@@ -689,7 +751,7 @@ export default function HexGridPage() {
                     {/* Setup Phase */}
                     {!gameState?.gameOver && gameState?.phase === 'SETUP' && (
                         <div className="phase-panel">
-                            <div className="turn-info">
+                            <div className={`turn-info turn-info-p${setupStep <= 2 ? (isTwoDevice ? myPlayer : setupStep) : ''}`}>
                                 {setupStep <= 2
                                     ? `Setup — Player ${isTwoDevice ? myPlayer : setupStep}: pick a kind, then click your territory hex`
                                     : 'Setup complete!'}
@@ -708,7 +770,7 @@ export default function HexGridPage() {
                     {/* Playing Phase */}
                     {!gameState?.gameOver && isPlaying && (
                         <div className="phase-panel">
-                            <div className="turn-info">
+                            <div className={`turn-info turn-info-p${gameState.currentPlayer}`}>
                                 Turn {gameState.turnCount + 1} — Player {gameState.currentPlayer}
                                 <span className="turn-step-badge">
                                     {turnStep === 'buy' ? ' · Buy Hex?' : turnStep === 'spawn' ? ' · Spawn?' : ' · Done'}
@@ -772,7 +834,7 @@ export default function HexGridPage() {
             <main className="main-area">
 
                 {/* P1 Character Sidebar */}
-                <div className="character-sidebar gold-frame">
+                <div className={`character-sidebar gold-frame ${isP1Active || (gameState?.phase === 'SETUP' && setupStep === 1) ? 'active-p1' : ''}`}>
                     {minionKinds.map((kind, idx) => {
                         const isSetupP1 = gameState?.phase === 'SETUP' && setupStep === 1;
                         const isSpawnActive = isP1Turn && turnStep === 'spawn';
@@ -794,14 +856,14 @@ export default function HexGridPage() {
                 </div>
 
                 {/* Board */}
-                <div className="board-container gold-frame">
+                <div className="board-container gold-frame" style={{ zoom: boardScale }}>
                     <div className="hex-grid" style={{ width: `${boardW}px`, height: `${boardH}px` }}>
                         {hexElems}
                     </div>
                 </div>
 
                 {/* P2 Character Sidebar */}
-                <div className="character-sidebar gold-frame">
+                <div className={`character-sidebar gold-frame ${isP2Active || (gameState?.phase === 'SETUP' && setupStep === 2) ? 'active-p2' : ''}`}>
                     {minionKinds.map((kind, idx) => {
                         const isSetupP2 = gameState?.phase === 'SETUP' && setupStep === 2;
                         const isSpawnActive = isP2Turn && turnStep === 'spawn';

@@ -11,59 +11,116 @@ import '../css/strategy-input.css';
 
 // ── Preset Strategies ─────────────────────────────────────────────────────────
 const PRESET_STRATEGIES = {
-    Attack:
-`# Attack — scan nearby, shoot on sight, pursue relentlessly
-{
-
-    if (Budget - 100) then
-        if (nearby up) then shoot up Budget / 2
-        else if (nearby upright) then shoot upright Budget / 2
-        else if (nearby downright) then shoot downright Budget / 2
-        else if (nearby down) then shoot down Budget / 2
-        else if (nearby downleft) then shoot downleft Budget / 2
-        else if (nearby upleft) then shoot upleft Budget / 2
-        else {
-            opponentLoc = opponent
-            opponentDir = opponentLoc % 10
-            if (opponentLoc) then
-                if (opponentDir - 5) then move downleft
-                else if (opponentDir - 4) then move down
-                else if (opponentDir - 3) then move downright
-                else if (opponentDir - 2) then move upright
-                else if (opponentDir - 1) then move up
-                else move upleft
-            else move downright
-        }
-    else done
-}`,
-    Support:
-`# Support — strategic movement, conserve budget, shoot when adjacent
-{
-    opponentLoc  = opponent
-    opponentDist = opponentLoc / 10
-    opponentDir  = opponentLoc % 10
-
-    if (Budget - 200) then
-        if (opponentLoc) then
-            if (opponentDist - 1) then
-                if (opponentDir - 5) then move downleft
-                else if (opponentDir - 4) then move down
-                else if (opponentDir - 3) then move downright
-                else if (opponentDir - 2) then move upright
-                else if (opponentDir - 1) then move up
-                else move upleft
-            else {
-                if (nearby up) then shoot up Budget / 3
-                else if (nearby upright) then shoot upright Budget / 3
-                else if (nearby downright) then shoot downright Budget / 3
-                else if (nearby down) then shoot down Budget / 3
-                else if (nearby downleft) then shoot downleft Budget / 3
-                else if (nearby upleft) then shoot upleft Budget / 3
-                else done
-            }
-        else done
-    else done
-}`,
+    Attack: {
+        defenseFactor: 5,
+        strategy:
+`t = t + 1
+m = 0
+while (3 - m) {
+  if (Budget - 12) then {} else done
+  opponentLoc = opponent
+  if (opponentLoc / 10 - 1)
+  then {
+    if (opponentLoc % 10 - 5) then move upleft
+    else if (opponentLoc % 10 - 4) then move downleft
+    else if (opponentLoc % 10 - 3) then move down
+    else if (opponentLoc % 10 - 2) then move downright
+    else if (opponentLoc % 10 - 1) then move upright
+    else move up
+  }
+  else if (opponentLoc)
+  then {
+    if (opponentLoc % 10 - 5) then shoot upleft 10
+    else if (opponentLoc % 10 - 4) then shoot downleft 10
+    else if (opponentLoc % 10 - 3) then shoot down 10
+    else if (opponentLoc % 10 - 2) then shoot downright 10
+    else if (opponentLoc % 10 - 1) then shoot upright 10
+    else shoot up 10
+  }
+  else {
+    try = 0
+    while (3 - try) {
+      success = 1
+      dir = random % 6
+      if ((dir - 4) * (nearby upleft % 10 + 1) ^ 2) then move upleft
+      else if ((dir - 3) * (nearby downleft % 10 + 1) ^ 2) then move downleft
+      else if ((dir - 2) * (nearby down % 10 + 1) ^ 2) then move down
+      else if ((dir - 1) * (nearby downright % 10 + 1) ^ 2) then move downright
+      else if (dir * (nearby upright % 10 + 1) ^ 2) then move upright
+      else if ((nearby up % 10 + 1) ^ 2) then move up
+      else success = 0
+      if (success) then try = 3 else try = try + 1
+    }
+    m = m + 1
+  }
+}
+done
+`,
+    },
+    Support: {
+        defenseFactor: 3,
+        strategy:
+`t = t + 1
+m = 0
+while (3 - m) {
+  if (Budget - 12) then {} else done
+  opponentLoc = opponent
+  if (opponentLoc / 10 - 1)
+  then {
+    if (Budget - 5000) then {
+      if (opponentLoc % 10 - 5) then move upleft
+      else if (opponentLoc % 10 - 4) then move downleft
+      else if (opponentLoc % 10 - 3) then move down
+      else if (opponentLoc % 10 - 2) then move downright
+      else if (opponentLoc % 10 - 1) then move upright
+      else move up
+    } else {
+      if (opponentLoc % 10 - 5) then move downright
+      else if (opponentLoc % 10 - 4) then move upright
+      else if (opponentLoc % 10 - 3) then move up
+      else if (opponentLoc % 10 - 2) then move upleft
+      else if (opponentLoc % 10 - 1) then move downleft
+      else move down
+    }
+  }
+  else if (opponentLoc)
+  then {
+    if (Budget - 5000) then {
+      if (opponentLoc % 10 - 5) then shoot upleft 10
+      else if (opponentLoc % 10 - 4) then shoot downleft 10
+      else if (opponentLoc % 10 - 3) then shoot down 10
+      else if (opponentLoc % 10 - 2) then shoot downright 10
+      else if (opponentLoc % 10 - 1) then shoot upright 10
+      else shoot up 10
+    } else {
+      if (opponentLoc % 10 - 5) then move downright
+      else if (opponentLoc % 10 - 4) then move upright
+      else if (opponentLoc % 10 - 3) then move up
+      else if (opponentLoc % 10 - 2) then move upleft
+      else if (opponentLoc % 10 - 1) then move downleft
+      else move down
+    }
+  }
+  else {
+    try = 0
+    while (3 - try) {
+      success = 1
+      dir = random % 6
+      if ((dir - 4) * (nearby upleft % 10 + 1) ^ 2) then move upleft
+      else if ((dir - 3) * (nearby downleft % 10 + 1) ^ 2) then move downleft
+      else if ((dir - 2) * (nearby down % 10 + 1) ^ 2) then move down
+      else if ((dir - 1) * (nearby downright % 10 + 1) ^ 2) then move downright
+      else if (dir * (nearby upright % 10 + 1) ^ 2) then move upright
+      else if ((nearby up % 10 + 1) ^ 2) then move up
+      else success = 0
+      if (success) then try = 3 else try = 3
+    }
+    m = m + 1
+  }
+}
+done
+`,
+    },
 };
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -131,7 +188,7 @@ function Strategyinput() {
     const [checkResult, setCheckResult]         = useState(null); // null | 'ok' | 'error'
     const [checkError, setCheckError]           = useState('');
     const [checkLoading, setCheckLoading]       = useState(false);
-    const [savedPresets]                        = useState(
+    const [savedPresets, setSavedPresets]       = useState(
         () => { try { return JSON.parse(localStorage.getItem('kombat_presets')) || []; } catch { return []; } }
     );
     const [expandedPresetIdx, setExpandedPresetIdx] = useState(null);
@@ -174,6 +231,11 @@ function Strategyinput() {
             setCurrentIndex(lastIdx);
             loadIndex(lastIdx);
         } else if (currentIndex > 0) {
+            const hasUnsaved = !minionDataMap[currentIndex] &&
+                (charName.trim() !== '' || defenseInfo.trim() !== '' || defenseFactor.toString().trim() !== '');
+            if (hasUnsaved && !window.confirm(`ข้อมูล Minion ที่ ${currentIndex + 1} ยังไม่ได้ Record\nหากกลับไปข้อมูลจะหายไป ต้องการดำเนินการต่อหรือไม่?`)) {
+                return;
+            }
             const prevIndex = currentIndex - 1;
             setCurrentIndex(prevIndex);
             loadIndex(prevIndex);
@@ -190,10 +252,17 @@ function Strategyinput() {
 
     const handleSelectStat = (type) => {
         setSelectedStat(prev => {
-            if (prev === type) return null;
+            if (prev === type) {
+                setDefenseInfo('');
+                setDefenseFactor('');
+                setEditorKey(k => k + 1);
+                resetCheckState();
+                return null;
+            }
             const preset = PRESET_STRATEGIES[type];
             if (preset) {
-                setDefenseInfo(preset);
+                setDefenseInfo(preset.strategy);
+                setDefenseFactor(String(preset.defenseFactor));
                 setEditorKey(k => k + 1);
                 resetCheckState();
             }
@@ -229,13 +298,40 @@ function Strategyinput() {
     };
 
     const handleCreateCustomStrategy = () => {
-        const customStat = prompt('ระบุชื่อ Stat Type ของคุณ:');
-        if (customStat && customStat.trim() !== '') setSelectedStat(customStat);
+        if (defenseInfo.trim() === '') {
+            alert('กรุณากรอก Strategy ก่อนบันทึก Preset');
+            return;
+        }
+        const presetName = prompt('ระบุชื่อ Preset:');
+        if (!presetName || presetName.trim() === '') return;
+        const newPreset = {
+            name: presetName.trim(),
+            strategy: defenseInfo,
+            defenseFactor,
+            statType: selectedStat,
+        };
+        setSavedPresets(prev => {
+            const updated = [...prev, newPreset];
+            localStorage.setItem('kombat_presets', JSON.stringify(updated));
+            return updated;
+        });
+    };
+
+    const handleDeletePreset = (idx, e) => {
+        e.stopPropagation();
+        if (!window.confirm(`ลบ Preset "${savedPresets[idx].name}" ออกหรือไม่?`)) return;
+        setSavedPresets(prev => {
+            const updated = prev.filter((_, i) => i !== idx);
+            localStorage.setItem('kombat_presets', JSON.stringify(updated));
+            return updated;
+        });
+        if (expandedPresetIdx === idx) setExpandedPresetIdx(null);
     };
 
     const handlePresetClick = (preset, idx) => {
         setDefenseInfo(preset.strategy || '');
         setSelectedStat(preset.statType || null);
+        setDefenseFactor(preset.defenseFactor != null ? String(preset.defenseFactor) : '');
         setExpandedPresetIdx(prev => prev === idx ? null : idx);
         setEditorKey(k => k + 1);
         resetCheckState();
@@ -320,7 +416,7 @@ function Strategyinput() {
                                     <img src="/images/defasefactor.png" alt="Defense Factor" className="label-text-img" />
                                     <div className="input-box-bg" style={{ backgroundImage: "url('/images/ช่อง.png')" }}>
                                         <input
-                                            type="text"
+                                            type="number"
                                             className="strat-input"
                                             placeholder="Enter factor..."
                                             value={defenseFactor}
@@ -354,6 +450,9 @@ function Strategyinput() {
                                 {checkLoading ? 'Checking…' : checkResult === 'ok' ? '✓ Passed' : checkResult === 'error' ? '✗ Failed' : 'Check Strategy'}
                                 
                             </button>
+                            {checkResult === 'ok' && (
+                                <div className="check-ok-msg">Strategy is valid!</div>
+                            )}
                             {checkResult === 'error' && (
                                 <div className="check-error-msg">{checkError}</div>
                             )}
@@ -395,6 +494,7 @@ function Strategyinput() {
                                         onClick={() => handlePresetClick(p, i)}
                                     >
                                         <span className="preset-item-name">{p.name}</span>
+                                        <span className="preset-delete-btn" onClick={(e) => handleDeletePreset(i, e)}>✕</span>
                                     </button>
                                 ))
                             )}
