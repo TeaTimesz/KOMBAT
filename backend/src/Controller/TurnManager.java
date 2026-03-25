@@ -96,16 +96,7 @@ public class TurnManager {
         } else if (random.nextBoolean()) {
             maybeSpawnBot(player, playerIndex);
         }
-
-        for (Minion m : List.copyOf(player.getMinions())) {
-            if (m.getStrategy() == null) {
-                continue;
-            }
-            try {
-                evaluator.evaluate(m);
-            } catch (DoneException ignored) {
-            }
-        }
+        // Strategy execution is handled explicitly by GameService, not here.
     }
 
     private void maybeBuyHexBot(Player player, int playerIndex) {
@@ -133,7 +124,14 @@ public class TurnManager {
 
         long hp = config.init_hp;
         long def = Math.max(1, config.init_hp / 10);
+        // Inherit strategy from an existing minion so bot-spawned minions also act
         Strategy strat = defaultStrategy == null ? null : new Strategy(defaultStrategy);
+        for (Minion m : player.getMinions()) {
+            if (m.getStrategy() != null) {
+                strat = m.getStrategy();
+                break;
+            }
+        }
         spawnHex.setTerritory(player);
         new Minion(hp, def, spawnHex, player, strat);
     }

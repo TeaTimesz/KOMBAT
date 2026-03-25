@@ -8,10 +8,6 @@ const HEX_W = 2 * R;
 const HEX_H = Math.sqrt(3) * R;
 const COL_SPACING = 1.5 * R;
 
-const DEFAULT_KINDS = [
-    { id: 1, img: '/images/minion1.png', name: 'Warrior', defense: 10, strategy: 'done' },
-];
-
 const STORAGE_KEY = 'kombat_session';
 
 function saveSession(data) {
@@ -46,9 +42,9 @@ const getMinionImg = (kindImg, ownerPlayer) => {
 
 // ─── Player Stats Panel ────────────────────────────────────────────────────────
 
-function PlayerPanel({ num, data, isActive }) {
+function PlayerPanel({ num, data, isActive, mode }) {
     return (
-        <div className={`player-stats ${num === 1 ? 'p1-stats' : 'p2-stats'} ${isActive ? (num === 1 ? 'active-p1' : 'active-p2') : ''}`}>
+        <div className={`player-stats ${num === 1 ? 'p1-stats' : 'p2-stats'} ${isActive && mode !== 'AUTO' ? (num === 1 ? 'active-p1' : 'active-p2') : ''}`}>
             <div className="player-name">Player {num}</div>
             <div className="stats-info">
                 <div className="stat-item">
@@ -71,7 +67,7 @@ export default function HexGridPage() {
     const navigate = useNavigate();
 
     const [mode, setMode] = useState('DUEL');
-    const [minionKinds, setMinionKinds] = useState(DEFAULT_KINDS);
+    const [minionKinds, setMinionKinds] = useState([]);
     const [gameId, setGameId]           = useState(null);
     const [p1Token, setP1Token]         = useState(null);
     const [p2Token, setP2Token]         = useState(null);
@@ -223,11 +219,11 @@ export default function HexGridPage() {
     };
 
     /** Auto-spawn a bot minion for playerNum during SETUP phase. */
-    const botSetupSpawn = async (playerNum, token, gId, currentState, imgMapIn) => {
+    const botSetupSpawn = async (playerNum, token, gId, currentState, imgMapIn, kinds = minionKinds) => {
         const candidates = currentState.grid?.filter(h => h.territory === playerNum && !h.hasMinion) ?? [];
         if (!candidates.length) return { state: currentState, newImgMap: imgMapIn };
         const hex = candidates[Math.floor(Math.random() * candidates.length)];
-        const kind = minionKinds[0];
+        const kind = kinds[0];
         try {
             await api.spawnFree(gId, token, hex.row, hex.col, kind.strategy, kind.defense);
             const state = await waitForNextState();
@@ -276,11 +272,20 @@ export default function HexGridPage() {
             addLog(`Game ID: ${gId}`);
             if (modeStr === 'AUTO') {
                 setMessage('Bot is placing minions…');
-                const { state: s1, newImgMap: im1 } = await botSetupSpawn(1, t1, gId, joined.state, {});
-                const { newImgMap: im2 } = await botSetupSpawn(2, t2, gId, s1, im1);
+                const { state: s1, newImgMap: im1 } = await botSetupSpawn(1, t1, gId, joined.state, {}, kinds);
+                const { state: s2, newImgMap: im2 } = await botSetupSpawn(2, t2, gId, s1, im1, kinds);
+                // Rebuild imgMap from final state to ensure both bots have images
+                const finalImgMap = { ...im2 };
+                s2.grid?.forEach(h => {
+                    if (h.hasMinion && h.minionId && !finalImgMap[h.minionId]) {
+                        const kind = kinds[0];
+                        if (kind) finalImgMap[h.minionId] = getMinionImg(kind.img, h.minionOwner);
+                    }
+                });
+                setMinionImgMap(finalImgMap);
                 setSetupStep(3);
                 saveSession({ gameId: gId, p1Token: t1, p2Token: t2, minionKinds: kinds,
-                              mode: modeStr, setupStep: 3, setupKindIdx: 0, turnStep: 'buy', minionImgMap: im2 });
+                              mode: modeStr, setupStep: 3, setupKindIdx: 0, turnStep: 'buy', minionImgMap: finalImgMap });
                 setMessage('Both players ready! Click START GAME.');
             } else {
                 setMessage('SETUP — Player 1: pick a kind from the sidebar, then click a blue hex to spawn.');
@@ -297,22 +302,80 @@ export default function HexGridPage() {
         setMessage('Restoring game…');
         try {
             const state = await api.getState(saved.gameId);
-            setGameId(saved.gameId);
-            setP1Token(saved.p1Token);
-            setP2Token(saved.p2Token);
-            setMode(saved.mode ?? 'DUEL');
-            setMinionKinds(saved.minionKinds ?? DEFAULT_KINDS);
-            setSetupStep(saved.setupStep ?? 1);
+            const restoredMode  = saved.mode ?? 'DUEL';
+            const restoredKinds = saved.minionKinds ?? [];
+            const t1 = saved.p1Token, t2 = saved.p2Token, gId = saved.gameId;
+
+            setGameId(gId);
+            setP1Token(t1);
+            setP2Token(t2);
+            setMode(restoredMode);
+            setMinionKinds(restoredKinds);
             setSetupKindIdx(saved.setupKindIdx ?? 0);
             setTurnStep(saved.turnStep ?? 'buy');
-            setMinionImgMap(saved.minionImgMap ?? {});
             setTurnLog(saved.turnLog?.length ? saved.turnLog : ['── Session restored ──']);
+
+            // Rebuild imgMap from current grid (saved map may be stale)
+            const builtMap = {};
+            state.grid?.forEach(h => {
+                if (h.hasMinion && h.minionId) {
+                    const kind = restoredKinds[0];
+                    if (kind) builtMap[h.minionId] = getMinionImg(kind.img, h.minionOwner);
+                }
+            });
+            const imgMap = Object.keys(builtMap).length > 0 ? builtMap : (saved.minionImgMap ?? {});
+            setMinionImgMap(imgMap);
+
+            // Derive actual setup step from backend grid (not from stale session value)
+            let setupStep = saved.setupStep ?? 1;
+            if (state.phase === 'SETUP') {
+                const p1Has = state.grid?.some(h => h.minionOwner === 1 && h.hasMinion);
+                const p2Has = state.grid?.some(h => h.minionOwner === 2 && h.hasMinion);
+                if (p1Has && p2Has) setupStep = 3;
+                else if (p1Has) setupStep = 2;
+                else setupStep = 1;
+
+                // AUTO: re-run bot setup for any missing bot minions
+                if (restoredMode === 'AUTO' && setupStep < 3) {
+                    setGameState(state);
+                    setSetupStep(setupStep);
+                    setMessage('Bot is placing minions…');
+                    let curState = state, curMap = imgMap;
+                    if (setupStep <= 1) {
+                        ({ state: curState, newImgMap: curMap } =
+                            await botSetupSpawn(1, t1, gId, curState, curMap, restoredKinds));
+                    }
+                    const { newImgMap: im2 } =
+                        await botSetupSpawn(2, t2, gId, curState, curMap, restoredKinds);
+                    setSetupStep(3);
+                    persist({ setupStep: 3, minionImgMap: im2 });
+                    setMessage('Both players ready! Click START GAME.');
+                    setLoading(false);
+                    return;
+                }
+
+                // SOLITAIRE: P1 spawned but P2 bot hasn't yet
+                if (restoredMode === 'SOLITAIRE' && setupStep === 2) {
+                    setGameState(state);
+                    setSetupStep(2);
+                    setMessage('Bot is placing its minion…');
+                    const { newImgMap: im2 } =
+                        await botSetupSpawn(2, t2, gId, state, imgMap, restoredKinds);
+                    setSetupStep(3);
+                    persist({ setupStep: 3, minionImgMap: im2 });
+                    setMessage('Both players ready! Click START GAME.');
+                    setLoading(false);
+                    return;
+                }
+            }
+
+            setSetupStep(setupStep);
             setGameState(state);
             setMessage('Game restored! Continue where you left off.');
         } catch (e) {
             // Backend was restarted — session is gone, start fresh
             clearSession();
-            await startFreshGame(saved.minionKinds ?? DEFAULT_KINDS, saved.mode ?? 'DUEL');
+            await startFreshGame(saved.minionKinds ?? [], saved.mode ?? 'DUEL');
         }
         setLoading(false);
     };
@@ -321,7 +384,7 @@ export default function HexGridPage() {
     const startLobbyGame = async (gId, t1, t2, kinds, selectedMode) => {
         setLoading(true);
         setMode(selectedMode);
-        setMinionKinds(kinds ?? DEFAULT_KINDS);
+        setMinionKinds(kinds ?? []);
         setSetupStep(t2 && !t1 ? 2 : 1); // P2-only device starts at step 2
         setSetupKindIdx(0);
         setTurnStep('buy');
@@ -335,7 +398,7 @@ export default function HexGridPage() {
             const state = await api.getState(gId);
             setGameState(state);
             saveSession({ gameId: gId, p1Token: t1, p2Token: t2,
-                minionKinds: kinds ?? DEFAULT_KINDS, mode: selectedMode,
+                minionKinds: kinds ?? [], mode: selectedMode,
                 setupStep: t2 && !t1 ? 2 : 1, setupKindIdx: 0,
                 turnStep: 'buy', minionImgMap: {} });
             setMessage(t1
@@ -384,7 +447,7 @@ export default function HexGridPage() {
             if (saved?.gameId) {
                 restoreGame(saved);
             } else {
-                startFreshGame(DEFAULT_KINDS, initialMode);
+                navigate('/');
             }
         }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -445,9 +508,18 @@ export default function HexGridPage() {
                         setSetupStep(2);
                         persist({ setupStep: 2, setupKindIdx: 0, minionImgMap: newImgMap });
                         setMessage('Bot is placing its minion…');
-                        const { newImgMap: im2 } = await botSetupSpawn(2, p2Token, gameId, state, newImgMap);
+                        const { state: botState, newImgMap: im2 } = await botSetupSpawn(2, p2Token, gameId, state, newImgMap);
+                        // Rebuild imgMap from final state to ensure both players have images
+                        const finalImgMap = { ...im2 };
+                        botState.grid?.forEach(h => {
+                            if (h.hasMinion && h.minionId && !finalImgMap[h.minionId]) {
+                                const k = minionKinds[0];
+                                if (k) finalImgMap[h.minionId] = getMinionImg(k.img, h.minionOwner);
+                            }
+                        });
+                        setMinionImgMap(finalImgMap);
                         setSetupStep(3);
-                        persist({ setupStep: 3, minionImgMap: im2 });
+                        persist({ setupStep: 3, minionImgMap: finalImgMap });
                         setMessage('Both players ready! Click START GAME.');
                     } else {
                         setSetupStep(2);
@@ -534,6 +606,17 @@ export default function HexGridPage() {
         try {
             await api.startGame(gameId, p1Token);
             const state = await waitForNextState();
+            // Rebuild imgMap to cover any minions spawned by handleBotTurn during startTurn
+            setMinionImgMap(prev => {
+                const updated = { ...prev };
+                state.grid?.forEach(h => {
+                    if (h.hasMinion && h.minionId && !updated[h.minionId]) {
+                        const kind = minionKinds[0];
+                        if (kind) updated[h.minionId] = getMinionImg(kind.img, h.minionOwner);
+                    }
+                });
+                return updated;
+            });
             setGameState(state);
             setTurnStep('buy');
             persist({ turnStep: 'buy', setupStep: 3 });
@@ -776,7 +859,7 @@ export default function HexGridPage() {
 
             {/* ── Top Bar ── */}
             <header className="top-bar">
-                <PlayerPanel num={1} data={p1} isActive={isP1Active} />
+                <PlayerPanel num={1} data={p1} isActive={isP1Active} mode={mode} />
 
                 <div className="center-controls">
                     {/* Game Over */}
@@ -859,7 +942,7 @@ export default function HexGridPage() {
                     </div>
                 </div>
 
-                <PlayerPanel num={2} data={p2} isActive={isP2Active} />
+                <PlayerPanel num={2} data={p2} isActive={isP2Active} mode={mode} />
             </header>
 
             {/* ── Turn Log (fixed left) ── */}
@@ -879,7 +962,7 @@ export default function HexGridPage() {
             <main className="main-area">
 
                 {/* P1 Character Sidebar */}
-                <div className={`character-sidebar gold-frame ${isP1Active || (gameState?.phase === 'SETUP' && setupStep === 1) ? 'active-p1' : ''}`}>
+                <div className={`character-sidebar gold-frame ${mode !== 'AUTO' && (isP1Active || (gameState?.phase === 'SETUP' && setupStep === 1)) ? 'active-p1' : ''}`}>
                     {minionKinds.map((kind, idx) => {
                         const isSetupP1 = gameState?.phase === 'SETUP' && setupStep === 1;
                         const isSpawnActive = mode !== 'AUTO' && isP1Turn && turnStep === 'spawn';
@@ -908,7 +991,7 @@ export default function HexGridPage() {
                 </div>
 
                 {/* P2 Character Sidebar */}
-                <div className={`character-sidebar gold-frame ${isP2Active || (gameState?.phase === 'SETUP' && setupStep === 2) ? 'active-p2' : ''}`}>
+                <div className={`character-sidebar gold-frame ${mode !== 'AUTO' && (isP2Active || (gameState?.phase === 'SETUP' && setupStep === 2)) ? 'active-p2' : ''}`}>
                     {minionKinds.map((kind, idx) => {
                         const isSetupP2 = gameState?.phase === 'SETUP' && setupStep === 2;
                         const isSpawnActive = mode !== 'AUTO' && isP2Turn && turnStep === 'spawn';

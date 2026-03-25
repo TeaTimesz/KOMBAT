@@ -202,6 +202,7 @@ public class GameService {
                         + " interest (total: " + Math.round(nextPlayer.getBudget()) + ")");
             }
             if (!session.manager.isBot(nextPlayerIndex)) break;
+            session.manager.executeStrategies(nextPlayer);
             session.manager.endTurn();
         }
 
