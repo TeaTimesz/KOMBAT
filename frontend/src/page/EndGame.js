@@ -19,10 +19,10 @@ function EndGame() {
             style={{ backgroundImage: `url('${bgImage}')` }}
         >
             <div className="endgame-buttons">
-                <button className="endgame-btn" onClick={() => { localStorage.removeItem('kombat_presets'); navigate('/'); }}>
-                    GO TO MENU
+                <button className="endgame-img-btn" onClick={() => { localStorage.removeItem('kombat_presets'); navigate('/'); }}>
+                    <img src="/images/backtomenu.png" alt="Go Back to Menu" />
                 </button>
-                <button className="endgame-btn" onClick={() => {
+                <button className="endgame-img-btn" onClick={() => {
                     const lobby = loadLobbyInfo();
                     if (mode === 'DUEL' && lobby?.lobbyId) {
                         lobbyReset(lobby.lobbyId);
@@ -31,7 +31,7 @@ function EndGame() {
                         navigate('/select-amount', { state: { mode } });
                     }
                 }}>
-                    PLAY AGAIN
+                    <img src="/images/playagain.png" alt="Play Again" />
                 </button>
             </div>
         </div>

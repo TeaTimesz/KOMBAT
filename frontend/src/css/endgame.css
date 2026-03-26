@@ -11,8 +11,13 @@
 }
 
 .endgame-buttons {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     gap: 32px;
+    z-index: 10;
 }
 
 .endgame-btn {
@@ -38,4 +43,32 @@
 
 .endgame-btn:active {
     transform: translateY(0);
+}
+
+.endgame-img-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+
+.endgame-img-btn img {
+    width: clamp(160px, 18vw, 280px);
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+    transition: transform 0.15s;
+}
+
+.endgame-img-btn:hover img {
+    transform: scale(1.08);
+}
+
+.endgame-img-btn:active img {
+    transform: scale(0.96);
+}
+
+.endgame-img-btn:active img {
+    transform: scale(1.92);
 }

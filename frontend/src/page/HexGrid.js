@@ -545,6 +545,8 @@ export default function HexGridPage() {
 
         // ── PLAYING ──
         if (isTwoDevice && gameState.currentPlayer !== myPlayer) return;
+        const isBotTurn = (mode === 'SOLITAIRE' && gameState.currentPlayer !== 1) || mode === 'AUTO';
+        if (isBotTurn) return;
 
         if (turnStep === 'buy') {
             if ((hexData?.territory ?? 0) !== 0) {
@@ -942,7 +944,7 @@ export default function HexGridPage() {
                     {!gameState?.gameOver && isPlaying && (
                         <div className="phase-panel">
                             <div className={`turn-info turn-info-p${gameState.currentPlayer}`}>
-                                Turn {gameState.turnCount + 1} — {(mode === 'AUTO' || (mode === 'SOLITAIRE' && !isP1Active)) ? `Bot P${gameState.currentPlayer}` : `Player ${gameState.currentPlayer}`}
+                                Turn {gameState.turnCount + 1}{gameState.maxTurns ? `/${gameState.maxTurns}` : ''} — {(mode === 'AUTO' || (mode === 'SOLITAIRE' && !isP1Active)) ? `Bot P${gameState.currentPlayer}` : `Player ${gameState.currentPlayer}`}
                                 {mode !== 'AUTO' && (
                                     <span className="turn-step-badge">
                                         {turnStep === 'buy' ? ' · Buy Hex?' : turnStep === 'spawn' ? ' · Spawn?' : ' · Done'}
@@ -1039,7 +1041,7 @@ export default function HexGridPage() {
                 <div className={`character-sidebar gold-frame ${mode !== 'AUTO' && (isP2Active || (gameState?.phase === 'SETUP' && setupStep === 2)) ? 'active-p2' : ''}`}>
                     {minionKinds.map((kind, idx) => {
                         const isSetupP2 = gameState?.phase === 'SETUP' && setupStep === 2;
-                        const isSpawnActive = mode !== 'AUTO' && isP2Turn && turnStep === 'spawn';
+                        const isSpawnActive = mode === 'DUEL' && isP2Turn && turnStep === 'spawn';
                         const canClick = isSetupP2 || isSpawnActive;
                         const isSelected = isSetupP2
                             ? setupKindIdx === idx

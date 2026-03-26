@@ -20,5 +20,6 @@ public class GameStateDTO {
     private List<String> actionLog;
     private long hexPurchaseCost;
     private long spawnCost;
+    private long maxTurns;
 
 }

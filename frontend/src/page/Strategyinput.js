@@ -164,6 +164,7 @@ function StrategyEditor({ onChange, defaultValue }) {
                     automaticLayout: true,
                     padding: { top: 8, bottom: 8 },
                     scrollbar: { verticalScrollbarSize: 4 },
+                    stickyScroll: { enabled: false },
                 }}
             />
         </div>

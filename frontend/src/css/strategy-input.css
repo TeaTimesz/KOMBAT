@@ -1,28 +1,35 @@
 /* --- พื้นหลังหลัก --- */
 .strategy-screen {
-    height: 100vh;
+    min-height: 100vh;
     width: 100vw;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
+    padding: clamp(20px, 3vh, 50px) 0;
     background-size: cover;
     background-position: center;
+    background-attachment: fixed;
     margin: 0;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     position: relative;
     font-family: 'Henny Penny', cursive;
+    box-sizing: border-box;
 }
 
 /* --- บอร์ดไม้หลัก --- */
 .main-board {
-    width: 1400px; 
-    height: 700px;
+    width: clamp(500px, 90vw, 1400px);
+    height: auto;
+    min-height: clamp(280px, 45vw, 700px);
     background-size: 100% 100%;
     background-repeat: no-repeat;
-    position: relative; 
-    display: flex;
-    flex-direction: column;
-    padding: 100px 80px 60px;
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr clamp(120px, 12vw, 175px);
+    grid-template-rows: 1fr auto;
+    column-gap: clamp(8px, 1.2vw, 18px);
+    padding: clamp(40px, 7vw, 100px) clamp(20px, 3vw, 50px) clamp(20px, 4vw, 60px) clamp(30px, 5.5vw, 80px);
     box-sizing: border-box;
 }
 
@@ -30,14 +37,14 @@
 .stat-type-header {
     display: flex;
     align-items: center;
-    gap: 30px;
-    margin-bottom: 30px;
-    margin-top: 50px;
+    gap: clamp(10px, 2vw, 30px);
+    margin-bottom: clamp(10px, 2vw, 30px);
+    margin-top: clamp(15px, 3vw, 50px);
     width: 100%;
 }
 
 .stat-label-img {
-    width: 260px;
+    width: clamp(100px, 18vw, 260px);
     height: auto;
     mix-blend-mode: multiply;
 }
@@ -46,12 +53,12 @@
     background: transparent;
     border: none;
     padding: 0;
-    margin: 0 8px;
+    margin: 0 clamp(2px, 0.5vw, 8px);
 }
 
 .stat-buttons-row {
     display: flex;
-    gap: 12px;
+    gap: clamp(5px, 0.8vw, 12px);
     align-items: center;
 }
 
@@ -61,14 +68,14 @@
 }
 
 .stat-btn img {
-    height: 60px;
+    height: clamp(28px, 4vw, 60px);
     width: auto;
     transition: 0.2s;
     cursor: pointer;
 }
 
 .stat-btn.btn-plus img {
-    height: 60px;
+    height: clamp(28px, 4vw, 60px);
     width: auto;
     object-fit: contain;
 }
@@ -79,18 +86,31 @@
 
 /* --- ส่วนเนื้อหาหลัก (แบ่งซ้าย-ขวา) --- */
 .content-body {
+    grid-column: 1;
+    grid-row: 1;
     display: flex;
-    flex: 1;
     width: 100%;
-    gap: 40px;
+    gap: clamp(15px, 2.8vw, 40px);
     align-items: flex-start;
-    height: 900px;
-    margin-top: 80px;
+    margin-top: clamp(20px, 4vw, 80px);
+    min-height: 0;
+}
+
+.check-record-row {
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(4px, 0.4vw, 6px);
+    margin-bottom: clamp(5px, 0.56vw, 8px);
+    margin-top: clamp(12px, 2.1vw, 30px);
 }
 
 /* ฝั่งซ้าย */
 .char-column {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -98,15 +118,14 @@
 }
 
 .char-frame-container {
-    width: 290px;
-    height: 280px;
+    width: clamp(80px, 14vw, 290px);
+    height: clamp(80px, 14vw, 280px);
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 20px;
-    margin-top: 30px;
-    position: relative;  /* เพิ่ม */
-    top: 10px;           /* ปรับตัวเลขนี้ ยิ่งมากยิ่งลง */
+    margin-bottom: clamp(6px, 1vw, 20px);
+    margin-top: clamp(6px, 1vw, 30px);
+    position: relative;
 }
 
 .char-img {
@@ -123,15 +142,15 @@
 }
 
 .label-text-img {
-    width: 300px;
+    width: min(100%, clamp(120px, 21vw, 300px));
     margin-bottom: -10px;
     z-index: 2;
     mix-blend-mode: multiply;
 }
 
 .input-box-bg {
-    width: 290px;
-    height: 65px;
+    width: min(100%, clamp(120px, 20vw, 290px));
+    height: clamp(35px, 4.5vw, 65px);
     background-size: 100% 100%;
     background-repeat: no-repeat;
     display: flex;
@@ -141,44 +160,33 @@
 
 /* ฝั่งขวา */
 .strategy-column {
-    flex: 1.5;
+    flex: 3;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    height: 100%;
+    gap: clamp(8px, 1.4vw, 20px);
+    min-height: clamp(300px, 40vw, 580px);
+    margin-left: clamp(-60px, -8vw, -120px);
 }
 
 .strategy-detail-box {
     position: relative;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     flex: 1;
+    min-height: clamp(300px, 40vw, 580px);
+    overflow: hidden;
+    clip-path: inset(0);
 }
 
-.defense-factor-box {
-    
-    position: absolute;
-    top: 130px;        /* ปรับขึ้น/ลง */
-    left: 80px;         /* ปรับซ้าย/ขวา */
-    width: 280px;
-    z-index: 5;
-    overflow: visible;
-}
-
-/* ป้าย "Strategy Detail" — absolute ขยับอิสระ ไม่กระทบ editor
-   ปรับ top เพื่อขยับขึ้น/ลง */
+/* รูป Strategydetail.png ปูเต็มกล่องเป็น backdrop */
 .detail-header-img {
     position: absolute;
-    top: -55px;
-    left: 20%;
-    transform: translateX(-50%);
-    width: 700px;
-    z-index: 3;
-    mix-blend-mode: multiply;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
     pointer-events: none;
-    height: 530px;
+    z-index: 0;
 }
 
 .defense-factor-box {
@@ -186,11 +194,11 @@
     flex-direction: column;
     align-items: flex-start;
     width: 100%;
-    margin-top: 20px;
+    margin-top: clamp(8px, 1.4vw, 20px);
 }
 
 .defense-factor-label-img {
-    width: 300px;
+    width: clamp(130px, 21vw, 300px);
     margin-bottom: -10px;
     z-index: 2;
     mix-blend-mode: multiply;
@@ -201,14 +209,17 @@
    ======================================== */
 
 .monaco-wrapper {
-    width: 90%;
-    height: 550px;
-    margin-top: 30px;
-    margin-left: -450px;
+    position: absolute;
+    /* offset เข้าไปจากขอบตกแต่งของรูป — ปรับได้ */
+    top: 18%;
+    left: 5%;
+    right: 5%;
+    bottom: 6%;
+    z-index: 1;
     border-radius: 4px;
     overflow: hidden;
+    clip-path: inset(0);
     background: transparent;
-    height: 100%;
 }
 
 .monaco-wrapper .overflow-guard,
@@ -220,7 +231,7 @@
 
 .val-defense {
     font-family: 'Courier New', monospace;
-    font-size: 13px;
+    font-size: clamp(10px, 0.9vw, 13px);
     white-space: pre-wrap;
     word-break: break-all;
     margin: 0;
@@ -237,7 +248,7 @@
     font-weight: bold;
     text-align: center;
     width: 100%;
-    font-size: 22px;
+    font-size: clamp(11px, 1.5vw, 22px);
 }
 
 .defense-input {
@@ -246,24 +257,24 @@
     border: none !important;
     outline: none;
     font-family: 'Henny Penny', cursive;
-    font-size: 20px;
+    font-size: clamp(11px, 1.4vw, 20px);
     color: #4a3728;
     text-align: left;
-    padding: 10px;
+    padding: clamp(4px, 0.7vw, 10px);
 }
 
 /* --- ปุ่ม Record และ Back --- */
 .back-btn-global {
     position: fixed;
-    bottom: 30px;
-    left: 40px; 
+    bottom: clamp(15px, 2.2vw, 30px);
+    left: clamp(15px, 2.8vw, 40px);
     background: transparent !important;
     border: none;
     cursor: pointer;
     z-index: 200;
     padding: 0;
-    width: 180px; 
-    height: 65px;
+    width: clamp(100px, 12.5vw, 180px);
+    height: clamp(38px, 4.5vw, 65px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -272,15 +283,15 @@
 
 .record-btn-container {
     position: fixed;
-    bottom: 30px;
-    right: 40px; 
+    bottom: clamp(15px, 2.2vw, 30px);
+    right: clamp(15px, 2.8vw, 40px);
     background: transparent;
     border: none;
     cursor: pointer;
     z-index: 200;
     padding: 0;
-    width: 180px; 
-    height: 65px;
+    width: clamp(100px, 12.5vw, 180px);
+    height: clamp(38px, 4.5vw, 65px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -291,7 +302,7 @@
 .record-btn-container img {
     width: 100%;
     height: 100%;
-    object-fit: fill; 
+    object-fit: fill;
     filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.35));
     display: block;
 }
@@ -305,22 +316,22 @@
 .record-btn-container:active {
     transform: scale(0.95);
 }
+
 /* --- Step Indicator --- */
 .step-indicator {
     position: absolute;
-    top: 20px;
+    top: clamp(10px, 1.4vw, 20px);
     left: 50%;
     transform: translateX(-50%);
     background: rgba(74, 55, 40, 0.9);
     color: #fff;
-    padding: 8px 25px;
+    padding: clamp(4px, 0.6vw, 8px) clamp(12px, 1.8vw, 25px);
     border-radius: 20px;
     z-index: 100;
-    font-size: 18px;
+    font-size: clamp(11px, 1.3vw, 18px);
 }
 
 /* --- หน้า Summary --- */
-/* --- ปรับแต่งหน้า Summary เพิ่มเติม --- */
 .summary-container {
     display: flex;
     justify-content: center;
@@ -330,22 +341,24 @@
 }
 
 .summary-board {
-    width: 1000px; /* ขยายความกว้างบอร์ด */
-    height: 750px; /* ขยายความสูงบอร์ด */
+    width: clamp(360px, 85vw, 1000px);
+    max-height: 85vh;
+    height: auto;
     background-size: 100% 100%;
     background-repeat: no-repeat;
-    padding: 60px 80px;
+    padding: clamp(25px, 4vw, 60px) clamp(30px, 5.5vw, 80px);
     display: flex;
     flex-direction: column;
     align-items: center;
     position: relative;
+    overflow: hidden;
 }
 
 .summary-header {
-    font-size: 36px;
+    font-size: clamp(18px, 2.5vw, 36px);
     color: #4a3728;
-    margin-bottom: 20px;
-    margin-top: 10px;
+    margin-bottom: clamp(8px, 1.4vw, 20px);
+    margin-top: clamp(5px, 0.7vw, 10px);
     font-family: 'Henny Penny', cursive;
 }
 
@@ -353,17 +366,16 @@
     width: 100%;
     flex: 1;
     overflow-y: auto;
-    margin-top: 10px;
-    padding-right: 15px; /* กันเนื้อหาเบียด scrollbar */
+    margin-top: clamp(5px, 0.7vw, 10px);
+    padding-right: 15px;
 }
 
-/* ตกแต่ง Card ให้ดูสะอาดตาขึ้น */
 .summary-card {
-    background: rgba(255, 255, 255, 0.2); 
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 12px;
-    margin-bottom: 20px;
+    margin-bottom: clamp(10px, 1.4vw, 20px);
     display: flex;
-    padding: 15px;
+    padding: clamp(8px, 1vw, 15px);
     border: 2px solid #4a3728;
 }
 
@@ -371,13 +383,13 @@
 
 .sk-board {
     display: flex;
-    gap: 40px;
+    gap: clamp(15px, 2.8vw, 40px);
     background: rgba(253, 245, 220, 0.92);
-    border: 6px solid #8d6e63;
-    border-radius: 20px;
-    padding: 40px 50px;
-    width: 900px;
-    min-height: 480px;
+    border: clamp(3px, 0.4vw, 6px) solid #8d6e63;
+    border-radius: clamp(10px, 1.4vw, 20px);
+    padding: clamp(18px, 2.8vw, 40px) clamp(20px, 3.5vw, 50px);
+    width: clamp(380px, 88vw, 900px);
+    min-height: auto;
     box-shadow: 0 8px 32px rgba(0,0,0,0.45);
 }
 
@@ -386,14 +398,14 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 160px;
+    width: clamp(90px, 11vw, 160px);
     flex-shrink: 0;
-    gap: 15px; /* เว้นระยะระหว่างกรอบรูปกับป้าย */
+    gap: clamp(8px, 1vw, 15px);
 }
 
 .minion-frame {
-    width: 130px;
-    height: 130px;
+    width: clamp(70px, 9vw, 130px);
+    height: clamp(70px, 9vw, 130px);
     border: 3px solid #5c3200;
     border-radius: 12px;
     overflow: hidden;
@@ -407,74 +419,58 @@
 .minion-frame img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* ให้รูปเต็มกรอบสวยๆ */
+    object-fit: cover;
 }
 
 .summary-stat-tag {
-    background: #7a4e10; 
+    background: #7a4e10;
     color: #ffffff;
-    padding: 6px 16px;   /* เพิ่มพื้นที่ข้างในป้ายให้กว้างขึ้น */
-    border-radius: 20px; /* ปรับให้โค้งมนเหมือนป้ายชื่อเกม */
-    font-size: 16px;
-    font-weight: bold;
-    line-height: 1;      /* บังคับความสูงบรรทัดให้พอดีตัวอักษร */
-    text-align: center;
-    min-width: 100px;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-    border: 2px solid #5c3200; /* เพิ่มขอบเข้มให้ดูมีมิติ */
-    
-    /* ป้องกันการสืบทอด Style ที่ทำให้ตัวหนังสือเลื่อน */
-    display: inline-block; 
-    margin: 0; 
-}
-
-.summary-right {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-.tag-wrapper {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-}
-.summary-stat-tag {
-    background: #7a4e10; /* สีน้ำตาลเข้มตามรูป */
-    color: #ffffff;
-    padding: 8px 20px;
+    padding: clamp(4px, 0.6vw, 8px) clamp(10px, 1.4vw, 20px);
     border-radius: 8px;
-    font-size: 18px; /* ขยายตัวหนังสือให้ชัดขึ้น */
+    font-size: clamp(11px, 1.3vw, 18px);
     font-weight: bold;
     text-align: center;
-    min-width: 110px;
+    min-width: clamp(70px, 7.8vw, 110px);
     box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
     border: 1px solid #4a3728;
     line-height: 1;
     display: block;
 }
 
+.summary-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(8px, 1vw, 15px);
+}
+
+.tag-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
 .summary-row label {
     font-weight: bold;
     color: #4a3728;
-    font-size: 18px;
+    font-size: clamp(12px, 1.3vw, 18px);
     margin-bottom: 4px;
     display: block;
 }
 
 .val-name {
-    font-size: 24px;
+    font-size: clamp(14px, 1.7vw, 24px);
     color: #2a1b0a;
 }
 
 .val-defense {
     font-family: 'Courier New', monospace;
-    font-size: 16px;
+    font-size: clamp(10px, 1.1vw, 16px);
     color: #3d2b1f;
     background: rgba(255, 255, 255, 0.3);
-    padding: 10px;
+    padding: clamp(5px, 0.7vw, 10px);
     border-radius: 5px;
-    min-height: 60px;
+    min-height: clamp(35px, 4.3vw, 60px);
 }
 
 /* ปรับตำแหน่งปุ่ม Start Game */
@@ -482,8 +478,8 @@
     background: transparent !important;
     border: none;
     cursor: pointer;
-    margin-top: 25px;
-    width: 280px; 
+    margin-top: clamp(12px, 1.8vw, 25px);
+    width: clamp(140px, 20vw, 280px);
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     padding: 0;
 }
@@ -492,21 +488,19 @@
     width: 100%;
     height: auto;
     display: block;
-    /* ลบขอบขาวถ้ามี และเพิ่มเงา */
     filter: drop-shadow(2px 5px 10px rgba(0,0,0,0.4));
 }
 
 .final-start-btn:hover {
     transform: scale(1.1);
     flex-shrink: 0;
-    width: 220px;
 }
 
 .sk-minion-frame {
-    width: 200px;
-    height: 220px;
-    border: 4px solid #8d6e63;
-    border-radius: 16px;
+    width: clamp(100px, 14vw, 200px);
+    height: clamp(110px, 15.5vw, 220px);
+    border: clamp(2px, 0.3vw, 4px) solid #8d6e63;
+    border-radius: clamp(8px, 1.1vw, 16px);
     background: #fff8f0;
     overflow: hidden;
     display: flex;
@@ -525,13 +519,13 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: clamp(8px, 1.3vw, 18px);
 }
 
 .sk-field-group {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: clamp(3px, 0.4vw, 6px);
 }
 
 .sk-field-grow {
@@ -540,14 +534,14 @@
 
 .sk-label {
     font-family: 'Cinzel', 'Henny Penny', serif;
-    font-size: 0.95rem;
+    font-size: clamp(0.7rem, 0.95vw, 0.95rem);
     font-weight: bold;
     color: #5d4037;
     letter-spacing: 0.04em;
 }
 
 .sk-hint {
-    font-size: 0.78rem;
+    font-size: clamp(0.65rem, 0.78vw, 0.78rem);
     font-weight: normal;
     color: #8d6e63;
     font-family: sans-serif;
@@ -555,15 +549,16 @@
 
 .sk-text-input {
     width: 100%;
-    padding: 10px 14px;
+    padding: clamp(6px, 0.7vw, 10px) clamp(8px, 1vw, 14px);
     border: 2px solid #a1887f;
-    border-radius: 10px;
+    border-radius: clamp(6px, 0.7vw, 10px);
     background: #fff8f0;
-    font-size: 1.05rem;
+    font-size: clamp(0.8rem, 1.05vw, 1.05rem);
     color: #3e2723;
     font-family: 'Mali', sans-serif;
     outline: none;
     transition: border-color 0.15s;
+    box-sizing: border-box;
 }
 
 .sk-text-input:focus {
@@ -571,24 +566,25 @@
 }
 
 .sk-short {
-    width: 140px;
+    width: clamp(80px, 9.8vw, 140px);
 }
 
 .sk-textarea {
     flex: 1;
     width: 100%;
-    min-height: 130px;
-    padding: 10px 14px;
+    min-height: clamp(70px, 9vw, 130px);
+    padding: clamp(6px, 0.7vw, 10px) clamp(8px, 1vw, 14px);
     border: 2px solid #a1887f;
-    border-radius: 10px;
+    border-radius: clamp(6px, 0.7vw, 10px);
     background: #fff8f0;
-    font-size: 0.9rem;
+    font-size: clamp(0.72rem, 0.9vw, 0.9rem);
     color: #3e2723;
     font-family: 'Courier New', monospace;
     resize: vertical;
     outline: none;
     line-height: 1.5;
     transition: border-color 0.15s;
+    box-sizing: border-box;
 }
 
 .sk-textarea:focus {
@@ -597,12 +593,12 @@
 
 /* Summary board — CSS-only, no background image needed */
 .sk-summary-board {
-    width: 900px;
+    width: clamp(360px, 88vw, 900px);
     max-height: 80vh;
     background: rgba(253, 245, 220, 0.95);
-    border: 6px solid #8d6e63;
-    border-radius: 20px;
-    padding: 40px 60px;
+    border: clamp(3px, 0.4vw, 6px) solid #8d6e63;
+    border-radius: clamp(10px, 1.4vw, 20px);
+    padding: clamp(18px, 2.8vw, 40px) clamp(22px, 4.2vw, 60px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -611,61 +607,61 @@
 
 .sk-strategy-preview {
     font-family: 'Courier New', monospace;
-    font-size: 0.85rem;
+    font-size: clamp(0.7rem, 0.85vw, 0.85rem);
     white-space: pre-wrap;
     word-break: break-all;
-    max-height: 80px;
+    max-height: clamp(50px, 5.6vw, 80px);
     overflow-y: auto;
 }
+
 /* ── Game Layout: main board + preset panel ──────────────────────────────── */
 .game-layout {
     display: flex;
     align-items: flex-start;
-    gap: 20px;
+    gap: clamp(8px, 1.4vw, 20px);
 }
 
 /* ── Preset Panel ─────────────────────────────────────────────────────────── */
 .preset-panel {
-    width: 180px;
-    min-height: 400px;
-    max-height: 680px;
+    grid-column: 2;
+    grid-row: 1 / 3;
+    width: 100%;
     background: rgba(74, 55, 40, 0.88);
-    border: 3px solid #c8a84b;
-    border-radius: 14px;
+    border: clamp(2px, 0.2vw, 3px) solid #c8a84b;
+    border-radius: clamp(8px, 1vw, 14px);
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    padding: 12px 10px;
+    padding: clamp(6px, 0.8vw, 12px) clamp(5px, 0.7vw, 10px);
     box-shadow: 0 4px 18px rgba(0,0,0,0.45);
-    position: absolute;
-    top: 100px;
-    right: 90px;
+    overflow: hidden;
+    margin-top: clamp(20px, 4vw, 80px);
 }
 
 .preset-panel-title {
     font-family: 'Henny Penny', cursive;
     color: #ffd700;
-    font-size: 1rem;
+    font-size: clamp(0.72rem, 1vw, 1rem);
     text-align: center;
     letter-spacing: 2px;
-    margin-bottom: 10px;
+    margin-bottom: clamp(5px, 0.7vw, 10px);
     border-bottom: 2px solid #c8a84b;
-    padding-bottom: 6px;
+    padding-bottom: clamp(3px, 0.4vw, 6px);
 }
 
 .preset-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: clamp(4px, 0.56vw, 8px);
     overflow-y: auto;
     flex: 1;
 }
 
 .preset-empty {
     color: #c8a84b99;
-    font-size: 0.82rem;
+    font-size: clamp(0.68rem, 0.82vw, 0.82rem);
     text-align: center;
-    margin-top: 16px;
+    margin-top: clamp(8px, 1.1vw, 16px);
     font-family: sans-serif;
 }
 
@@ -673,13 +669,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 7px 10px;
+    padding: clamp(4px, 0.5vw, 7px) clamp(5px, 0.7vw, 10px);
     border-radius: 8px;
     border: 2px solid transparent;
     background: rgba(200, 168, 75, 0.15);
     cursor: pointer;
     font-family: 'Henny Penny', cursive;
-    font-size: 0.82rem;
+    font-size: clamp(0.68rem, 0.82vw, 0.82rem);
     color: #fff8e1;
     transition: background 0.15s, border-color 0.15s;
     text-align: left;
@@ -704,22 +700,23 @@
 
 .preset-delete-btn {
     flex-shrink: 0;
-    margin-left: 6px;
+    margin-left: clamp(3px, 0.4vw, 6px);
     padding: 1px 5px;
     border-radius: 4px;
-    font-size: 0.75rem;
+    font-size: clamp(0.62rem, 0.75vw, 0.75rem);
     color: #c62828;
     background: transparent;
     transition: background 0.15s, color 0.15s;
 }
+
 .preset-delete-btn:hover {
     background: #c6282822;
     color: #ff1744;
 }
 
 .preset-item-status {
-    font-size: 0.9rem;
-    margin-left: 6px;
+    font-size: clamp(0.75rem, 0.9vw, 0.9rem);
+    margin-left: clamp(3px, 0.4vw, 6px);
     flex-shrink: 0;
 }
 
@@ -736,8 +733,8 @@
     cursor: pointer;
     color: #fff8e1;
     font-family: 'Henny Penny', cursive;
-    font-size: 0.82rem;
-    padding: 7px 10px;
+    font-size: clamp(0.68rem, 0.82vw, 0.82rem);
+    padding: clamp(4px, 0.5vw, 7px) clamp(5px, 0.7vw, 10px);
     text-align: left;
 }
 
@@ -747,7 +744,7 @@
 }
 
 .preset-expand-arrow {
-    font-size: 0.7rem;
+    font-size: clamp(0.6rem, 0.7vw, 0.7rem);
     color: #c8a84b;
     flex-shrink: 0;
     margin-left: 4px;
@@ -763,11 +760,11 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 6px 10px 10px;
+    padding: clamp(4px, 0.4vw, 6px) clamp(5px, 0.7vw, 10px) clamp(6px, 0.7vw, 10px);
 }
 
 .preset-edit-label {
-    font-size: 0.72rem;
+    font-size: clamp(0.62rem, 0.72vw, 0.72rem);
     color: #c8a84b;
     font-family: sans-serif;
 }
@@ -777,8 +774,8 @@
     border: 1px solid #c8a84b88;
     border-radius: 5px;
     color: #fff8e1;
-    font-size: 0.8rem;
-    padding: 4px 7px;
+    font-size: clamp(0.68rem, 0.8vw, 0.8rem);
+    padding: clamp(2px, 0.3vw, 4px) clamp(4px, 0.5vw, 7px);
     outline: none;
     width: 100%;
     box-sizing: border-box;
@@ -789,11 +786,11 @@
     border: 1px solid #c8a84b88;
     border-radius: 5px;
     color: #fff8e1;
-    font-size: 0.75rem;
+    font-size: clamp(0.65rem, 0.75vw, 0.75rem);
     font-family: 'Courier New', monospace;
-    padding: 5px 7px;
+    padding: clamp(3px, 0.35vw, 5px) clamp(4px, 0.5vw, 7px);
     resize: vertical;
-    min-height: 80px;
+    min-height: clamp(50px, 5.6vw, 80px);
     outline: none;
     width: 100%;
     box-sizing: border-box;
@@ -801,14 +798,14 @@
 
 .preset-save-btn {
     margin-top: 4px;
-    padding: 5px 0;
+    padding: clamp(3px, 0.35vw, 5px) 0;
     background: #c8a84b;
     color: #3a2200;
     border: none;
     border-radius: 6px;
     font-weight: bold;
     font-family: 'Henny Penny', cursive;
-    font-size: 0.82rem;
+    font-size: clamp(0.68rem, 0.82vw, 0.82rem);
     cursor: pointer;
     transition: background 0.15s;
 }
@@ -819,8 +816,8 @@
 
 /* ── Add Preset button ────────────────────────────────────────────────────── */
 .add-preset-btn {
-    padding: 6px 18px;
-    font-size: 0.9rem;
+    padding: clamp(4px, 0.4vw, 6px) clamp(10px, 1.3vw, 18px);
+    font-size: clamp(0.72rem, 0.9vw, 0.9rem);
     font-weight: bold;
     border-radius: 8px;
     border: 2px solid #c8a84b;
@@ -846,20 +843,11 @@
     margin-bottom: 4px;
 }
 
-.check-record-row {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 8px;
-    margin-top: 30px;
-}
-
 .check-strategy-btn {
     padding: 0;
     font-size: 0;
-    width: 270px;
-    height: 65px;
+    width: clamp(140px, 19vw, 270px);
+    height: clamp(38px, 4.5vw, 65px);
     background-image: url('../../public/images/Checkstrategy-btn.png');
     background-size: 100% 100%;
     background-color: transparent;
@@ -867,6 +855,7 @@
     position: relative;
     mix-blend-mode: normal;
 }
+
 .check-strategy-btn.check-ok {
     background-image: url('../../public/images/Checkstrategy-btn.png');
     border-color: #2e7d32;
@@ -887,39 +876,42 @@
 }
 
 .check-ok-msg {
-    font-size: 0.85rem;
+    font-size: clamp(0.72rem, 0.85vw, 0.85rem);
     color: #1b5e20;
     background: #e8f5e9;
     border: 1px solid #a5d6a7;
     border-radius: 6px;
-    padding: 4px 12px;
-    max-width: 340px;
+    padding: clamp(3px, 0.3vw, 4px) clamp(8px, 0.85vw, 12px);
+    max-width: clamp(200px, 24vw, 340px);
     text-align: center;
     word-break: break-word;
 }
+
 .check-error-msg {
-    font-size: 0.85rem;
+    font-size: clamp(0.72rem, 0.85vw, 0.85rem);
     color: #c62828;
     background: #ffebee;
     border: 1px solid #ef9a9a;
     border-radius: 6px;
-    padding: 4px 12px;
-    max-width: 340px;
+    padding: clamp(3px, 0.3vw, 4px) clamp(8px, 0.85vw, 12px);
+    max-width: clamp(200px, 24vw, 340px);
     text-align: center;
     word-break: break-word;
 }
+
 .preset-stat-type {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: clamp(6px, 0.85vw, 12px);
     padding: 0 8px 12px;
 }
+
 .preset-stat-type .stat-btn {
     width: 100%;
     margin: 0;
     padding: 0;
-    display: block
+    display: block;
 }
 
 .preset-stat-type .stat-btn img {

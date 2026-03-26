@@ -375,6 +375,7 @@ public class GameService {
         GameConfig cfg = GameConfig.getInstance();
         dto.setHexPurchaseCost(cfg.hex_purchase_cost);
         dto.setSpawnCost(cfg.spawn_cost);
+        dto.setMaxTurns(cfg.max_turns);
         return dto;
     }
 
