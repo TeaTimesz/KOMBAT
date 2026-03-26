@@ -99,6 +99,19 @@ public class TurnManager {
         // Strategy execution is handled explicitly by GameService, not here.
     }
 
+    public void doBotBuyHex(Player player, int playerIndex) {
+        maybeBuyHexBot(player, playerIndex);
+    }
+
+    public void doBotSpawnMinion(Player player, int playerIndex) {
+        maybeSpawnBot(player, playerIndex);
+    }
+
+    /** Apply economy only — used at game start and between manual bot turns. */
+    public void applyEconomyOnly(Player player) {
+        applyEconomy(player);
+    }
+
     private void maybeBuyHexBot(Player player, int playerIndex) {
         if (player.getBudget() < config.hex_purchase_cost) {
             return;

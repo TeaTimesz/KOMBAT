@@ -28,12 +28,11 @@ public class LobbyController {
             result.put("guestReady",   room.guestReady);
             result.put("bothReady",    room.bothReady());
             result.put("setupStarted", room.setupStarted);
-            if (room.isGameReady()) {
-                result.put("gameId",  room.gameId);
-                result.put("p1Token", room.p1Token);
-                result.put("p2Token", room.p2Token);
-                result.put("kinds",   room.kinds);
-            }
+            result.put("gameReady",    room.isGameReady());
+            result.put("gameId",       room.gameId);
+            result.put("p1Token",      room.p1Token);
+            result.put("p2Token",      room.p2Token);
+            result.put("kinds",        room.kinds);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();

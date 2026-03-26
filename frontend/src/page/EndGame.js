@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { loadLobbyInfo } from '../api/gameWsApi';
+import { loadLobbyInfo, lobbyReset } from '../api/gameWsApi';
 import '../css/endgame.css';
 
 function EndGame() {
@@ -25,6 +25,7 @@ function EndGame() {
                 <button className="endgame-btn" onClick={() => {
                     const lobby = loadLobbyInfo();
                     if (mode === 'DUEL' && lobby?.lobbyId) {
+                        lobbyReset(lobby.lobbyId);
                         navigate('/status-room', { state: { lobbyId: lobby.lobbyId, role: lobby.role } });
                     } else {
                         navigate('/select-amount', { state: { mode } });

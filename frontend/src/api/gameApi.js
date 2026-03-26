@@ -34,6 +34,9 @@ export const joinGame = (gameId) =>
 export const getState = (gameId) =>
   fetch(`${BASE}/game/${gameId}/state`).then(checkOk);
 
+export const getLobbyStatus = (lobbyId) =>
+  fetch(`${BASE}/lobby/${lobbyId}/status`).then(checkOk);
+
 export const spawnFree = (gameId, playerToken, row, col, strategy, defenseFactor) =>
   fetch(`${BASE}/game/${gameId}/spawn-free`, {
     method: "POST",

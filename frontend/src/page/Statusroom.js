@@ -129,11 +129,8 @@ function Statusroom() {
     }, [lobbyId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // ── WS polling — periodic sync to catch missed broadcasts ────────────────
-    // Sends lobbySync every 2 s. The SYNC handler already handles gameId recovery
-    // so P2 will navigate to HexGrid if GAME_READY was missed.
     useEffect(() => {
         if (!lobbyId || !role) return;
-
         const interval = setInterval(() => {
             lobbySync(lobbyId, role).catch(() => {});
         }, 2000);

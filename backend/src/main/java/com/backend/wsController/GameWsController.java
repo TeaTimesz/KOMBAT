@@ -37,7 +37,9 @@ public class GameWsController {
                         gameId, request.getPlayerToken(), request.getRow(), request.getCol(),
                         request.getStrategy(), request.getDefenseFactor());
                 case "END_TURN"  -> gameService.endTurn(gameId, request.getPlayerToken());
-                case "BOT_MOVE"  -> gameService.botStep(gameId);
+                case "BOT_MOVE"         -> gameService.botStep(gameId);
+                case "BOT_BUY_HEX"     -> gameService.botBuyHex(gameId);
+                case "BOT_SPAWN_MINION"-> gameService.botSpawnMinion(gameId);
                 default -> null;
             };
 

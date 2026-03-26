@@ -108,7 +108,9 @@ public class GameService {
         resolvePlayer(session, playerToken);
         session.phase = "PLAYING";
 
-        session.manager.startTurn(session.env.getPlayer1(), 1);
+        // Apply economy for the first player without triggering bot buy/spawn.
+        // In AUTO mode the player will click BOT ACTION to perform the first bot turn.
+        session.manager.applyEconomyOnly(session.env.getPlayer1());
         return toStateDTO(session);
     }
 
@@ -191,24 +193,39 @@ public class GameService {
 
         session.manager.endTurn();
 
-        while (!session.env.isGameOver()) {
+        // Apply economy for the next player — bot buy/spawn and strategy execution
+        // happen on the next BOT ACTION click, just like in AUTO mode.
+        if (!session.env.isGameOver()) {
             Player nextPlayer = session.env.getCurrentPlayer();
             int nextPlayerIndex = (nextPlayer == session.env.getPlayer1()) ? 1 : 2;
             double budgetBefore = nextPlayer.getBudget();
-            session.manager.startTurn(nextPlayer, nextPlayerIndex);
+            session.manager.applyEconomyOnly(nextPlayer);
             double interest = nextPlayer.getBudget() - budgetBefore;
             if (interest > 0.5) {
                 log.add("P" + nextPlayerIndex + " earned +" + Math.round(interest)
                         + " interest (total: " + Math.round(nextPlayer.getBudget()) + ")");
             }
-            if (!session.manager.isBot(nextPlayerIndex)) break;
-            session.manager.executeStrategies(nextPlayer);
-            session.manager.endTurn();
         }
 
         GameStateDTO dto = toStateDTO(session);
         dto.setActionLog(log);
         return dto;
+    }
+
+    public GameStateDTO botBuyHex(String gameId) {
+        GameSession session = getSession(gameId);
+        Player currentPlayer = session.env.getCurrentPlayer();
+        int idx = (currentPlayer == session.env.getPlayer1()) ? 1 : 2;
+        session.manager.doBotBuyHex(currentPlayer, idx);
+        return toStateDTO(session);
+    }
+
+    public GameStateDTO botSpawnMinion(String gameId) {
+        GameSession session = getSession(gameId);
+        Player currentPlayer = session.env.getCurrentPlayer();
+        int idx = (currentPlayer == session.env.getPlayer1()) ? 1 : 2;
+        session.manager.doBotSpawnMinion(currentPlayer, idx);
+        return toStateDTO(session);
     }
 
     public GameStateDTO botStep(String gameId) {
@@ -220,18 +237,23 @@ public class GameService {
 
         List<String> log = new ArrayList<>();
 
+        // Bot decides to buy a hex and/or spawn a minion this turn
+        session.manager.doBotBuyHex(currentPlayer, currentPlayerIndex);
+        session.manager.doBotSpawnMinion(currentPlayer, currentPlayerIndex);
+
+        // Snapshot positions and HP before strategy execution
         java.util.IdentityHashMap<Minion, int[]> locBefore = new java.util.IdentityHashMap<>();
         for (Minion m : currentPlayer.getMinions()) {
             if (m.getLocation() != null)
                 locBefore.put(m, new int[]{m.getLocation().getRow(), m.getLocation().getCol()});
         }
-
         java.util.IdentityHashMap<Minion, Long> oppHpBefore = new java.util.IdentityHashMap<>();
         List<Minion> oppMinionsBefore = List.copyOf(opponent.getMinions());
         for (Minion m : oppMinionsBefore) oppHpBefore.put(m, m.getHp());
 
         session.manager.executeStrategies(currentPlayer);
 
+        // Log movements
         int actions = 0;
         for (Minion m : List.copyOf(currentPlayer.getMinions())) {
             int[] prev = locBefore.get(m);
@@ -243,6 +265,7 @@ public class GameService {
                 }
             }
         }
+        // Log shots / eliminations
         for (Minion m : oppMinionsBefore) {
             Long hpBefore = oppHpBefore.get(m);
             if (hpBefore == null) continue;
@@ -257,69 +280,21 @@ public class GameService {
                 actions++;
             }
         }
-        if (actions == 0) log.add("  Bot P" + currentPlayerIndex + " took no action (done)");
+        if (actions == 0) log.add("  Bot P" + currentPlayerIndex + " took no action");
 
         session.manager.endTurn();
 
-        boolean processedAdditionalBot = false;
-        while (!session.env.isGameOver()) {
+        // Apply economy for the next player — buy/spawn happens on their BOT ACTION click
+        if (!session.env.isGameOver()) {
             Player nextPlayer = session.env.getCurrentPlayer();
             int nextPlayerIndex = (nextPlayer == session.env.getPlayer1()) ? 1 : 2;
             double budgetBefore = nextPlayer.getBudget();
-            session.manager.startTurn(nextPlayer, nextPlayerIndex);
+            session.manager.applyEconomyOnly(nextPlayer);
             double interest = nextPlayer.getBudget() - budgetBefore;
             if (interest > 0.5) {
                 log.add("P" + nextPlayerIndex + " earned +" + Math.round(interest)
                         + " interest (total: " + Math.round(nextPlayer.getBudget()) + ")");
             }
-            // Human player: their turn is now set up; stop here
-            if (!session.manager.isBot(nextPlayerIndex)) break;
-            // Already ran one extra bot; this bot's turn is set up for next botStep() call
-            if (processedAdditionalBot) break;
-
-            // Execute strategies for this additional bot and log actions
-            log.add("── Bot P" + nextPlayerIndex + " acting ──");
-            java.util.IdentityHashMap<Minion, int[]> loc2 = new java.util.IdentityHashMap<>();
-            Player opp2 = (nextPlayer == session.env.getPlayer1())
-                    ? session.env.getPlayer2() : session.env.getPlayer1();
-            for (Minion m : nextPlayer.getMinions())
-                if (m.getLocation() != null)
-                    loc2.put(m, new int[]{m.getLocation().getRow(), m.getLocation().getCol()});
-            java.util.IdentityHashMap<Minion, Long> opp2HpBefore = new java.util.IdentityHashMap<>();
-            List<Minion> opp2Before = List.copyOf(opp2.getMinions());
-            for (Minion m : opp2Before) opp2HpBefore.put(m, m.getHp());
-
-            session.manager.executeStrategies(nextPlayer);
-
-            int acts2 = 0;
-            for (Minion m : List.copyOf(nextPlayer.getMinions())) {
-                int[] prev = loc2.get(m);
-                if (prev != null && m.getLocation() != null) {
-                    int r = m.getLocation().getRow(), c = m.getLocation().getCol();
-                    if (prev[0] != r || prev[1] != c) {
-                        log.add("  Minion (" + prev[0] + "," + prev[1] + ") moved → (" + r + "," + c + ")");
-                        acts2++;
-                    }
-                }
-            }
-            for (Minion m : opp2Before) {
-                Long hpB = opp2HpBefore.get(m);
-                if (hpB == null) continue;
-                if (!opp2.getMinions().contains(m)) {
-                    String pos = m.getLocation() != null
-                            ? m.getLocation().getRow() + "," + m.getLocation().getCol() : "?";
-                    log.add("  Minion at (" + pos + ") was eliminated!");
-                    acts2++;
-                } else if (m.getHp() < hpB) {
-                    log.add("  Shot enemy (" + m.getLocation().getRow() + "," + m.getLocation().getCol()
-                            + "): " + hpB + " → " + m.getHp() + " HP");
-                    acts2++;
-                }
-            }
-            if (acts2 == 0) log.add("  Bot P" + nextPlayerIndex + " took no action (done)");
-
-            session.manager.endTurn();
-            processedAdditionalBot = true;
         }
 
         GameStateDTO dto = toStateDTO(session);
@@ -397,6 +372,9 @@ public class GameService {
             }
         }
         dto.setGrid(hexList);
+        GameConfig cfg = GameConfig.getInstance();
+        dto.setHexPurchaseCost(cfg.hex_purchase_cost);
+        dto.setSpawnCost(cfg.spawn_cost);
         return dto;
     }
 

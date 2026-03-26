@@ -64,7 +64,17 @@ public class LobbyService {
 
     public LobbyRoom joinLobby(String lobbyId, String guestSessionId) {
         LobbyRoom room = get(lobbyId);
-        if (room.hasGuest) throw new RuntimeException("Room is full");
+        if (room.hasGuest) {
+            // Allow rejoin only if the previous guest's session is no longer tracked
+            // (disconnect event already fired, or session expired ungracefully)
+            boolean oldSessionAlive = room.guestSessionId != null
+                    && sessionToLobby.containsKey(room.guestSessionId);
+            if (oldSessionAlive) throw new RuntimeException("Room is full");
+            // Evict the stale guest entry
+            if (room.guestSessionId != null) untrackSession(room.guestSessionId);
+            room.hasGuest  = false;
+            room.guestReady = false;
+        }
         room.guestSessionId = guestSessionId;
         room.hasGuest = true;
         trackSession(guestSessionId, lobbyId, "guest");

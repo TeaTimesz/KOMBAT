@@ -391,3 +391,78 @@ body { font-family: 'Mali', cursive, sans-serif; overflow: hidden; }
     font-weight: normal;
     color: #7a5c2e;
 }
+
+/* ── Purchase Confirmation Dialog ──────────────────────────────────────────── */
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.confirm-dialog {
+    background: #fdf6e3;
+    border: 3px solid var(--gold);
+    border-radius: 12px;
+    padding: 28px 36px;
+    min-width: 260px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    font-family: 'Cinzel', serif;
+}
+
+.confirm-p1 {
+    border-color: var(--p1-dark);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 4px var(--p1-blue);
+}
+
+.confirm-p2 {
+    border-color: var(--p2-dark);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 4px var(--p2-red);
+}
+
+.confirm-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #4a3000;
+    margin-bottom: 10px;
+}
+
+.confirm-cost {
+    font-size: 1.05rem;
+    color: #7a5c2e;
+    margin-bottom: 22px;
+    font-family: 'Mali', cursive;
+}
+
+.confirm-buttons {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+}
+
+.confirm-btn {
+    padding: 8px 26px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.15s;
+}
+
+.confirm-btn:hover { filter: brightness(1.1); }
+
+.confirm-yes {
+    background: var(--gold);
+    color: #3a2000;
+}
+
+.confirm-no {
+    background: #c0392b;
+    color: #fff;
+}

@@ -1,7 +1,7 @@
 import { connect } from './wsClient';
 
 // Re-export REST endpoints that stay as HTTP
-export { parseStrategy, getState } from './gameApi';
+export { parseStrategy, getState, getLobbyStatus } from './gameApi';
 
 // ── Internal helpers ────────────────────────────────────────────────────────
 
@@ -115,9 +115,9 @@ export async function subscribeToLobbyStatus(lobbyId, onStatus) {
 // ── Lobby info in localStorage ─────────────────────────────────────────────
 
 const LOBBY_KEY = 'kombat_lobby';
-export const saveLobbyInfo  = (data) => { try { localStorage.setItem(LOBBY_KEY, JSON.stringify(data)); } catch (_) {} };
-export const loadLobbyInfo  = ()     => { try { return JSON.parse(localStorage.getItem(LOBBY_KEY)); } catch (_) { return null; } };
-export const clearLobbyInfo = ()     => localStorage.removeItem(LOBBY_KEY);
+export const saveLobbyInfo  = (data) => { try { sessionStorage.setItem(LOBBY_KEY, JSON.stringify(data)); } catch (_) {} };
+export const loadLobbyInfo  = ()     => { try { return JSON.parse(sessionStorage.getItem(LOBBY_KEY)); } catch (_) { return null; } };
+export const clearLobbyInfo = ()     => sessionStorage.removeItem(LOBBY_KEY);
 
 // ── In-game actions (fire-and-forget; state arrives via persistent subscription) ──
 
@@ -138,6 +138,12 @@ export const endTurn = (gameId, playerToken) =>
 
 export const botMove = (gameId) =>
     sendAction(gameId, { type: 'BOT_MOVE' });
+
+export const botBuyHex = (gameId) =>
+    sendAction(gameId, { type: 'BOT_BUY_HEX' });
+
+export const botSpawnMinion = (gameId) =>
+    sendAction(gameId, { type: 'BOT_SPAWN_MINION' });
 
 // ── Persistent subscriptions (passive updates for DUEL two-device play) ────
 
