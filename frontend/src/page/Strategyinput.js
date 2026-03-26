@@ -12,12 +12,14 @@ import '../css/strategy-input.css';
 // ── Preset Strategies ─────────────────────────────────────────────────────────
 const PRESET_STRATEGIES = {
     Attack: {
-        defenseFactor: 5,
+        defenseFactor: 20,
         strategy:
 `t = t + 1
 m = 0
 while (3 - m) {
   if (Budget - 12) then {} else done
+  pwr = Budget / 8
+  if (pwr - 1) then {} else pwr = 1
   opponentLoc = opponent
   if (opponentLoc / 10 - 1)
   then {
@@ -30,95 +32,71 @@ while (3 - m) {
   }
   else if (opponentLoc)
   then {
-    if (opponentLoc % 10 - 5) then shoot upleft 10
-    else if (opponentLoc % 10 - 4) then shoot downleft 10
-    else if (opponentLoc % 10 - 3) then shoot down 10
-    else if (opponentLoc % 10 - 2) then shoot downright 10
-    else if (opponentLoc % 10 - 1) then shoot upright 10
-    else shoot up 10
+    if (opponentLoc % 10 - 5) then shoot upleft pwr
+    else if (opponentLoc % 10 - 4) then shoot downleft pwr
+    else if (opponentLoc % 10 - 3) then shoot down pwr
+    else if (opponentLoc % 10 - 2) then shoot downright pwr
+    else if (opponentLoc % 10 - 1) then shoot upright pwr
+    else shoot up pwr
   }
   else {
-    try = 0
-    while (3 - try) {
-      success = 1
-      dir = random % 6
-      if ((dir - 4) * (nearby upleft % 10 + 1) ^ 2) then move upleft
-      else if ((dir - 3) * (nearby downleft % 10 + 1) ^ 2) then move downleft
-      else if ((dir - 2) * (nearby down % 10 + 1) ^ 2) then move down
-      else if ((dir - 1) * (nearby downright % 10 + 1) ^ 2) then move downright
-      else if (dir * (nearby upright % 10 + 1) ^ 2) then move upright
-      else if ((nearby up % 10 + 1) ^ 2) then move up
-      else success = 0
-      if (success) then try = 3 else try = try + 1
-    }
-    m = m + 1
+    dir = random % 6
+    if (dir - 4) then move upleft
+    else if (dir - 3) then move downleft
+    else if (dir - 2) then move down
+    else if (dir - 1) then move downright
+    else if (dir) then move upright
+    else move up
   }
+  m = m + 1
 }
 done
+
 `,
     },
     Support: {
-        defenseFactor: 3,
+        defenseFactor: 10,
         strategy:
 `t = t + 1
 m = 0
 while (3 - m) {
   if (Budget - 12) then {} else done
+  if (Budget - 3000)
+  then pwr = Budget / 20
+  else pwr = Budget / 50
+  if (pwr - 1) then {} else pwr = 1
   opponentLoc = opponent
   if (opponentLoc / 10 - 1)
   then {
-    if (Budget - 5000) then {
-      if (opponentLoc % 10 - 5) then move upleft
-      else if (opponentLoc % 10 - 4) then move downleft
-      else if (opponentLoc % 10 - 3) then move down
-      else if (opponentLoc % 10 - 2) then move downright
-      else if (opponentLoc % 10 - 1) then move upright
-      else move up
-    } else {
-      if (opponentLoc % 10 - 5) then move downright
-      else if (opponentLoc % 10 - 4) then move upright
-      else if (opponentLoc % 10 - 3) then move up
-      else if (opponentLoc % 10 - 2) then move upleft
-      else if (opponentLoc % 10 - 1) then move downleft
-      else move down
-    }
+    if (opponentLoc % 10 - 5) then move upleft
+    else if (opponentLoc % 10 - 4) then move downleft
+    else if (opponentLoc % 10 - 3) then move down
+    else if (opponentLoc % 10 - 2) then move downright
+    else if (opponentLoc % 10 - 1) then move upright
+    else move up
   }
   else if (opponentLoc)
   then {
-    if (Budget - 5000) then {
-      if (opponentLoc % 10 - 5) then shoot upleft 10
-      else if (opponentLoc % 10 - 4) then shoot downleft 10
-      else if (opponentLoc % 10 - 3) then shoot down 10
-      else if (opponentLoc % 10 - 2) then shoot downright 10
-      else if (opponentLoc % 10 - 1) then shoot upright 10
-      else shoot up 10
-    } else {
-      if (opponentLoc % 10 - 5) then move downright
-      else if (opponentLoc % 10 - 4) then move upright
-      else if (opponentLoc % 10 - 3) then move up
-      else if (opponentLoc % 10 - 2) then move upleft
-      else if (opponentLoc % 10 - 1) then move downleft
-      else move down
-    }
+    if (opponentLoc % 10 - 5) then shoot upleft pwr
+    else if (opponentLoc % 10 - 4) then shoot downleft pwr
+    else if (opponentLoc % 10 - 3) then shoot down pwr
+    else if (opponentLoc % 10 - 2) then shoot downright pwr
+    else if (opponentLoc % 10 - 1) then shoot upright pwr
+    else shoot up pwr
   }
   else {
-    try = 0
-    while (3 - try) {
-      success = 1
-      dir = random % 6
-      if ((dir - 4) * (nearby upleft % 10 + 1) ^ 2) then move upleft
-      else if ((dir - 3) * (nearby downleft % 10 + 1) ^ 2) then move downleft
-      else if ((dir - 2) * (nearby down % 10 + 1) ^ 2) then move down
-      else if ((dir - 1) * (nearby downright % 10 + 1) ^ 2) then move downright
-      else if (dir * (nearby upright % 10 + 1) ^ 2) then move upright
-      else if ((nearby up % 10 + 1) ^ 2) then move up
-      else success = 0
-      if (success) then try = 3 else try = 3
-    }
-    m = m + 1
+    dir = random % 6
+    if (dir - 4) then move upleft
+    else if (dir - 3) then move downleft
+    else if (dir - 2) then move down
+    else if (dir - 1) then move downright
+    else if (dir) then move upright
+    else move up
   }
+  m = m + 1
 }
 done
+
 `,
     },
 };
